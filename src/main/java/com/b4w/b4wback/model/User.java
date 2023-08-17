@@ -1,10 +1,8 @@
 package com.b4w.b4wback.model;
 
-import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.dto.CreateUserDTO;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -28,11 +26,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    public User(UserDTO userDTO){
-        name = userDTO.getName();
-        lastName = userDTO.getLastName();
-        email = userDTO.getEmail();
-        phoneNumber = userDTO.getPhoneNumber();
-        password = userDTO.getPassword();
+    public User(CreateUserDTO createUserDTO){
+        name = createUserDTO.getName();
+        lastName = createUserDTO.getLastName();
+        email = createUserDTO.getEmail();
+        phoneNumber = createUserDTO.getPhoneNumber();
+        password = createUserDTO.getPassword();
     }
 }
