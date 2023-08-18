@@ -12,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Table(name = "app_user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,5 +33,15 @@ public class User {
         email = createUserDTO.getEmail();
         phoneNumber = createUserDTO.getPhoneNumber();
         password = createUserDTO.getPassword();
+    }
+
+    public CreateUserDTO toDTO() {
+        return CreateUserDTO.builder()
+                .name(name)
+                .lastName(lastName)
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .password(password)
+                .build();
     }
 }
