@@ -1,10 +1,10 @@
 package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.dto.CreateAppUserDTO;
+import com.b4w.b4wback.dto.CreateUserDTO;
 
 
 public interface UserService {
-    CreateAppUserDTO getUserById(long id);
+    CreateUserDTO getUserById(long id);
 
-    CreateAppUserDTO createUser(CreateAppUserDTO user);
+    CreateUserDTO createUser(CreateUserDTO user);
 }

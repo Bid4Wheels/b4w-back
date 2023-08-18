@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAppUserDTO {
+public class CreateUserDTO {
     private String name;
     private String lastName;
     private String email;

@@ -1,6 +1,6 @@
 package com.b4w.b4wback.controller;
 
-import com.b4w.b4wback.dto.CreateAppUserDTO;
+import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.service.UserService;
 import lombok.val;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody CreateAppUserDTO user){
+    public ResponseEntity<?> createUser(@RequestBody CreateUserDTO user){
         val newUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
