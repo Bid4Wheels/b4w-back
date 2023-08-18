@@ -5,8 +5,14 @@ import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.service.MailService;
 import com.b4w.b4wback.service.UserService;
 import com.b4w.b4wback.repository.UserRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 
+import java.util.Optional;
+
+@Service
+@Validated
 public class UserServiceImpl implements UserService {
     private final UserRepository UserRepository;
     private final MailService mailService;
@@ -24,7 +30,13 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(createUserDTO.getPhoneNumber())
                 .password(createUserDTO.getPassword())
                 .build();
-        MailService.sendMail(createUserDTO.getEmail(), "Welcome", "Welcome to our app");
+        mailService.sendMail(createUserDTO.getEmail(), "Welcome", "Welcome to our app");
         return UserRepository.save(user).toDTO();
+    }
+
+    @Override
+    public Optional<User> getUserById(Long id) {
+        Optional<User> user = UserRepository.findById(id);
+        return user;
     }
 }

@@ -3,7 +3,11 @@ package com.b4w.b4wback.service.impl;
 import com.b4w.b4wback.service.MailService;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
+@Service
+@Validated
 public class MailServiceImpl implements MailService {
 
         private MailSender mailSender;
@@ -16,7 +20,6 @@ public class MailServiceImpl implements MailService {
         public void setTemplateMessage(SimpleMailMessage templateMessage) {
             this.templateMessage = templateMessage;
         }
-
     @Override
     public void sendMail(String to, String subject, String text) {
         SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
