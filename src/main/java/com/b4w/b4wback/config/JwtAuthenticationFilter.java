@@ -1,5 +1,6 @@
 package com.b4w.b4wback.config;
 
+import com.b4w.b4wback.service.AuthUserDetailService;
 import com.b4w.b4wback.service.AuthenticationService;
 import com.b4w.b4wback.service.JwtService;
 import io.micrometer.common.util.StringUtils;
@@ -22,7 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final AuthenticationService authenticationService;
+    private final AuthUserDetailService authUserDetailService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
@@ -36,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         userEmail = jwtService.extractUsername(jwt);
         if (StringUtils.isNotEmpty(userEmail)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = authenticationService.userDetailsService().loadUserByUsername(userEmail);
+            UserDetails userDetails = authUserDetailService.userDetailsService().loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
