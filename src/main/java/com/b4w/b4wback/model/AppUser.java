@@ -1,6 +1,6 @@
 package com.b4w.b4wback.model;
 
-import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.CreateAppUserDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class User {
+public class AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -26,11 +26,14 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    public User(CreateUserDTO createUserDTO){
+    public AppUser(CreateAppUserDTO createUserDTO){
         name = createUserDTO.getName();
         lastName = createUserDTO.getLastName();
         email = createUserDTO.getEmail();
         phoneNumber = createUserDTO.getPhoneNumber();
         password = createUserDTO.getPassword();
+    }
+    public CreateAppUserDTO toDTO(){
+        return CreateAppUserDTO.builder().name(name).lastName(lastName).email(email).phoneNumber(phoneNumber).password(password).build();
     }
 }
