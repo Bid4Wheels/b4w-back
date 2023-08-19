@@ -8,6 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
@@ -37,8 +38,5 @@ public class User {
         email = createUserDTO.getEmail();
         phoneNumber = createUserDTO.getPhoneNumber();
         password = createUserDTO.getPassword();
-    }
-    public CreateUserDTO toDTO(){
-        return CreateUserDTO.builder().name(name).lastName(lastName).email(email).phoneNumber(phoneNumber).password(password).build();
     }
 }
