@@ -133,7 +133,6 @@ public class UserControllerTest {
         assertTrue(error.contains("email can't be blank"));
     }
 
-    //TODO: should implement all validation error of mail if already tested validation?
 
     @Test
     void Test008_UserControllerWhenPostNewUserWithDTOMissingPhoneNumberShouldRespondBadRequest(){
@@ -176,6 +175,4 @@ public class UserControllerTest {
         assertTrue(error.contains("password"));
         assertTrue(error.contains("password can't be blank"));
     }
-    //TODO: should implement all validation error of password if already tested validation?
-
 }

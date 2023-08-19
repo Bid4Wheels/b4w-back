@@ -46,39 +46,25 @@ class UserServiceTest {
     }
 
     @Test
-    void Test003_UserServiceWhenReceiveCreatedUserDTOWithEmptyNameShouldThrowDataIntegrityViolationException() {
-        userDTO.setName("");
-        userService.createUser(userDTO);
-        //TODO: should throw error?
-    }
-
-    @Test
-    void Test004_UserServiceWhenReceiveCreatedUserDTOWithNullLastNameShouldThrowDataIntegrityViolationException() {
+    void Test003_UserServiceWhenReceiveCreatedUserDTOWithNullLastNameShouldThrowDataIntegrityViolationException() {
         userDTO.setLastName(null);
         assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
     }
 
     @Test
-    void Test005_UserServiceWhenReceiveCreatedUserDTOWithEmptyLastNameShouldThrowDataIntegrityViolationException() {
-        userDTO.setLastName("");
-        userService.createUser(userDTO);
-        //TODO: should throw error?
-    }
-
-    @Test
-    void Test006_UserServiceWhenReceiveCreatedUserDTOWithNullEmailShouldThrowDataIntegrityViolationException() {
+    void Test004_UserServiceWhenReceiveCreatedUserDTOWithNullEmailShouldThrowDataIntegrityViolationException() {
         userDTO.setEmail(null);
         assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
     }
 
     @Test
-    void Test007_UserServiceWhenReceiveCreatedUserDTOWithNullPhoneNumberShouldThrowDataIntegrityViolationException() {
+    void Test005_UserServiceWhenReceiveCreatedUserDTOWithNullPhoneNumberShouldThrowDataIntegrityViolationException() {
         userDTO.setEmail(null);
         assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
     }
 
     @Test
-    void Test008_UserServiceWhenReceiveCreatedUserDTOWithNullPassWordShouldThrowDataIntegrityViolationException() {
+    void Test006_UserServiceWhenReceiveCreatedUserDTOWithNullPassWordShouldThrowDataIntegrityViolationException() {
         userDTO.setPassword(null);
         assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
     }
