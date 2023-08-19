@@ -13,6 +13,6 @@ public class AuthUserDetailServiceImpl implements AuthUserDetailService {
     private final AuthUserRepository authUserRepository;
     @Override
     public UserDetailsService userDetailsService() {
-        return username -> authUserRepository.findUserByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+        return username -> authUserRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
     }
 }

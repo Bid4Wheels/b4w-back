@@ -1,7 +1,6 @@
 package com.b4w.b4wback.config;
 
 import com.b4w.b4wback.service.AuthUserDetailService;
-import com.b4w.b4wback.service.AuthenticationService;
 import com.b4w.b4wback.service.JwtService;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;

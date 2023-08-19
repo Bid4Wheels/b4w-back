@@ -6,6 +6,5 @@ public interface JwtService {
     String extractUsername(String token);
 
     String generateToken(String email);
-    //7 dias token.
     boolean isTokenValid(String token, UserDetails userDetails);
 }

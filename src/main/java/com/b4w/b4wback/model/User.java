@@ -33,7 +33,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-
     public User(CreateUserDTO createUserDTO){
         name = createUserDTO.getName();
         lastName = createUserDTO.getLastName();
@@ -49,9 +48,8 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return getEmail();
+        return email;
     }
-    //When should I implement this?
     @Override
     public boolean isAccountNonExpired() {
         return true;
