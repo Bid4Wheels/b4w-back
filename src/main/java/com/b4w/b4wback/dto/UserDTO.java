@@ -15,12 +15,14 @@ import lombok.*;
 Class used to respond with the data of the user
  */
 public class UserDTO {
+    private long id;
     private String name;
     private String lastName;
     private String email;
     private Integer phoneNumber;
 
     public UserDTO(User user){
+        id = user.getId();
         name = user.getName();
         lastName = user.getLastName();
         email = user.getEmail();

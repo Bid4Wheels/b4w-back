@@ -175,4 +175,41 @@ public class UserControllerTest {
         assertTrue(error.contains("password"));
         assertTrue(error.contains("password can't be blank"));
     }
+
+    @Test
+    void Test011_UserControllerWhenGetUserByIdShouldReturnUserCorrectly(){
+        ResponseEntity<UserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), UserDTO.class);
+
+        UserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+        assertEquals(userDTO.getName(), createdUser.getName());
+        assertEquals(userDTO.getLastName(), createdUser.getLastName());
+        assertEquals(userDTO.getEmail(), createdUser.getEmail());
+        assertEquals(userDTO.getPhoneNumber(), createdUser.getPhoneNumber());
+
+        ResponseEntity<UserDTO> getUserResponse = restTemplate.exchange(baseUrl + "/" + createdUser.getId(),
+                HttpMethod.GET, null, UserDTO.class);
+
+        UserDTO getUser = getUserResponse.getBody();
+        assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
+        assertNotNull(getUser);
+        assertEquals(createdUser.getName(), getUser.getName());
+        assertEquals(createdUser.getLastName(), getUser.getLastName());
+        assertEquals(createdUser.getEmail(), getUser.getEmail());
+        assertEquals(createdUser.getPhoneNumber(), getUser.getPhoneNumber());
+    }
+
+    @Test
+    void Test012_UserControllerWhenGetUserByIdWithInvalidIdShouldRespondNotFound(){
+        ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/1",
+                HttpMethod.GET, null, String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
+        String error = getUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("User not found"));
+    }
+
 }

@@ -4,6 +4,7 @@ import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,4 +69,20 @@ class UserServiceTest {
         userDTO.setPassword(null);
         assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
     }
+
+    @Test
+    void Test007_UserServiceWhenSearchUserByIdWithValidIdShouldReturnUserDTO() {
+        User user = userService.createUser(userDTO);
+        assertEquals(userDTO.getName(), userService.getUserById(user.getId()).getName());
+        assertEquals(userDTO.getLastName(), userService.getUserById(user.getId()).getLastName());
+        assertEquals(userDTO.getEmail(), userService.getUserById(user.getId()).getEmail());
+        assertEquals(userDTO.getPhoneNumber(), userService.getUserById(user.getId()).getPhoneNumber());
+    }
+
+    @Test
+    void Test008_UserServiceWhenSearchUserByIdWithInvalidIdShouldThrowEntityNotFoundException() {
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.getUserById(1));
+    }
+
+
 }
