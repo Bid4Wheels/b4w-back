@@ -22,17 +22,18 @@ public class UserServiceImpl implements UserService {
         this.mailService = mailService;
     }
     @Override
-    public CreateUserDTO createUser(CreateUserDTO createUserDTO) {
-        User user = User.builder()
-                .name(createUserDTO.getName())
-                .lastName(createUserDTO.getLastName())
-                .email(createUserDTO.getEmail())
-                .phoneNumber(createUserDTO.getPhoneNumber())
-                .password(createUserDTO.getPassword())
-                .build();
-        mailService.sendMail(createUserDTO.getEmail(), "Welcome", "Welcome to our app");
-        return UserRepository.save(user).toDTO();
+    public CreateUserDTO createUser(CreateUserDTO user) {
+        User newUser = User.builder().
+                name(user.getName()).
+                lastName(user.getLastName()).
+                email(user.getEmail()).
+                phoneNumber(user.getPhoneNumber()).
+                password(user.getPassword()).
+                build();
+        mailService.sendMail(user.getEmail(), "Welcome", "Welcome to our app");
+        return UserRepository.save(newUser).toDTO();
     }
+
 
     @Override
     public Optional<User> getUserById(Long id) {
