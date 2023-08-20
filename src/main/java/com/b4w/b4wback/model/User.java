@@ -39,13 +39,4 @@ public class User {
         password = createUserDTO.getPassword();
     }
 
-    public CreateUserDTO toDTO() {
-        return CreateUserDTO.builder()
-                .name(name)
-                .lastName(lastName)
-                .email(email)
-                .phoneNumber(phoneNumber)
-                .password(password)
-                .build();
-    }
 }

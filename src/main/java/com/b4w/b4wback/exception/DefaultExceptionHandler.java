@@ -1,6 +1,5 @@
 package com.b4w.b4wback.exception;
 
-import com.b4w.b4wback.service.JSONBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
