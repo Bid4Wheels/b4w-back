@@ -1,7 +1,6 @@
-package com.b4w.b4wback.service.impl;
+package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.service.MailService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.b4w.b4wback.service.interfaces.MailService;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
