@@ -1,36 +1,23 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.service.UserService;
+import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.service.interfaces.UserService;
+import jakarta.validation.Valid;
 import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-@RequestMapping("/user")
 @RestController
+@RequestMapping("/user")
 public class UserController {
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    public UserController(UserService userService) {this.userService = userService;}
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody CreateUserDTO user){
-        val newUser = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
-    }
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable long id){
-        try {
-            val user = userService.getUserById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(user);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+    public ResponseEntity<?> postNewUser(@Valid @RequestBody CreateUserDTO userDTO){
+        val user = new UserDTO(userService.createUser(userDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 }
