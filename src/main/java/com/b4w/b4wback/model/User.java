@@ -13,7 +13,6 @@ import java.util.Collection;
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
@@ -24,11 +23,16 @@ public class User implements UserDetails {
     private long id;
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false)
     private String lastName;
+
     @Column(unique = true, nullable = false)
     private String email;
-    private int phoneNumber;
+
+    @Column(nullable = false)
+    private Integer phoneNumber;
+
     @Column(nullable = false)
     private String password;
 
