@@ -8,11 +8,11 @@ import org.springframework.validation.annotation.Validated;
 
 @Service
 @Validated
-public class MailServiceImpl implements MailService {
+public class MailServiceImp implements MailService {
 
     private final JavaMailSender mailSender;
 
-    public MailServiceImpl(JavaMailSender mailSender) {
+    public MailServiceImp(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
