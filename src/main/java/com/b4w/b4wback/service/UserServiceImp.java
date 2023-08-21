@@ -31,7 +31,7 @@ public class UserServiceImp implements UserService {
         if (user.isPresent()) {
             return UserDTO.builder().name(user.get().getName()).lastName(user.get().getLastName()).email(user.get().getEmail()).phoneNumber(user.get().getPhoneNumber()).build();
         } else {
-            throw new EntityNotFoundException();
+            throw new EntityNotFoundException("User not found");
         }
     }
 }
