@@ -5,6 +5,8 @@ import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,5 +30,10 @@ public class UserServiceImp implements UserService {
         }
         createUserDTO.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));
         return userRepository.save(new User(createUserDTO));
+    }
+
+    @Override
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
     }
 }

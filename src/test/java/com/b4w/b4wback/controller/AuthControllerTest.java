@@ -1,4 +1,4 @@
-package com.b4w.b4wback.authtest;
+package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.auth.JwtResponse;
@@ -52,44 +52,43 @@ public class AuthControllerTest {
 
 
     @Test
-    void Test002_AuthControllerWhenReceivesExistingUserWithInvalidPasswordShouldReturnStatusNOTFOUND(){
-
+    void Test002_AuthControllerWhenReceivesExistingUserWithInvalidPasswordShouldReturnStatusUNAUTHORIZED(){
             SignInRequest signInRequest=new SignInRequest(userDTO.getEmail(), "BAD_PASSWORD");
             userService.createUser(userDTO);
             ResponseEntity<String> response=restTemplate.postForEntity(baseUrl+"/login",signInRequest, String.class);
-            assertEquals(response.getStatusCode(),HttpStatus.NOT_FOUND);
+            assertEquals(response.getStatusCode(),HttpStatus.UNAUTHORIZED);
 
     }
     @Test
-    void Test003_AuthControllerWhenReceivesInvalidEmailWithCorrectPasswordShouldReturnStatusNOTFOUND(){
+    void Test003_AuthControllerWhenReceivesInvalidEmailWithCorrectPasswordShouldReturnStatusUNAUTHORIZED(){
             SignInRequest signInRequest=new SignInRequest("bad_email@gmail.com", userDTO.getPassword());
             userService.createUser(userDTO);
             ResponseEntity<String> response=restTemplate.postForEntity(baseUrl+"/login",signInRequest, String.class);
-            assertEquals(response.getStatusCode(),HttpStatus.NOT_FOUND);
+            assertEquals(response.getStatusCode(),HttpStatus.UNAUTHORIZED);
 
     }
 
     @Test
-    void Test004_AuthControllerWhenReceivesPasswordNullFieldReturnStatusNOTFOUND(){
+    void Test004_AuthControllerWhenReceivesPasswordNullFieldReturnStatusUNAUTHORIZED(){
         SignInRequest signInRequest=new SignInRequest(null, userDTO.getPassword());
         userService.createUser(userDTO);
         ResponseEntity<String> response=restTemplate.postForEntity(baseUrl+"/login",signInRequest, String.class);
-        assertEquals(response.getStatusCode(),HttpStatus.NOT_FOUND);
+        assertEquals(response.getStatusCode(),HttpStatus.UNAUTHORIZED);
     }
 
     @Test
-    void Test005_AuthControllerWhenReceivesEmailNullFieldReturnStatusNOTFOUND(){
+    void Test005_AuthControllerWhenReceivesEmailNullFieldReturnStatusUNAUTHORIZED(){
         SignInRequest signInRequest=new SignInRequest(userDTO.getEmail(), null);
         userService.createUser(userDTO);
         ResponseEntity<String> response=restTemplate.postForEntity(baseUrl+"/login",signInRequest, String.class);
-        assertEquals(response.getStatusCode(),HttpStatus.NOT_FOUND);
+        assertEquals(response.getStatusCode(),HttpStatus.UNAUTHORIZED);
     }
 
     @Test
-    void Test006_AuthControllerWhenReceivesNullFieldsReturnStatusNOTFOUND(){
+    void Test006_AuthControllerWhenReceivesNullFieldsReturnStatusUNAUTHORIZED(){
         SignInRequest signInRequest=new SignInRequest(null, null);
         userService.createUser(userDTO);
         ResponseEntity<String> response=restTemplate.postForEntity(baseUrl+"/login",signInRequest, String.class);
-        assertEquals(response.getStatusCode(),HttpStatus.NOT_FOUND);
+        assertEquals(response.getStatusCode(),HttpStatus.UNAUTHORIZED);
     }
 }

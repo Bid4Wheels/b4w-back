@@ -1,6 +1,6 @@
-package com.b4w.b4wback.service.impl;
+package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.service.JwtService;
+import com.b4w.b4wback.service.interfaces.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class AuthExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<String> handleUserNotAuthenticated(){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid Credentials.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials.");
     }
 }

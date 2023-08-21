@@ -1,6 +1,5 @@
-package com.b4w.b4wback.authtest;
+package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.service.impl.JwtServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

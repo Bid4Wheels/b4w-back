@@ -2,6 +2,7 @@ package com.b4w.b4wback.service.interfaces;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.model.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService {
     /**
@@ -12,4 +13,6 @@ public interface UserService {
      * @return a user entity with the data of user
      */
     User createUser(CreateUserDTO createUserDTO);
+
+    UserDetailsService userDetailsService();
 }
