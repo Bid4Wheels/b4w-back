@@ -137,7 +137,6 @@ public class ValidateCreateUserDTOTest {
     void Test011_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordMissingNumberShouldThrowOneInvalid(){
         userDTO.setPassword("Aqbsdfgf");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
-
         assertEquals(1, violations.size());
     }
 }
