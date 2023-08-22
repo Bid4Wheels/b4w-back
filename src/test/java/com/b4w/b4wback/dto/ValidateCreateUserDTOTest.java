@@ -19,14 +19,13 @@ public class ValidateCreateUserDTOTest {
     public void setup() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        userDTO = new CreateUserDTO("Nico", "Borja", "borja@gmail.com",
+        userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 8493123, "1Afjfslkjfl");
     }
 
     @Test
     void Test001_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullAndPasswordFormatValidShouldBeValid(){
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
-
         assertEquals(0, violations.size());
     }
 

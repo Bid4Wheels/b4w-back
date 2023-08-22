@@ -29,7 +29,7 @@ class UserServiceTest {
 
     @BeforeEach
     public void setup() {
-        userDTO = new CreateUserDTO("Nico", "Borja", "borja@gmail.com",
+        userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 8493123, "1Afjfslkjfl");
     }
 
