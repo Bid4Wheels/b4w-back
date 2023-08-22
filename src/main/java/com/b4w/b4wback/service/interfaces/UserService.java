@@ -3,6 +3,7 @@ package com.b4w.b4wback.service.interfaces;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.model.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService {
     /**
@@ -15,4 +16,6 @@ public interface UserService {
     User createUser(CreateUserDTO createUserDTO);
 
     UserDTO getUserById(long id);
+
+    UserDetailsService userDetailsService();
 }
