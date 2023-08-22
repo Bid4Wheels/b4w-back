@@ -25,10 +25,10 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
+        User newUser = userRepository.save(new User(createUserDTO));
         if(createUserDTO.getEmail() != null && sendMail){
             mailService.sendMail( createUserDTO.getEmail(), "Welcome", "Welcome to our app");
-            return userRepository.save(new User(createUserDTO));
         }
-        return userRepository.save(new User(createUserDTO));
+        return newUser;
     }
 }
