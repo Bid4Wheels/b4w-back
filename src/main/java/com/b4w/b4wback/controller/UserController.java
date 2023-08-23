@@ -20,4 +20,9 @@ public class UserController {
         val user = new UserDTO(userService.createUser(userDTO));
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable long id){
+        val user = userService.getUserById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
 }

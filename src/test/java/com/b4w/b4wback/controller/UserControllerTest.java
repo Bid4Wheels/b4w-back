@@ -36,7 +36,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test001_UserControllerWhenPostNewUserWithValidDTOShouldCreateUserCorrectly(){
+    void Test001_UserControllerWhenPostNewUserWithValidDTOShouldCreateUserCorrectly() {
         ResponseEntity<UserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
                 createHttpEntity(userDTO), UserDTO.class);
 
@@ -50,7 +50,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test002_UserControllerWhenPostNewUserWithDTOMissingNameShouldRespondBadRequest(){
+    void Test002_UserControllerWhenPostNewUserWithDTOMissingNameShouldRespondBadRequest() {
         userDTO.setName(null);
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -64,7 +64,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test003_UserControllerWhenPostNewUserWithDTONameEmptyShouldRespondBadRequest(){
+    void Test003_UserControllerWhenPostNewUserWithDTONameEmptyShouldRespondBadRequest() {
         userDTO.setName("");
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -78,7 +78,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test004_UserControllerWhenPostNewUserWithDTOMissingLastNameShouldRespondBadRequest(){
+    void Test004_UserControllerWhenPostNewUserWithDTOMissingLastNameShouldRespondBadRequest() {
         userDTO.setLastName(null);
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -92,7 +92,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test005_UserControllerWhenPostNewUserWithDTOEmptyLastNameShouldRespondBadRequest(){
+    void Test005_UserControllerWhenPostNewUserWithDTOEmptyLastNameShouldRespondBadRequest() {
         userDTO.setLastName("");
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -106,7 +106,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test006_UserControllerWhenPostNewUserWithDTOMissingEmailShouldRespondBadRequest(){
+    void Test006_UserControllerWhenPostNewUserWithDTOMissingEmailShouldRespondBadRequest() {
         userDTO.setEmail(null);
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -120,7 +120,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test007_UserControllerWhenPostNewUserWithDTOEmptyEmailShouldRespondBadRequest(){
+    void Test007_UserControllerWhenPostNewUserWithDTOEmptyEmailShouldRespondBadRequest() {
         userDTO.setEmail("");
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -135,7 +135,7 @@ public class UserControllerTest {
 
 
     @Test
-    void Test008_UserControllerWhenPostNewUserWithDTOMissingPhoneNumberShouldRespondBadRequest(){
+    void Test008_UserControllerWhenPostNewUserWithDTOMissingPhoneNumberShouldRespondBadRequest() {
         userDTO.setPhoneNumber(null);
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -149,7 +149,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test009_UserControllerWhenPostNewUserWithDTOMissingPasswordShouldRespondBadRequest(){
+    void Test009_UserControllerWhenPostNewUserWithDTOMissingPasswordShouldRespondBadRequest() {
         userDTO.setPassword(null);
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -163,7 +163,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test010_UserControllerWhenPostNewUserWithDTOEmptyPassWordShouldRespondBadRequest(){
+    void Test010_UserControllerWhenPostNewUserWithDTOEmptyPassWordShouldRespondBadRequest() {
         userDTO.setPassword("");
 
         ResponseEntity<String> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -175,4 +175,41 @@ public class UserControllerTest {
         assertTrue(error.contains("password"));
         assertTrue(error.contains("password can't be blank"));
     }
+
+    @Test
+    void Test011_UserControllerWhenGetUserByIdShouldReturnUserCorrectly() {
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+        assertEquals(userDTO.getName(), createdUser.getName());
+        assertEquals(userDTO.getLastName(), createdUser.getLastName());
+        assertEquals(userDTO.getEmail(), createdUser.getEmail());
+        assertEquals(userDTO.getPhoneNumber(), createdUser.getPhoneNumber());
+
+        ResponseEntity<UserDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
+                HttpMethod.GET, null, UserDTO.class);
+
+        UserDTO getUser = getUserResponse.getBody();
+        assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
+        assertNotNull(getUser);
+        assertEquals(createdUser.getName(), getUser.getName());
+        assertEquals(createdUser.getLastName(), getUser.getLastName());
+        assertEquals(createdUser.getEmail(), getUser.getEmail());
+        assertEquals(createdUser.getPhoneNumber(), getUser.getPhoneNumber());
+    }
+
+    @Test
+    void Test012_UserControllerWhenGetUserByIdWithInvalidIdShouldRespondNotFound() {
+        ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/1",
+                HttpMethod.GET, null, String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
+        String error = getUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("User not found"));
+    }
+
 }
