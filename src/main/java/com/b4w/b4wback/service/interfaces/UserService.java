@@ -15,7 +15,7 @@ public interface UserService {
      */
     User createUser(CreateUserDTO createUserDTO);
 
-    UserDTO getUserById(long id);
+    UserDTO getUserById(Long id);
 
     UserDetailsService userDetailsService();
 }

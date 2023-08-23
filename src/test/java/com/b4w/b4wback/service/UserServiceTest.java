@@ -1,10 +1,10 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +81,7 @@ class UserServiceTest {
 
     @Test
     void Test008_UserServiceWhenSearchUserByIdWithInvalidIdShouldThrowEntityNotFoundException() {
-        assertThrowsExactly(EntityNotFoundException.class, ()->userService.getUserById(1));
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.getUserById(1L));
     }
 
 

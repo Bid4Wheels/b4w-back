@@ -22,11 +22,7 @@ public class UserController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable long id){
-        try {
-            val user = userService.getUserById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(user);
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+        val user = userService.getUserById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }

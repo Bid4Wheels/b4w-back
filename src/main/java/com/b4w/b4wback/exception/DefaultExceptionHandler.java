@@ -31,8 +31,7 @@ public class DefaultExceptionHandler {
     }
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException exception) {
-        logger.info(exception.getMessage());
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
     }
 
     @ExceptionHandler(BadCredentialsException.class)
