@@ -34,11 +34,14 @@ public class UserServiceImp implements UserService {
     }
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
-        //Added encode method for the password.
+        //Added encode method for the password. If for test
         if (createUserDTO.getPassword()==null){
             throw new DataIntegrityViolationException("Password must not be null");
         }
         else if(createUserDTO.getEmail() != null && sendMail){
+            if (userRepository.findByEmail(createUserDTO.getEmail()).isPresent())
+                throw new DataIntegrityViolationException("Email already taken");
+
             mailService.sendMail( createUserDTO.getEmail(), "Welcome", "Welcome to our app");
         }
         createUserDTO.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));

@@ -59,19 +59,25 @@ class UserServiceTest {
     }
 
     @Test
-    void Test005_UserServiceWhenReceiveCreatedUserDTOWithNullPhoneNumberShouldThrowDataIntegrityViolationException() {
-        userDTO.setEmail(null);
+    void Test005_UserServiceWhenCreatingUserWithSameMailShouldThrowDataIntegrityViolationException(){
+        userService.createUser(userDTO);
         assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
     }
 
     @Test
-    void Test006_UserServiceWhenReceiveCreatedUserDTOWithNullPassWordShouldThrowDataIntegrityViolationException() {
+    void Test006_UserServiceWhenReceiveCreatedUserDTOWithNullPhoneNumberShouldThrowDataIntegrityViolationException() {
+        userDTO.setPhoneNumber(null);
+        assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
+    }
+
+    @Test
+    void Test007_UserServiceWhenReceiveCreatedUserDTOWithNullPassWordShouldThrowDataIntegrityViolationException() {
         userDTO.setPassword(null);
         assertThrowsExactly(DataIntegrityViolationException.class, ()->userService.createUser(userDTO));
     }
 
     @Test
-    void Test007_UserServiceWhenSearchUserByIdWithValidIdShouldReturnUserDTO() {
+    void Test008_UserServiceWhenSearchUserByIdWithValidIdShouldReturnUserDTO() {
         User user = userService.createUser(userDTO);
         assertEquals(userDTO.getName(), userService.getUserById(user.getId()).getName());
         assertEquals(userDTO.getLastName(), userService.getUserById(user.getId()).getLastName());
@@ -80,9 +86,7 @@ class UserServiceTest {
     }
 
     @Test
-    void Test008_UserServiceWhenSearchUserByIdWithInvalidIdShouldThrowEntityNotFoundException() {
+    void Test009_UserServiceWhenSearchUserByIdWithInvalidIdShouldThrowEntityNotFoundException() {
         assertThrowsExactly(EntityNotFoundException.class, ()->userService.getUserById(1L));
     }
-
-
 }
