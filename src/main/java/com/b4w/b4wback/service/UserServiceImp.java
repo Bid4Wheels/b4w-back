@@ -33,9 +33,6 @@ public class UserServiceImp implements UserService {
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
         //Added encode method for the password.
-        if(userRepository.findByEmail(createUserDTO.getEmail()).isPresent()){
-            throw new DataIntegrityViolationException("Email already exists");
-        }
         if (createUserDTO.getPassword()==null){
             throw new DataIntegrityViolationException("Password must not be null");
         }
