@@ -35,7 +35,7 @@ public class AuthControllerTest {
     @BeforeEach
     public void setUp(){
         userDTO=new CreateUserDTO("Nico", "Borja", "borja@gmail.com",
-                8493123, "1Afjfslkjfl");
+                "+5491154964341", "1Afjfslkjfl");
     }
 
     @Test

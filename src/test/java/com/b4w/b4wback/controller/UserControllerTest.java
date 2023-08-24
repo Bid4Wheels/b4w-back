@@ -26,7 +26,7 @@ public class UserControllerTest {
     @BeforeEach
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
-                8493123, "1Afjfslkjfl");
+                "+5491154964341", "1Afjfslkjfl");
     }
 
     private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {

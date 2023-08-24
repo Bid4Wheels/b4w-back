@@ -21,7 +21,8 @@ public class CreateUserDTO {
     private String email;
 
     @NotNull(message = "phone number can't be blank")
-    private Integer phoneNumber;
+    @Size(min = 14, message = "invalid phone number size, require at least 14")
+    private String phoneNumber;
 
     @NotBlank(message = "password can't be blank")
     @Size(min = 8, message = "Password length must be of 8 characters or more")
