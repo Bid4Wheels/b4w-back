@@ -1,7 +1,6 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.ModifyUserDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
@@ -24,9 +23,7 @@ public class UserServiceImp implements UserService {
     @Value("${sendMail.Boolean.Value}")
     private boolean sendMail;
     private final UserRepository userRepository;
-
     private final MailService mailService;
-
     private final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
 
     public UserServiceImp(UserRepository userRepository, MailService mailService) {
@@ -35,18 +32,18 @@ public class UserServiceImp implements UserService {
     }
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
-        //Added encode method for the password. If for test
+        //Added encode method for the password.
         if (createUserDTO.getPassword()==null){
             throw new DataIntegrityViolationException("Password must not be null");
         }
-        else if(createUserDTO.getEmail() != null && sendMail){
-            if (userRepository.findByEmail(createUserDTO.getEmail()).isPresent())
-                throw new DataIntegrityViolationException("Email already taken");
-
-            mailService.sendMail( createUserDTO.getEmail(), "Welcome", "Welcome to our app");
-        }
         createUserDTO.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));
-        return userRepository.save(new User(createUserDTO));
+        String email = createUserDTO.getEmail();
+        User newUser = userRepository.save(new User(createUserDTO));
+        if (sendMail){
+            mailService.sendMail(email,"Welcome to B4W","Welcome to B4W");
+            email = "";
+        }
+        return newUser;
     }
     @Override
     public UserDTO getUserById(Long id) {
@@ -57,14 +54,5 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
-    }
-
-    @Override
-    public void modifyUser(long id, ModifyUserDTO userDTO){
-        User userModify = userRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("User not found"));
-
-        userModify.modifyUser(userDTO);
-        userRepository.save(userModify);
     }
 }
