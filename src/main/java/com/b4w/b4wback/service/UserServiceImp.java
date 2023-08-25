@@ -23,9 +23,7 @@ public class UserServiceImp implements UserService {
     @Value("${sendMail.Boolean.Value}")
     private boolean sendMail;
     private final UserRepository userRepository;
-
     private final MailService mailService;
-
     private final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
 
     public UserServiceImp(UserRepository userRepository, MailService mailService) {
@@ -38,11 +36,14 @@ public class UserServiceImp implements UserService {
         if (createUserDTO.getPassword()==null){
             throw new DataIntegrityViolationException("Password must not be null");
         }
-        else if(createUserDTO.getEmail() != null && sendMail){
-            mailService.sendMail( createUserDTO.getEmail(), "Welcome", "Welcome to our app");
-        }
         createUserDTO.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));
-        return userRepository.save(new User(createUserDTO));
+        String email = createUserDTO.getEmail();
+        User newUser = userRepository.save(new User(createUserDTO));
+        if (sendMail){
+            mailService.sendMail(email,"Welcome to B4W","Welcome to B4W");
+            email = "";
+        }
+        return newUser;
     }
     @Override
     public UserDTO getUserById(Long id) {
