@@ -1,6 +1,7 @@
 package com.b4w.b4wback.model;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.ModifyUserDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,6 +43,12 @@ public class User implements UserDetails {
         email = createUserDTO.getEmail();
         phoneNumber = createUserDTO.getPhoneNumber();
         password = createUserDTO.getPassword();
+    }
+
+    public void modifyUser(ModifyUserDTO userDTO){
+        name = userDTO.getName();
+        lastName = userDTO.getLastName();
+        phoneNumber = userDTO.getPhoneNumber();
     }
 
     @Override
