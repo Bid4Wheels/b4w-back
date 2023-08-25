@@ -36,12 +36,16 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private Integer passwordCode;
+
     public User(CreateUserDTO createUserDTO){
         name = createUserDTO.getName();
         lastName = createUserDTO.getLastName();
         email = createUserDTO.getEmail();
         phoneNumber = createUserDTO.getPhoneNumber();
         password = createUserDTO.getPassword();
+        passwordCode = 0;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.GetPasswordCodeDTO;
+import com.b4w.b4wback.dto.PasswordChangerDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.service.interfaces.UserService;
 import jakarta.validation.Valid;
@@ -23,6 +25,18 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable long id){
         val user = userService.getUserById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> getPasswordChangerForId(@PathVariable long id, @Valid @RequestBody PasswordChangerDTO userDTO){
+        val user = userService.getPasswordChangerForId(id, userDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    @GetMapping("/password")
+    public ResponseEntity<?> getPasswordCode(@RequestBody GetPasswordCodeDTO email){
+        val user = userService.getPasswordCode(email);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }

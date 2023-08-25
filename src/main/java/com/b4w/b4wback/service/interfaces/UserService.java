@@ -1,6 +1,8 @@
 package com.b4w.b4wback.service.interfaces;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.GetPasswordCodeDTO;
+import com.b4w.b4wback.dto.PasswordChangerDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,4 +20,8 @@ public interface UserService {
     UserDTO getUserById(Long id);
 
     UserDetailsService userDetailsService();
+
+    UserDTO getPasswordChangerForId(long id, PasswordChangerDTO userDTO);
+
+    Boolean getPasswordCode(GetPasswordCodeDTO email);
 }

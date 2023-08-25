@@ -1,6 +1,8 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.GetPasswordCodeDTO;
+import com.b4w.b4wback.dto.PasswordChangerDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
@@ -16,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Objects;
+import java.util.Random;
+
 
 @Service
 @Validated
@@ -25,6 +30,8 @@ public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+
+    private static final Random Random = new Random();
 
     public UserServiceImp(UserRepository userRepository, MailService mailService) {
         this.userRepository = userRepository;
@@ -54,5 +61,20 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public UserDTO getPasswordChangerForId(long id, PasswordChangerDTO userDTO) {
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Integer passwordCode = Random.nextInt(1000000);
+        user.setPasswordCode(passwordCode);
+        mailService.sendMail(user.getEmail(),"Password change code","Your password change code is: "+ passwordCode);
+        return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).phoneNumber(user.getPhoneNumber()).build();
+    }
+
+    @Override
+    public Boolean getPasswordCode(GetPasswordCodeDTO email) {
+        User user = userRepository.findByEmail(email.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return Objects.equals(user.getPasswordCode(), email.getPasswordCode());
     }
 }
