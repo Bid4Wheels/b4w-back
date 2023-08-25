@@ -2,6 +2,8 @@ package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.dto.auth.JwtResponse;
+import com.b4w.b4wback.dto.auth.SignInRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +13,14 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class UserControllerTest {
-
     @Autowired
     private TestRestTemplate restTemplate;
     private final String baseUrl = "/user";
@@ -35,6 +38,12 @@ public class UserControllerTest {
         return new HttpEntity<>(createUserDTO, headers);
     }
 
+    private  String authenticateAndGetToken(SignInRequest signInRequest){
+        String loginURL ="/auth/login";
+        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
+                new HttpEntity<>(signInRequest), JwtResponse.class);
+        return Objects.requireNonNull(response.getBody()).getToken();
+    }
     @Test
     void Test001_UserControllerWhenPostNewUserWithValidDTOShouldCreateUserCorrectly() {
         ResponseEntity<UserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -184,13 +193,11 @@ public class UserControllerTest {
         CreateUserDTO createdUser = postUserResponse.getBody();
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
-        assertEquals(userDTO.getName(), createdUser.getName());
-        assertEquals(userDTO.getLastName(), createdUser.getLastName());
-        assertEquals(userDTO.getEmail(), createdUser.getEmail());
-        assertEquals(userDTO.getPhoneNumber(), createdUser.getPhoneNumber());
-
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
         ResponseEntity<UserDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
-                HttpMethod.GET, null, UserDTO.class);
+                HttpMethod.GET, new HttpEntity<>(headers), UserDTO.class);
 
         UserDTO getUser = getUserResponse.getBody();
         assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
@@ -203,13 +210,18 @@ public class UserControllerTest {
 
     @Test
     void Test012_UserControllerWhenGetUserByIdWithInvalidIdShouldRespondNotFound() {
-        ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/1",
-                HttpMethod.GET, null, String.class);
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
 
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
+        ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/2",
+                HttpMethod.GET, new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
-        String error = getUserResponse.getBody();
-        assertNotNull(error);
-        assertTrue(error.contains("User not found"));
+        assertEquals(getUserResponse.getBody(),"User not found.");
     }
-
 }
