@@ -1,9 +1,6 @@
 package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.GetPasswordCodeDTO;
-import com.b4w.b4wback.dto.PasswordChangerDTO;
-import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
@@ -30,7 +27,6 @@ public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
-
     private static final Random Random = new Random();
 
     public UserServiceImp(UserRepository userRepository, MailService mailService) {
@@ -69,6 +65,7 @@ public class UserServiceImp implements UserService {
         Integer passwordCode = Random.nextInt(1000000);
         user.setPasswordCode(passwordCode);
         mailService.sendMail(user.getEmail(),"Password change code","Your password change code is: "+ passwordCode);
+        userRepository.save(user);
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).phoneNumber(user.getPhoneNumber()).build();
     }
 
@@ -76,5 +73,14 @@ public class UserServiceImp implements UserService {
     public Boolean getPasswordCode(GetPasswordCodeDTO email) {
         User user = userRepository.findByEmail(email.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return Objects.equals(user.getPasswordCode(), email.getPasswordCode());
+    }
+
+    @Override
+    public UserDTO changePassword(ChangePasswordDTO changePasswordDTO) {
+        User user = userRepository.findByEmail(changePasswordDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setPassword(changePasswordDTO.getPassword());
+        userRepository.save(user);
+        user.setPasswordCode(null);
+        return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).phoneNumber(user.getPhoneNumber()).build();
     }
 }
