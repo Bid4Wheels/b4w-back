@@ -1,7 +1,6 @@
 package com.b4w.b4wback.controller;
 
-import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,17 +24,38 @@ public class UserControllerTest {
     private TestRestTemplate restTemplate;
     private final String baseUrl = "/user";
     private CreateUserDTO userDTO;
+    private GetPasswordCodeDTO getPasswordCodeDTO;
+    private PasswordChangerDTO passwordChangerDTO;
+    private ChangePasswordDTO changePasswordDTO;
 
     @BeforeEach
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 8493123, "1Afjfslkjfl");
+        getPasswordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456, false);
+        passwordChangerDTO = new PasswordChangerDTO("bejero7623@dusyum.com");
+        changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com", "Manfredi23");
     }
 
     private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(createUserDTO, headers);
+    }
+    private HttpEntity<GetPasswordCodeDTO> createHttpEntity(GetPasswordCodeDTO getPasswordCodeDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(getPasswordCodeDTO, headers);
+    }
+    private HttpEntity<PasswordChangerDTO> createHttpEntity(PasswordChangerDTO passwordChangerDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(passwordChangerDTO, headers);
+    }
+    private HttpEntity<ChangePasswordDTO> createHttpEntity(ChangePasswordDTO changePasswordDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(changePasswordDTO, headers);
     }
 
     private  String authenticateAndGetToken(SignInRequest signInRequest){
@@ -216,12 +236,93 @@ public class UserControllerTest {
         CreateUserDTO createdUser = postUserResponse.getBody();
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
+
         String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +jwtToken);
+
         ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/2",
                 HttpMethod.GET, new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
         assertEquals(getUserResponse.getBody(),"User not found.");
     }
+
+    @Test
+    void Test013_UserControllerWhenGetPasswordCodeForIdWithValidIdShouldReturnOk() {
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
+
+        ResponseEntity<PasswordChangerDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
+                HttpMethod.PATCH,new HttpEntity<>(createHttpEntity(passwordChangerDTO),headers), PasswordChangerDTO.class);
+        assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
+    }
+
+    @Test
+    void Test014_UserControllerWhenGetPasswordCodeForIdWithInvalidIdShouldRespondNotFound() {
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " + jwtToken);
+
+        ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl + "/2",
+                HttpMethod.PATCH, new HttpEntity<>(createHttpEntity(passwordChangerDTO),headers), String.class);
+        assertEquals(HttpStatus.NOT_FOUND, checkPasswordResponse.getStatusCode());
+        assertEquals(checkPasswordResponse.getBody(),"User not found.");
+    }
+
+    @Test
+    void Test015_UserControllerWhenCheckPasswordCodeWithValidCodeShouldReturnUser() {
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+
+        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+
+        ResponseEntity<String> checkPasswordCodeResponse = restTemplate.exchange(
+                baseUrl + "/password",
+                HttpMethod.GET,
+                new HttpEntity<>(createHttpEntity(getPasswordCodeDTO), headers),
+                String.class);
+
+        assertEquals(HttpStatus.OK, checkPasswordCodeResponse.getStatusCode());
+    }
+
+    @Test
+    void Test016_UserControllerWhenChangePasswordAndValidInfoShouldReturnOK(){
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+
+        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+
+        ResponseEntity<ChangePasswordDTO> changePasswordResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.PATCH,
+                new HttpEntity<>(createHttpEntity(changePasswordDTO), headers), ChangePasswordDTO.class);
+
+        assertEquals(HttpStatus.OK, changePasswordResponse.getStatusCode());
+    }
+
 }

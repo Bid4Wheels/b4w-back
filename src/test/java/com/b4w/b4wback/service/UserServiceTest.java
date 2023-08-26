@@ -41,7 +41,7 @@ class UserServiceTest {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 8493123, "1Afjfslkjfl");
         passwordChangerDto = new PasswordChangerDTO("bejero7623@dusyum.com");
-        passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
+        passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456, true);
         changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com","1Afjfslkjfl");
 
     }
@@ -98,25 +98,26 @@ class UserServiceTest {
 
     @Test
     void Test009_UserServiceWhenRequestForAPasswordChangeWndUserNotFoundShouldThrowEntityNotFoundException() {
-        assertThrowsExactly(EntityNotFoundException.class, ()->userService.getPasswordChangerForId(1L, passwordChangerDto));
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.createPasswordCodeForId(1L, passwordChangerDto));
     }
 
     @Test
     void Test010_UserServiceWhenRequestForAPasswordCodeShouldGeneratePasswordCode() {
         User user = userService.createUser(userDTO);
-        userService.getPasswordChangerForId(user.getId(), passwordChangerDto);
+        userService.createPasswordCodeForId(user.getId(), passwordChangerDto);
         User user1 = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         assertTrue(user1.getPasswordCode() != 0);
     }
     @Test
     void Test011_UserServiceWhenCheckForPasswordCodeAndUserNotFoundShouldThrowEntityNotFoundException() {
-        assertThrowsExactly(EntityNotFoundException.class, ()->userService.getPasswordCode(passwordCodeDTO));
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.checkPasswordCode(passwordCodeDTO));
     }
     @Test
-    void Test012_UserServiceWhenComparingPasswordCodeAndEqualsShouldReturnTrue() {
+    void Test012_UserServiceWhenComparingPasswordCodeAndEqualsShouldReturnPasswordCodeDTOWithTrue() {
         User user = userService.createUser(userDTO);
-        passwordCodeDTO.setPasswordCode(user.getPasswordCode());
-        assertEquals(true, userService.getPasswordCode(passwordCodeDTO));
+        Integer code = userService.createPasswordCodeForId(user.getId(), passwordChangerDto);
+        assertNotNull(code);
+        assertEquals(6, code.toString().length());
     }
     @Test
     void Test013_UserServiceWhenChangingPasswordAndUserNotFoundShouldThrowEntityNotFoundException() {

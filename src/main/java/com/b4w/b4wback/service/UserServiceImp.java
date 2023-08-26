@@ -60,18 +60,21 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public void getPasswordChangerForId(long id, PasswordChangerDTO userDTO) {
+    public Integer createPasswordCodeForId(long id, PasswordChangerDTO userDTO) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Integer passwordCode = Random.nextInt(100000, 999999);
         user.setPasswordCode(passwordCode);
-        mailService.sendMail(user.getEmail(),"Password change code","Your password change code is: "+ passwordCode);
+        mailService.sendMail(userDTO.getEmail(),"Password change code","Your password change code is: "+ passwordCode);
         userRepository.save(user);
+        return passwordCode;
     }
 
     @Override
-    public Boolean getPasswordCode(GetPasswordCodeDTO passwordCodeDTO) {
+    public GetPasswordCodeDTO checkPasswordCode(GetPasswordCodeDTO passwordCodeDTO) {
         User user = userRepository.findByEmail(passwordCodeDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        return Objects.equals(user.getPasswordCode(), passwordCodeDTO.getPasswordCode());
+        boolean check = Objects.equals(user.getPasswordCode(), passwordCodeDTO.getPasswordCode());
+        passwordCodeDTO.setMatchingCode(check);
+        return passwordCodeDTO;
     }
 
     @Override

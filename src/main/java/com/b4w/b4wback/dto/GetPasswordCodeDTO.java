@@ -10,4 +10,5 @@ import lombok.*;
 public class GetPasswordCodeDTO {
     private String email;
     private Integer passwordCode;
+    private boolean matchingCode;
 }

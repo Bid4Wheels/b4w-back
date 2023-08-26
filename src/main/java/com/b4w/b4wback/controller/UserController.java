@@ -26,20 +26,20 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> getPasswordChangerForId(@PathVariable long id, @Valid @RequestBody PasswordChangerDTO userDTO){
-        userService.getPasswordChangerForId(id, userDTO);
+    public ResponseEntity<?> createPasswordCodeForId(@PathVariable long id, @Valid @RequestBody PasswordChangerDTO userDTO){
+        userService.createPasswordCodeForId(id, userDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/password")
-    public ResponseEntity<?> getPasswordCode(@RequestBody GetPasswordCodeDTO email){
-        val user = userService.getPasswordCode(email);
+    public ResponseEntity<?> checkPasswordCode(@RequestBody GetPasswordCodeDTO passwordCodeDTO){
+        val user = userService.checkPasswordCode(passwordCodeDTO);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
     @PatchMapping("/password")
-    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDTO passwordChangerDTO){
-        userService.changePassword(passwordChangerDTO);
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO){
+        userService.changePassword(changePasswordDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
