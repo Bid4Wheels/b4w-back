@@ -3,6 +3,7 @@ package com.b4w.b4wback.controller;
 import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
+import com.b4w.b4wback.service.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class UserControllerTest {
     private GetPasswordCodeDTO getPasswordCodeDTO;
     private PasswordChangerDTO passwordChangerDTO;
     private ChangePasswordDTO changePasswordDTO;
+
+    private UserService userService;
 
     @BeforeEach
     public void setup() {
@@ -261,25 +264,25 @@ public class UserControllerTest {
         headers.set("Authorization","Bearer " +jwtToken);
 
         ResponseEntity<PasswordChangerDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
-                HttpMethod.PATCH,new HttpEntity<>(createHttpEntity(passwordChangerDTO),headers), PasswordChangerDTO.class);
+                HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO,headers), PasswordChangerDTO.class);
         assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
     }
 
     @Test
     void Test014_UserControllerWhenGetPasswordCodeForIdWithInvalidIdShouldRespondNotFound() {
-        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
-                createHttpEntity(userDTO), CreateUserDTO.class);
+            ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                    createHttpEntity(userDTO), CreateUserDTO.class);
 
-        CreateUserDTO createdUser = postUserResponse.getBody();
-        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
-        assertNotNull(createdUser);
+            CreateUserDTO createdUser = postUserResponse.getBody();
+            assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+            assertNotNull(createdUser);
 
         String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " + jwtToken);
 
         ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl + "/2",
-                HttpMethod.PATCH, new HttpEntity<>(createHttpEntity(passwordChangerDTO),headers), String.class);
+                HttpMethod.PATCH, new HttpEntity<>(passwordChangerDTO,headers), String.class);
         assertEquals(HttpStatus.NOT_FOUND, checkPasswordResponse.getStatusCode());
         assertEquals(checkPasswordResponse.getBody(),"User not found.");
     }
@@ -297,11 +300,10 @@ public class UserControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + jwtToken);
 
-        ResponseEntity<String> checkPasswordCodeResponse = restTemplate.exchange(
-                baseUrl + "/password",
-                HttpMethod.GET,
-                new HttpEntity<>(createHttpEntity(getPasswordCodeDTO), headers),
-                String.class);
+        ResponseEntity<String> checkPasswordCodeResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.GET,
+                new HttpEntity<>(getPasswordCodeDTO, headers), String.class);
+
+        System.out.println(checkPasswordCodeResponse.getBody());
 
         assertEquals(HttpStatus.OK, checkPasswordCodeResponse.getStatusCode());
     }
@@ -319,8 +321,9 @@ public class UserControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + jwtToken);
 
+
         ResponseEntity<ChangePasswordDTO> changePasswordResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.PATCH,
-                new HttpEntity<>(createHttpEntity(changePasswordDTO), headers), ChangePasswordDTO.class);
+                new HttpEntity<>(changePasswordDTO, headers), ChangePasswordDTO.class);
 
         assertEquals(HttpStatus.OK, changePasswordResponse.getStatusCode());
     }

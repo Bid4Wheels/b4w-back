@@ -9,4 +9,5 @@ import lombok.*;
 @Builder
 public class PasswordChangerDTO {
     private String email;
+
 }

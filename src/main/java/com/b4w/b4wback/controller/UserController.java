@@ -26,8 +26,8 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<?> createPasswordCodeForId(@PathVariable long id, @Valid @RequestBody PasswordChangerDTO userDTO){
-        userService.createPasswordCodeForId(id, userDTO);
+    public ResponseEntity<?> createPasswordCodeForId(@PathVariable long id, @Valid @RequestBody PasswordChangerDTO passwordChangerDTO){
+        userService.createPasswordCodeForId(id, passwordChangerDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
