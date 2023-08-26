@@ -2,7 +2,6 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.exception.BadRequestParametersException;
-import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
