@@ -10,6 +10,7 @@ import com.b4w.b4wback.service.interfaces.AuctionService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+
 @Service
 @Validated
 public class AuctionServiceImpl implements AuctionService {
@@ -29,4 +30,5 @@ public class AuctionServiceImpl implements AuctionService {
         auctionRepository.save(auction);
         return createAuctionDTO;
     }
+
 }

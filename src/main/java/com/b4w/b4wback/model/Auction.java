@@ -12,10 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
 public class Auction {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -65,6 +62,6 @@ public class Auction {
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
     }
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne()
     private User user;
 }
