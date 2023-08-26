@@ -29,7 +29,7 @@ public class DefaultExceptionHandler {
                 .reduce("", (a, s) -> a + s + '\n');
     }
     @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException exception) {
+    protected ResponseEntity<Object> handleEntityNotFound() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
     }
 
@@ -39,7 +39,7 @@ public class DefaultExceptionHandler {
     }
 
     @ExceptionHandler(PasswordCodeDoesNotMatchException.class)
-    protected ResponseEntity<String> handlePasswordCodeDoesNotMatch(PasswordCodeDoesNotMatchException exception){
+    protected ResponseEntity<String> handlePasswordCodeDoesNotMatch(){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password code does not match.");
     }
 }
