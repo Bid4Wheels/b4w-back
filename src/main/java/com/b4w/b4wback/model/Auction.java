@@ -53,7 +53,7 @@ public class Auction {
     public Auction (CreateAuctionDTO createAuctionDTO){
         this.description = createAuctionDTO.getDescription();
         this.deadline = createAuctionDTO.getDeadline();
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createAuctionDTO.getCreatedAt();
         this.brand = createAuctionDTO.getBrand();
         this.model = createAuctionDTO.getModel();
         this.basePrice = createAuctionDTO.getBasePrice();
@@ -65,4 +65,6 @@ public class Auction {
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
     }
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private User user;
 }
