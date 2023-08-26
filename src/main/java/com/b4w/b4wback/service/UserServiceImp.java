@@ -60,27 +60,25 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public UserDTO getPasswordChangerForId(long id, PasswordChangerDTO userDTO) {
+    public void getPasswordChangerForId(long id, PasswordChangerDTO userDTO) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        Integer passwordCode = Random.nextInt(1000000);
+        Integer passwordCode = Random.nextInt(100000, 999999);
         user.setPasswordCode(passwordCode);
         mailService.sendMail(user.getEmail(),"Password change code","Your password change code is: "+ passwordCode);
         userRepository.save(user);
-        return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).phoneNumber(user.getPhoneNumber()).build();
     }
 
     @Override
-    public Boolean getPasswordCode(GetPasswordCodeDTO email) {
-        User user = userRepository.findByEmail(email.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        return Objects.equals(user.getPasswordCode(), email.getPasswordCode());
+    public Boolean getPasswordCode(GetPasswordCodeDTO passwordCodeDTO) {
+        User user = userRepository.findByEmail(passwordCodeDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return Objects.equals(user.getPasswordCode(), passwordCodeDTO.getPasswordCode());
     }
 
     @Override
-    public UserDTO changePassword(ChangePasswordDTO changePasswordDTO) {
+    public void changePassword(ChangePasswordDTO changePasswordDTO) {
         User user = userRepository.findByEmail(changePasswordDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setPassword(changePasswordDTO.getPassword());
         userRepository.save(user);
         user.setPasswordCode(null);
-        return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).phoneNumber(user.getPhoneNumber()).build();
     }
 }

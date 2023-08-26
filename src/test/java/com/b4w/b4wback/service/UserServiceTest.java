@@ -1,6 +1,10 @@
 package com.b4w.b4wback.service;
 
+import com.b4w.b4wback.dto.ChangePasswordDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.GetPasswordCodeDTO;
+import com.b4w.b4wback.dto.PasswordChangerDTO;
+
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
@@ -13,8 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
@@ -27,11 +30,20 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     CreateUserDTO userDTO;
+    PasswordChangerDTO passwordChangerDto;
+    GetPasswordCodeDTO passwordCodeDTO;
+    ChangePasswordDTO changePasswordDTO;
+
+
 
     @BeforeEach
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 8493123, "1Afjfslkjfl");
+        passwordChangerDto = new PasswordChangerDTO("bejero7623@dusyum.com");
+        passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
+        changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com","1Afjfslkjfl");
+
     }
 
     @Test
@@ -84,5 +96,38 @@ class UserServiceTest {
         assertThrowsExactly(EntityNotFoundException.class, ()->userService.getUserById(1L));
     }
 
+    @Test
+    void Test009_UserServiceWhenRequestForAPasswordChangeWndUserNotFoundShouldThrowEntityNotFoundException() {
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.getPasswordChangerForId(1L, passwordChangerDto));
+    }
 
+    @Test
+    void Test010_UserServiceWhenRequestForAPasswordCodeShouldGeneratePasswordCode() {
+        User user = userService.createUser(userDTO);
+        userService.getPasswordChangerForId(user.getId(), passwordChangerDto);
+        User user1 = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        assertTrue(user1.getPasswordCode() != 0);
+    }
+    @Test
+    void Test011_UserServiceWhenCheckForPasswordCodeAndUserNotFoundShouldThrowEntityNotFoundException() {
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.getPasswordCode(passwordCodeDTO));
+    }
+    @Test
+    void Test012_UserServiceWhenComparingPasswordCodeAndEqualsShouldReturnTrue() {
+        User user = userService.createUser(userDTO);
+        passwordCodeDTO.setPasswordCode(user.getPasswordCode());
+        assertEquals(true, userService.getPasswordCode(passwordCodeDTO));
+    }
+    @Test
+    void Test013_UserServiceWhenChangingPasswordAndUserNotFoundShouldThrowEntityNotFoundException() {
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.changePassword(changePasswordDTO));
+    }
+
+    @Test
+    void Test014_UserServiceWhenChangingPasswordShouldChangePassword() {
+        User user = userService.createUser(userDTO);
+        String pas = user.getPassword();
+        userService.changePassword(changePasswordDTO);
+        assertNotEquals(pas,changePasswordDTO.getPassword());
+    }
 }

@@ -27,8 +27,8 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> getPasswordChangerForId(@PathVariable long id, @Valid @RequestBody PasswordChangerDTO userDTO){
-        val user = userService.getPasswordChangerForId(id, userDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        userService.getPasswordChangerForId(id, userDTO);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping("/password")
@@ -39,7 +39,7 @@ public class UserController {
 
     @PatchMapping("/password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDTO passwordChangerDTO){
-        val user = userService.changePassword(passwordChangerDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        userService.changePassword(passwordChangerDTO);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
