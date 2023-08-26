@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ChangePasswordDTO {
     private String email;
     @NotBlank(message = "password can't be blank")

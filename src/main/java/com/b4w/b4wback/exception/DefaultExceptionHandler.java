@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,5 +36,10 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<String> handleUserNotAuthenticated(){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials.");
+    }
+
+    @ExceptionHandler(PasswordCodeDoesNotMatchException.class)
+    protected ResponseEntity<String> handlePasswordCodeDoesNotMatch(PasswordCodeDoesNotMatchException exception){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password code does not match.");
     }
 }

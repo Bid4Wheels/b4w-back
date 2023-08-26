@@ -6,6 +6,7 @@ import com.b4w.b4wback.dto.GetPasswordCodeDTO;
 import com.b4w.b4wback.dto.PasswordChangerDTO;
 
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.exception.PasswordCodeDoesNotMatchException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
@@ -130,5 +131,13 @@ class UserServiceTest {
         String pas = user.getPassword();
         userService.changePassword(changePasswordDTO);
         assertNotEquals(pas,changePasswordDTO.getPassword());
+    }
+
+    @Test
+    void Test015_UserServiceWhenCheckingPasswordCodeAndDifferentShouldReturnExceptionPasswordCodeDoesNotMatch(){
+        User user = userService.createUser(userDTO);
+        userService.createPasswordCodeForId(user.getId(), passwordChangerDto);
+        passwordCodeDTO.setPasswordCode(1234567);
+        assertThrowsExactly(PasswordCodeDoesNotMatchException.class, ()->userService.checkPasswordCode(passwordCodeDTO));
     }
 }

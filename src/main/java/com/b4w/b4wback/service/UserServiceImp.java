@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.exception.PasswordCodeDoesNotMatchException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.MailService;
@@ -73,6 +74,9 @@ public class UserServiceImp implements UserService {
     public GetPasswordCodeDTO checkPasswordCode(GetPasswordCodeDTO passwordCodeDTO) {
         User user = userRepository.findByEmail(passwordCodeDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         boolean check = Objects.equals(user.getPasswordCode(), passwordCodeDTO.getPasswordCode());
+        if(!check){
+            throw new PasswordCodeDoesNotMatchException("Password code does not match");
+        }
         passwordCodeDTO.setMatchingCode(check);
         return passwordCodeDTO;
     }
