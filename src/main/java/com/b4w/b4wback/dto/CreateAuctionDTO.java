@@ -12,7 +12,6 @@ import lombok.*;
 
 
 import java.time.LocalDateTime;
-
 @Getter
 @Setter
 public class CreateAuctionDTO {
@@ -53,4 +52,21 @@ public class CreateAuctionDTO {
 
     @NotNull(message = "Gear type can't be blank.")
     private GearShiftType gearShiftType;
+
+    public CreateAuctionDTO(Long id, String description, LocalDateTime deadline, String brand, String model,
+                            Integer basePrice, Integer milage, GasType gasType, Integer modelYear,
+                            String color, Integer doorsAmount, GearShiftType gearShiftType) {
+        this.id = id;
+        this.description = description;
+        this.deadline = deadline;
+        this.brand = brand;
+        this.model = model;
+        this.basePrice = basePrice;
+        this.milage = milage;
+        this.gasType = gasType;
+        this.modelYear = modelYear;
+        this.color = color;
+        this.doorsAmount = doorsAmount;
+        this.gearShiftType = gearShiftType;
+    }
 }
