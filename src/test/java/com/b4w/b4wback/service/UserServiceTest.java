@@ -5,8 +5,8 @@ import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.GetPasswordCodeDTO;
 import com.b4w.b4wback.dto.PasswordChangerDTO;
 
+import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
-import com.b4w.b4wback.exception.PasswordCodeDoesNotMatchException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
@@ -138,6 +138,6 @@ class UserServiceTest {
         User user = userService.createUser(userDTO);
         userService.createPasswordCodeForId(user.getId(), passwordChangerDto);
         passwordCodeDTO.setPasswordCode(1234567);
-        assertThrowsExactly(PasswordCodeDoesNotMatchException.class, ()->userService.checkPasswordCode(passwordCodeDTO));
+        assertThrowsExactly(BadRequestParametersException.class, ()->userService.checkPasswordCode(passwordCodeDTO));
     }
 }
