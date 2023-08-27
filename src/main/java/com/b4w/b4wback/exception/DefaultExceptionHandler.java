@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class DefaultExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(DefaultExceptionHandler.class);
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -29,13 +29,16 @@ public class DefaultExceptionHandler {
                         })
                 .reduce("", (a, s) -> a + s + '\n');
     }
-    @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException exception) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-    }
+
 
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<String> handleUserNotAuthenticated(){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials.");
+    }
+
+    @ExceptionHandler({EntityNotFoundException.class, BadRequestParametersException.class})
+    protected ResponseEntity<String> handleCredentialsException(RuntimeException exception) {
+        HttpStatus status = (exception instanceof EntityNotFoundException) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status).body(exception.getMessage());
     }
 }
