@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class DefaultExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -28,18 +29,16 @@ public class DefaultExceptionHandler {
                         })
                 .reduce("", (a, s) -> a + s + '\n');
     }
-    @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
-    }
+
 
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<String> handleUserNotAuthenticated(){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials.");
     }
 
-    @ExceptionHandler(PasswordCodeDoesNotMatchException.class)
-    protected ResponseEntity<String> handlePasswordCodeDoesNotMatch(){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password code does not match.");
+    @ExceptionHandler({EntityNotFoundException.class, BadRequestParametersException.class})
+    protected ResponseEntity<String> handleCredentialsException(RuntimeException exception) {
+        HttpStatus status = (exception instanceof EntityNotFoundException) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status).body(exception.getMessage());
     }
 }
