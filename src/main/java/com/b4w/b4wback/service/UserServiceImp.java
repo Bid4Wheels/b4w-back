@@ -34,7 +34,6 @@ public class UserServiceImp implements UserService {
         this.userRepository = userRepository;
         this.mailService = mailService;
     }
-
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
         //Added encode method for the password.
@@ -50,7 +49,6 @@ public class UserServiceImp implements UserService {
         }
         return newUser;
     }
-
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -59,7 +57,15 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public void modifyUser(long id, ModifyUserDTO modifyUserDTO){
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("User not found"));
+        user.modifyUser(modifyUserDTO);
+        userRepository.save(user);
     }
 
     @Override

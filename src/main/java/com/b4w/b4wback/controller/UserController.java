@@ -42,4 +42,10 @@ public class UserController {
         userService.changePassword(changePasswordDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> modifyUser(@PathVariable long id, @Valid @RequestBody ModifyUserDTO modifyUserDTO){
+        userService.modifyUser(id, modifyUserDTO);
+        return  ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
