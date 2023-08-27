@@ -18,9 +18,9 @@ public interface UserService {
 
     UserDetailsService userDetailsService();
 
-    Integer createPasswordCodeForId(long id, PasswordChangerDTO userDTO);
+    Integer createPasswordCodeForId(PasswordChangerDTO userDTO);
 
-    GetPasswordCodeDTO checkPasswordCode(GetPasswordCodeDTO email);
+    void checkPasswordCode(GetPasswordCodeDTO email);
 
     void changePassword(ChangePasswordDTO passwordChangerDTO);
 }

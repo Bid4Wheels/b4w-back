@@ -27,28 +27,30 @@ public class UserServiceImp implements UserService {
     private boolean sendMail;
     private final UserRepository userRepository;
     private final MailService mailService;
-    private final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final Random Random = new Random();
 
     public UserServiceImp(UserRepository userRepository, MailService mailService) {
         this.userRepository = userRepository;
         this.mailService = mailService;
     }
+
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
         //Added encode method for the password.
-        if (createUserDTO.getPassword()==null){
+        if (createUserDTO.getPassword() == null) {
             throw new DataIntegrityViolationException("Password must not be null");
         }
         createUserDTO.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));
         String email = createUserDTO.getEmail();
         User newUser = userRepository.save(new User(createUserDTO));
-        if (sendMail){
-            mailService.sendMail(email,"Welcome to B4W","Welcome to B4W");
+        if (sendMail) {
+            mailService.sendMail(email, "Welcome to B4W", "Welcome to B4W");
             email = "";
         }
         return newUser;
     }
+
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -57,34 +59,34 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+        return username -> userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Override
-    public Integer createPasswordCodeForId(long id, PasswordChangerDTO userDTO) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    public Integer createPasswordCodeForId(PasswordChangerDTO userDTO) {
+        User user = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Integer passwordCode = Random.nextInt(100000, 999999);
         user.setPasswordCode(passwordCode);
-        mailService.sendMail(userDTO.getEmail(),"Password change code","Your password change code is: "+ passwordCode);
         userRepository.save(user);
+        mailService.sendMail(userDTO.getEmail(), "Password change code", "Your password change code is: " + passwordCode);
         return passwordCode;
     }
 
     @Override
-    public GetPasswordCodeDTO checkPasswordCode(GetPasswordCodeDTO passwordCodeDTO) {
+    public void checkPasswordCode(GetPasswordCodeDTO passwordCodeDTO) {
         User user = userRepository.findByEmail(passwordCodeDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         boolean check = Objects.equals(user.getPasswordCode(), passwordCodeDTO.getPasswordCode());
-        if(!check){
+        if (!check) {
             throw new BadRequestParametersException("Password code does not match");
         }
-        passwordCodeDTO.setMatchingCode(check);
-        return passwordCodeDTO;
+        user.setPasswordCode(null);
     }
+
 
     @Override
     public void changePassword(ChangePasswordDTO changePasswordDTO) {
         User user = userRepository.findByEmail(changePasswordDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        user.setPassword(changePasswordDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.getPassword()));
         userRepository.save(user);
         user.setPasswordCode(null);
     }

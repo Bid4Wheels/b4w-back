@@ -42,7 +42,7 @@ class UserServiceTest {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 8493123, "1Afjfslkjfl");
         passwordChangerDto = new PasswordChangerDTO("bejero7623@dusyum.com");
-        passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456, true);
+        passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
         changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com","1Afjfslkjfl");
 
     }
@@ -99,13 +99,13 @@ class UserServiceTest {
 
     @Test
     void Test009_UserServiceWhenRequestForAPasswordChangeWndUserNotFoundShouldThrowEntityNotFoundException() {
-        assertThrowsExactly(EntityNotFoundException.class, ()->userService.createPasswordCodeForId(1L, passwordChangerDto));
+        assertThrowsExactly(EntityNotFoundException.class, ()->userService.createPasswordCodeForId( passwordChangerDto));
     }
 
     @Test
     void Test010_UserServiceWhenRequestForAPasswordCodeShouldGeneratePasswordCode() {
-        User user = userService.createUser(userDTO);
-        userService.createPasswordCodeForId(user.getId(), passwordChangerDto);
+        userService.createUser(userDTO);
+        userService.createPasswordCodeForId(passwordChangerDto);
         User user1 = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         assertTrue(user1.getPasswordCode() != 0);
     }
@@ -114,9 +114,9 @@ class UserServiceTest {
         assertThrowsExactly(EntityNotFoundException.class, ()->userService.checkPasswordCode(passwordCodeDTO));
     }
     @Test
-    void Test012_UserServiceWhenComparingPasswordCodeAndEqualsShouldReturnPasswordCodeDTOWithTrue() {
-        User user = userService.createUser(userDTO);
-        Integer code = userService.createPasswordCodeForId(user.getId(), passwordChangerDto);
+    void Test012_UserServiceWhenCreatingPasswordCodeShouldReturnPasswordCodeCorrectly() {
+        userService.createUser(userDTO);
+        Integer code = userService.createPasswordCodeForId(passwordChangerDto);
         assertNotNull(code);
         assertEquals(6, code.toString().length());
     }
@@ -135,9 +135,9 @@ class UserServiceTest {
 
     @Test
     void Test015_UserServiceWhenCheckingPasswordCodeAndDifferentShouldReturnExceptionPasswordCodeDoesNotMatch(){
-        User user = userService.createUser(userDTO);
-        userService.createPasswordCodeForId(user.getId(), passwordChangerDto);
-        passwordCodeDTO.setPasswordCode(1234567);
+        userService.createUser(userDTO);
+        userService.createPasswordCodeForId(passwordChangerDto);
+        passwordCodeDTO.setPasswordCode(123457);
         assertThrowsExactly(BadRequestParametersException.class, ()->userService.checkPasswordCode(passwordCodeDTO));
     }
 }

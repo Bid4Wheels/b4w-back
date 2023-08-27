@@ -33,7 +33,7 @@ public class UserControllerTest {
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 8493123, "1Afjfslkjfl");
-        getPasswordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456, false);
+        getPasswordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
         passwordChangerDTO = new PasswordChangerDTO("bejero7623@dusyum.com");
         changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com", "Manfredi23");
     }
@@ -242,30 +242,16 @@ public class UserControllerTest {
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
 
-        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
-        HttpHeaders headers= new HttpHeaders();
-        headers.set("Authorization","Bearer " +jwtToken);
 
-        ResponseEntity<PasswordChangerDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
-                HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO,headers), PasswordChangerDTO.class);
+        ResponseEntity<PasswordChangerDTO> getUserResponse = restTemplate.exchange(baseUrl,
+                HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO), PasswordChangerDTO.class);
         assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
     }
 
     @Test
     void Test014_UserControllerWhenGetPasswordCodeForIdWithInvalidIdShouldRespondNotFound() {
-            ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
-                    createHttpEntity(userDTO), CreateUserDTO.class);
-
-            CreateUserDTO createdUser = postUserResponse.getBody();
-            assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
-            assertNotNull(createdUser);
-
-        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
-        HttpHeaders headers= new HttpHeaders();
-        headers.set("Authorization","Bearer " + jwtToken);
-
-        ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl + "/2",
-                HttpMethod.PATCH, new HttpEntity<>(passwordChangerDTO,headers), String.class);
+        ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl ,
+                HttpMethod.PATCH, new HttpEntity<>(passwordChangerDTO), String.class);
         assertEquals(HttpStatus.NOT_FOUND, checkPasswordResponse.getStatusCode());
         assertEquals(checkPasswordResponse.getBody(),"User not found");
     }
@@ -280,13 +266,9 @@ public class UserControllerTest {
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
 
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
-
 
         ResponseEntity<ChangePasswordDTO> changePasswordResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.PATCH,
-                new HttpEntity<>(changePasswordDTO, headers), ChangePasswordDTO.class);
+                new HttpEntity<>(changePasswordDTO), ChangePasswordDTO.class);
 
         assertEquals(HttpStatus.OK, changePasswordResponse.getStatusCode());
     }
@@ -300,15 +282,12 @@ public class UserControllerTest {
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
 
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
 
-        restTemplate.exchange(baseUrl + "/1", HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO,headers), PasswordChangerDTO.class);
+        restTemplate.exchange(baseUrl + "/1", HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO), PasswordChangerDTO.class);
 
 
         ResponseEntity<String> checkPasswordCodeResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.GET,
-                new HttpEntity<>(getPasswordCodeDTO, headers), String.class);
+                new HttpEntity<>(getPasswordCodeDTO), String.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, checkPasswordCodeResponse.getStatusCode());
         assertEquals(checkPasswordCodeResponse.getBody(),"Password code does not match");
