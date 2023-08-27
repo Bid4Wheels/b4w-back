@@ -86,6 +86,7 @@ public class UserServiceImp implements UserService {
             throw new BadRequestParametersException("Password code does not match");
         }
         user.setPasswordCode(null);
+        userRepository.save(user);
     }
 
 
@@ -94,6 +95,5 @@ public class UserServiceImp implements UserService {
         User user = userRepository.findByEmail(changePasswordDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setPassword(passwordEncoder.encode(changePasswordDTO.getPassword()));
         userRepository.save(user);
-        user.setPasswordCode(null);
     }
 }
