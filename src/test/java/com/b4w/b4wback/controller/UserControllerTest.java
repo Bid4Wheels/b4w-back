@@ -1,7 +1,6 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.*;
-import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import org.junit.jupiter.api.BeforeEach;
