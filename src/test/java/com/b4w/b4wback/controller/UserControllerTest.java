@@ -238,7 +238,7 @@ public class UserControllerTest {
         ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/2",
                 HttpMethod.GET, new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
-        assertEquals(getUserResponse.getBody(),"User not found.");
+        assertEquals(getUserResponse.getBody(),"User not found");
     }
 
     @Test

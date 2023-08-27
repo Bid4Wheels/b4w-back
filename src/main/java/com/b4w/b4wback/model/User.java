@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 
 @Entity
@@ -45,11 +46,16 @@ public class User implements UserDetails {
         password = createUserDTO.getPassword();
     }
 
+
     public void modifyUser(ModifyUserDTO userDTO){
         name = userDTO.getName();
         lastName = userDTO.getLastName();
         phoneNumber = userDTO.getPhoneNumber();
     }
+
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.PERSIST)
+    private List<Auction> auctionList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
