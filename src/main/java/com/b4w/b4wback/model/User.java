@@ -38,6 +38,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    private Integer passwordCode;
+
     public User(CreateUserDTO createUserDTO){
         name = createUserDTO.getName();
         lastName = createUserDTO.getLastName();
