@@ -20,7 +20,7 @@ public class ValidateCreateUserDTOTest {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
-                8493123, "1Afjfslkjfl");
+                "+5491154964341", "1Afjfslkjfl");
     }
 
     @Test
@@ -70,7 +70,23 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test005_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullExceptEmailAndPasswordFormatValidShouldThrowOneInvalid(){
+    void Test005_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullExceptPhoneWithEmptyStringAndPasswordFormatValidShouldThrow2Invalid() {
+        userDTO.setPhoneNumber("");
+        Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
+
+        assertEquals(1, violations.size());
+    }
+
+    @Test
+    void Test006_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullAndPhoneNumberWithSmallSizeAndPasswordFormatValidShouldThrowOneInvalid() {
+        userDTO.setPhoneNumber("5894032");
+        Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
+
+        assertEquals(1, violations.size());
+    }
+
+    @Test
+    void Test007_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullExceptEmailAndPasswordFormatValidShouldThrowOneInvalid(){
         userDTO.setEmail(null);
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -78,7 +94,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test006_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordFormatValidAndEmailNotContainingArrobaShouldThrowOneInvalid(){
+    void Test008_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordFormatValidAndEmailNotContainingArrobaShouldThrowOneInvalid(){
         userDTO.setEmail("borjagmail.com");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -86,7 +102,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test007_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordFormatValidAndEmailNotContainingDomainPointShouldThrowOneInvalid(){
+    void Test009_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordFormatValidAndEmailNotContainingDomainPointShouldThrowOneInvalid(){
         userDTO.setEmail("borja@gmailcom");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -94,7 +110,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test008_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordFormatValidAndEmailNotContainingDomainEmptyShouldThrowOneInvalid(){
+    void Test010_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordFormatValidAndEmailNotContainingDomainEmptyShouldThrowOneInvalid(){
         userDTO.setEmail("borja@gmail.");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -102,7 +118,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test009_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullExceptPasswordShouldThrowOneInvalid(){
+    void Test011_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullExceptPasswordShouldThrowOneInvalid(){
         userDTO.setPassword(null);
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -110,7 +126,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test010_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullSmallPasswordShouldThrowOneInvalid(){
+    void Test012_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullSmallPasswordShouldThrowOneInvalid(){
         userDTO.setPassword("1Absdfg");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -118,7 +134,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test010_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordMissingUpperCaseShouldThrowOneInvalid(){
+    void Test013_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordMissingUpperCaseShouldThrowOneInvalid(){
         userDTO.setPassword("1qbsdfgf");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -126,7 +142,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test010_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordMissingLowerCaseShouldThrowOneInvalid(){
+    void Test014_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordMissingLowerCaseShouldThrowOneInvalid(){
         userDTO.setPassword("1qbsdfgf");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
 
@@ -134,7 +150,7 @@ public class ValidateCreateUserDTOTest {
     }
 
     @Test
-    void Test011_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordMissingNumberShouldThrowOneInvalid(){
+    void Test015_ValidateWhenCreatingCreateUserDTOWithAllFieldsAreNotNullPasswordMissingNumberShouldThrowOneInvalid(){
         userDTO.setPassword("Aqbsdfgf");
         Set<ConstraintViolation<CreateUserDTO>> violations = validator.validate(userDTO);
         assertEquals(1, violations.size());

@@ -2,6 +2,7 @@ package com.b4w.b4wback.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,14 +32,28 @@ public class DefaultExceptionHandler {
     }
 
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    protected String handleDataIntegrityViolation(DataIntegrityViolationException ex){
+        return ex.getMessage();
+    }
+
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    }
+
+
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<String> handleUserNotAuthenticated(){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials.");
     }
 
-    @ExceptionHandler({EntityNotFoundException.class, BadRequestParametersException.class})
-    protected ResponseEntity<String> handleCredentialsException(RuntimeException exception) {
-        HttpStatus status = (exception instanceof EntityNotFoundException) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
-        return ResponseEntity.status(status).body(exception.getMessage());
+
+    @ExceptionHandler(BadRequestParametersException.class)
+    protected ResponseEntity<String> handleCredentialsException(BadRequestParametersException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 }

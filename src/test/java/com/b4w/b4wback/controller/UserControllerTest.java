@@ -1,7 +1,9 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.ModifyUserDTO;
 import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,19 +25,33 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
+    
     private final String baseUrl = "/user";
     private CreateUserDTO userDTO;
 
     @BeforeEach
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
-                8493123, "1Afjfslkjfl");
+                "+5491154964341", "1Afjfslkjfl");
     }
 
     private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(createUserDTO, headers);
+    }
+
+    private HttpHeaders createHeaderWithToken(){
+        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
+        return headers;
+    }
+
+    private HttpEntity<ModifyUserDTO> createHttpEntity(ModifyUserDTO modifyUserDTO){
+        HttpHeaders headers = createHeaderWithToken();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(modifyUserDTO, headers);
     }
 
     private  String authenticateAndGetToken(SignInRequest signInRequest){
@@ -222,6 +238,57 @@ public class UserControllerTest {
         ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/2",
                 HttpMethod.GET, new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
-        assertEquals(getUserResponse.getBody(),"User not found");
+        assertEquals(getUserResponse.getBody(),"User not found.");
     }
+
+    @Test
+    void Test013_UserControllerWhenModifyingUserWithCorrectDataReturnsStatus200(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO("Pedro", "Goliat", "+5491112345678")),
+                String.class);
+        assertEquals(HttpStatus.OK, modUserResponse.getStatusCode());
+    }
+
+    @Test
+    void Test015_UserControllerWhenModifyingUserWithNullNameReturnsStatus400(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO(null, "Goliat", "+5491112345678")),
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, modUserResponse.getStatusCode());
+        String error = modUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("name can't be blank"));
+    }
+
+    @Test
+    void Test016_UserControllerWhenModifyingUserWithNullLastNameReturnsStatus400(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO("Pedro", null, "+5491112345678")),
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, modUserResponse.getStatusCode());
+        String error = modUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("last name can't be blank"));
+    }
+
+    @Test
+    void Test017_UserControllerWhenModifyingUserWithNullPhoneReturnsStatus400(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO("Pedro", "Goliat", null)),
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, modUserResponse.getStatusCode());
+        String error = modUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("phone number can't be blank"));
+    }
+
+
 }

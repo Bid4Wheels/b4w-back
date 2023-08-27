@@ -1,6 +1,7 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.ModifyUserDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
@@ -54,5 +55,13 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public void modifyUser(long id, ModifyUserDTO modifyUserDTO){
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("User not found"));
+        user.modifyUser(modifyUserDTO);
+        userRepository.save(user);
     }
 }

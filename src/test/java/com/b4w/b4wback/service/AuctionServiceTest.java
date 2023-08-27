@@ -36,7 +36,7 @@ public class AuctionServiceTest {
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
-                8493123, "1Afjfslkjfl");
+                "+5491112345678", "1Afjfslkjfl");
         userService.createUser(userDTO);
     }
 
