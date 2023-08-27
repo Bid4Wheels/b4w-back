@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 public class CreateAuctionDTO {
     @NotNull(message = "User id can't be blank.")
-    private Long id;
+    private Long userId;
     @NotBlank(message = "Description can't be blank.")
     @Size(max = 500, message = "The content must not exceed 500 characters.")
     private String description;
@@ -53,10 +53,10 @@ public class CreateAuctionDTO {
     @NotNull(message = "Gear type can't be blank.")
     private GearShiftType gearShiftType;
 
-    public CreateAuctionDTO(Long id, String description, LocalDateTime deadline, String brand, String model,
+    public CreateAuctionDTO(Long userId, String description, LocalDateTime deadline, String brand, String model,
                             Integer basePrice, Integer milage, GasType gasType, Integer modelYear,
                             String color, Integer doorsAmount, GearShiftType gearShiftType) {
-        this.id = id;
+        this.userId = userId;
         this.description = description;
         this.deadline = deadline;
         this.brand = brand;

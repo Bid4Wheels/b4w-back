@@ -92,6 +92,6 @@ public class AuctionServiceTest {
         assertEquals(auctionDTO.getModel(),auction.getModel());
         assertEquals(auctionDTO.getModelYear(),auction.getModelYear());
         assertEquals(auctionDTO.getStatus(),auction.getStatus());
-        assertEquals(auction.getUser().getId(),auctionDTO.getId());
+        assertEquals(auction.getUser().getId(),auctionDTO.getUserId());
     }
 }

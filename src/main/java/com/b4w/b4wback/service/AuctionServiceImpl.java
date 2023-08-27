@@ -24,7 +24,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     public CreateAuctionDTO createAuction(CreateAuctionDTO createAuctionDTO)  {
-        User user = userRepository.findById(createAuctionDTO.getId()).orElseThrow(()->new BadRequestParametersException("User with id "+createAuctionDTO.getId()+" not found"));
+        User user = userRepository.findById(createAuctionDTO.getUserId()).orElseThrow(()->new BadRequestParametersException("User with id "+createAuctionDTO.getUserId()+" not found"));
         Auction auction=new Auction(createAuctionDTO);
         auction.setUser(user);
         auctionRepository.save(auction);
