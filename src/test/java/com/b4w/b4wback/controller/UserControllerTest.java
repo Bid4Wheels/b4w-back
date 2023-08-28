@@ -1,7 +1,6 @@
 package com.b4w.b4wback.controller;
 
-import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,19 +22,39 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserControllerTest {
     @Autowired
     private TestRestTemplate restTemplate;
+
     private final String baseUrl = "/user";
     private CreateUserDTO userDTO;
+    private GetPasswordCodeDTO getPasswordCodeDTO;
+    private PasswordChangerDTO passwordChangerDTO;
+    private ChangePasswordDTO changePasswordDTO;
 
     @BeforeEach
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
-                8493123, "1Afjfslkjfl");
+                "+5491154964341", "1Afjfslkjfl");
+        getPasswordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
+        passwordChangerDTO = new PasswordChangerDTO("bejero7623@dusyum.com");
+        changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com", "Manfredi23");
     }
 
     private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(createUserDTO, headers);
+    }
+
+    private HttpHeaders createHeaderWithToken(){
+        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
+        return headers;
+    }
+
+    private HttpEntity<ModifyUserDTO> createHttpEntity(ModifyUserDTO modifyUserDTO){
+        HttpHeaders headers = createHeaderWithToken();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(modifyUserDTO, headers);
     }
 
     private  String authenticateAndGetToken(SignInRequest signInRequest){
@@ -224,4 +243,116 @@ public class UserControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
         assertEquals(getUserResponse.getBody(),"User not found.");
     }
+
+    @Test
+    void Test013_UserControllerWhenModifyingUserWithCorrectDataReturnsStatus200(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO("Pedro", "Goliat", "+5491112345678")),
+                String.class);
+        assertEquals(HttpStatus.OK, modUserResponse.getStatusCode());
+    }
+
+    @Test
+    void Test015_UserControllerWhenModifyingUserWithNullNameReturnsStatus400(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO(null, "Goliat", "+5491112345678")),
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, modUserResponse.getStatusCode());
+        String error = modUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("name can't be blank"));
+    }
+
+    @Test
+    void Test016_UserControllerWhenModifyingUserWithNullLastNameReturnsStatus400(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO("Pedro", null, "+5491112345678")),
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, modUserResponse.getStatusCode());
+        String error = modUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("last name can't be blank"));
+    }
+
+    @Test
+    void Test017_UserControllerWhenModifyingUserWithNullPhoneReturnsStatus400(){
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
+        ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
+                HttpMethod.PATCH,
+                createHttpEntity(new ModifyUserDTO("Pedro", "Goliat", null)),
+                String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, modUserResponse.getStatusCode());
+        String error = modUserResponse.getBody();
+        assertNotNull(error);
+        assertTrue(error.contains("phone number can't be blank"));
+    }
+
+
+
+    @Test
+    void Test013_UserControllerWhenGetPasswordCodeForIdWithValidIdShouldReturnOk() {
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+
+
+        ResponseEntity<PasswordChangerDTO> getUserResponse = restTemplate.exchange(baseUrl,
+                HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO), PasswordChangerDTO.class);
+        assertEquals(HttpStatus.OK, getUserResponse.getStatusCode());
+    }
+
+    @Test
+    void Test014_UserControllerWhenGetPasswordCodeForIdWithInvalidIdShouldRespondNotFound() {
+        ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl ,
+                HttpMethod.PATCH, new HttpEntity<>(passwordChangerDTO), String.class);
+        assertEquals(HttpStatus.NOT_FOUND, checkPasswordResponse.getStatusCode());
+        assertEquals(checkPasswordResponse.getBody(),"User not found.");
+    }
+
+
+    @Test
+    void Test015_UserControllerWhenChangePasswordAndValidInfoShouldReturnOK(){
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+
+
+        ResponseEntity<ChangePasswordDTO> changePasswordResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.PATCH,
+                new HttpEntity<>(changePasswordDTO), ChangePasswordDTO.class);
+
+        assertEquals(HttpStatus.OK, changePasswordResponse.getStatusCode());
+    }
+
+    @Test
+    void Test016_UserControllerWhenCheckingPasswordCodeAndNotEqualsShouldReturnBadRequest(){
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+
+
+        restTemplate.exchange(baseUrl + "/1", HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO), PasswordChangerDTO.class);
+
+
+        ResponseEntity<String> checkPasswordCodeResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.GET,
+                new HttpEntity<>(getPasswordCodeDTO), String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, checkPasswordCodeResponse.getStatusCode());
+        assertEquals(checkPasswordCodeResponse.getBody(),"Password code does not match");
+    }
+
 }

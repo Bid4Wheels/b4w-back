@@ -1,12 +1,14 @@
 package com.b4w.b4wback.model;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.ModifyUserDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 
 @Entity
@@ -31,10 +33,12 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false)
-    private Integer phoneNumber;
+    private String phoneNumber;
 
     @Column(nullable = false)
     private String password;
+
+    private Integer passwordCode;
 
     public User(CreateUserDTO createUserDTO){
         name = createUserDTO.getName();
@@ -43,6 +47,17 @@ public class User implements UserDetails {
         phoneNumber = createUserDTO.getPhoneNumber();
         password = createUserDTO.getPassword();
     }
+
+
+    public void modifyUser(ModifyUserDTO userDTO){
+        name = userDTO.getName();
+        lastName = userDTO.getLastName();
+        phoneNumber = userDTO.getPhoneNumber();
+    }
+
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.PERSIST)
+    private List<Auction> auctionList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
