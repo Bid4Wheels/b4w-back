@@ -241,7 +241,7 @@ public class UserControllerTest {
         ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/2",
                 HttpMethod.GET, new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
-        assertEquals(getUserResponse.getBody(),"User not found.");
+        assertEquals("User not found", getUserResponse.getBody());
     }
 
     @Test
@@ -315,7 +315,7 @@ public class UserControllerTest {
         ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl ,
                 HttpMethod.PATCH, new HttpEntity<>(passwordChangerDTO), String.class);
         assertEquals(HttpStatus.NOT_FOUND, checkPasswordResponse.getStatusCode());
-        assertEquals(checkPasswordResponse.getBody(),"User not found.");
+        assertEquals("User not found", checkPasswordResponse.getBody());
     }
 
 
