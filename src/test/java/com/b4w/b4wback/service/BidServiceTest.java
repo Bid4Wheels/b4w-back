@@ -53,7 +53,7 @@ public class BidServiceTest {
                 "+5491112345678", "Aa1bcdefgh"))));
 
         auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A", LocalDateTime.now(), "Toyota",
-                "A1", 100, 10000, GasType.DIESEL, 1990, "Blue", 4,
+                "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
                 GearShiftType.AUTOMATIC));
         auction.setUser(users.get(0));
         auction = auctionRepository.save(auction);
@@ -103,5 +103,11 @@ public class BidServiceTest {
         bidService.crateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
         assertThrows(BadRequestParametersException.class,
                 ()->bidService.crateBid(new CreateBidDTO(10, users.get(2).getId(), auction.getId())));
+    }
+
+    @Test
+    void Test007_BidServiceWhenReceiveCreatedBidDTOWithBidAmountLowerThanBaseShouldThrowBadRequestParametersException(){
+        assertThrows(BadRequestParametersException.class,
+                ()->bidService.crateBid(new CreateBidDTO(0, users.get(0).getId(), auction.getId())));
     }
 }

@@ -72,7 +72,7 @@ public class BidControllerTest {
         Optional<User> user = userRepository.findByEmail(userDTOS.get(0).getEmail());
         CreateAuctionDTO auctionDTO = auctionService.createAuction(new CreateAuctionDTO(user.get().getId(),"Subasta de automovil",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
+                "Corolla",1,30000, GasType.GASOLINE,2022,"Silver",
                 4, GearShiftType.AUTOMATIC));
 
 

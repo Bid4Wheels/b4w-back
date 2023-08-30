@@ -48,10 +48,15 @@ public class BidServiceImpl implements BidService {
             throw new BadRequestParametersException("User can't bid in own auctions");
 
         List<Bid> bids = bidRepository.getBidByAuction(auction);
-        bids.forEach(o->{
-            if (o.getAmount() >= bidDTO.getAmount())
-                throw new BadRequestParametersException("There is an bid with a higher amount");
-        });
+        if (bids.size() > 0) {
+            bids.forEach(o -> {
+                if (o.getAmount() >= bidDTO.getAmount())
+                    throw new BadRequestParametersException("There is an bid with a higher amount");
+            });
+        }else{
+            if (auction.getBasePrice() > bidDTO.getAmount())
+                throw new BadRequestParametersException("Base bid amount not reached");
+        }
 
 
         return bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
