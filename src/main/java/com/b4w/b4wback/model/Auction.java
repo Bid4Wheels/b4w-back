@@ -47,6 +47,10 @@ public class Auction {
     @Column(nullable = false)
     private GearShiftType gearShiftType;
 
+    @ManyToOne()
+    private User user;
+
+
     public Auction (CreateAuctionDTO createAuctionDTO){
         this.description = createAuctionDTO.getDescription();
         this.deadline = createAuctionDTO.getDeadline();
@@ -62,6 +66,12 @@ public class Auction {
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
     }
-    @ManyToOne()
-    private User user;
+
+    public AuctionStatus getStatus(){
+        if (status == AuctionStatus.OPEN)
+            if (LocalDateTime.now().isAfter(deadline))
+                return AuctionStatus.FINISHED;
+
+        return status;
+    }
 }
