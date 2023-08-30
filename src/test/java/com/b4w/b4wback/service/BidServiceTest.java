@@ -97,4 +97,11 @@ public class BidServiceTest {
         assertThrows(BadRequestParametersException.class,
                 ()->bidService.crateBid(new CreateBidDTO(5, users.get(2).getId(), auction.getId())));
     }
+
+    @Test
+    void Test006_BidServiceWhenReceiveCreateBidDTOWithSameBidAmountShouldBadRequestParametersException(){
+        bidService.crateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
+        assertThrows(BadRequestParametersException.class,
+                ()->bidService.crateBid(new CreateBidDTO(10, users.get(2).getId(), auction.getId())));
+    }
 }

@@ -49,7 +49,7 @@ public class BidServiceImpl implements BidService {
 
         List<Bid> bids = bidRepository.getBidByAuction(auction);
         bids.forEach(o->{
-            if (o.getAmount() > bidDTO.getAmount())
+            if (o.getAmount() >= bidDTO.getAmount())
                 throw new BadRequestParametersException("There is an bid with a higher amount");
         });
 
