@@ -32,7 +32,7 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
-    public void CrateBid(CreateBidDTO bidDTO) {
+    public Bid CrateBid(CreateBidDTO bidDTO) {
         Optional<User> userOptional = userRepository.findById(bidDTO.getUserId());
         if (userOptional.isEmpty()) throw new EntityNotFoundException("The user could not be found");
         Optional<Auction> auctionOptional = auctionRepository.findById(bidDTO.getAuctionId());
@@ -54,6 +54,6 @@ public class BidServiceImpl implements BidService {
         });
 
 
-        bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
+        return bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
     }
 }

@@ -1,5 +1,6 @@
 package com.b4w.b4wback.controller;
 
+import com.b4w.b4wback.dto.BidDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
@@ -8,6 +9,7 @@ import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
@@ -27,8 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -46,7 +47,6 @@ public class BidControllerTest {
 
     private final String baseUrl = "/bid";
     private List<CreateUserDTO> userDTOS;
-    private CreateAuctionDTO auctionDTO;
     private long auctionId;
 
     @BeforeEach
@@ -70,7 +70,7 @@ public class BidControllerTest {
 
 
         Optional<User> user = userRepository.findByEmail(userDTOS.get(0).getEmail());
-        auctionDTO = auctionService.createAuction(new CreateAuctionDTO(user.get().getId(),"Subasta de automovil",
+        CreateAuctionDTO auctionDTO = auctionService.createAuction(new CreateAuctionDTO(user.get().getId(),"Subasta de automovil",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
                 4, GearShiftType.AUTOMATIC));
@@ -113,11 +113,17 @@ public class BidControllerTest {
         int userNumber = 1;
         Optional<User> user = userRepository.findByEmail(userDTOS.get(userNumber).getEmail());
 
-        ResponseEntity<?> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+        ResponseEntity<BidDTO> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
                createHttpEntity(new CreateBidDTO(10, user.get().getId(), auctionId), userDTOS.get(userNumber)),
-                String.class);
+                BidDTO.class);
 
         assertEquals(HttpStatus.CREATED, postBidResponse.getStatusCode());
+        assertTrue(postBidResponse.hasBody());
+
+        BidDTO bid = postBidResponse.getBody();
+        assertEquals(10, bid.getAmount());
+        assertEquals(user.get().getId(), bid.getUserId());
+        assertNotNull(bid.getTime());
     }
 
     @Test

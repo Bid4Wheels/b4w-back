@@ -9,6 +9,7 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
@@ -60,7 +61,12 @@ public class BidServiceTest {
 
     @Test
     void Test001_BidServiceWhenReceiveCreatedBidDTOWithValidDTOShouldCreateBid() {
-        bidService.CrateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
+        Bid bid = bidService.CrateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
+
+        assertEquals(10, bid.getAmount());
+        assertEquals(users.get(1).getId(), bid.getBidder().getId());
+        assertEquals(auction.getId(), bid.getAuction().getId());
+        assertNotNull(bid.getDate());
     }
 
     @Test

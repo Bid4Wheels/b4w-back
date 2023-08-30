@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -21,7 +22,7 @@ public class Bid {
     private long id;
     @Column
     @NotNull
-    private Date date;
+    private LocalDateTime date;
     @Column
     @NotNull
     private Integer amount;
@@ -34,7 +35,7 @@ public class Bid {
     private Auction auction;
 
     public Bid(Integer amount, User bidder, Auction auction){
-        date = Date.from(Instant.now());
+        date = LocalDateTime.now();
         this.amount = amount;
         this.bidder = bidder;
         this.auction = auction;

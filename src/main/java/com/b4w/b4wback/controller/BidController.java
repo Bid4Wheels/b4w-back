@@ -1,6 +1,8 @@
 package com.b4w.b4wback.controller;
 
+import com.b4w.b4wback.dto.BidDTO;
 import com.b4w.b4wback.dto.CreateBidDTO;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.service.interfaces.BidService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,8 +22,8 @@ public class BidController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createUserAuction(@RequestBody @Valid CreateBidDTO bidDTO){
-        bidService.CrateBid(bidDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<BidDTO> createUserAuction(@RequestBody @Valid CreateBidDTO bidDTO){
+        Bid bid = bidService.CrateBid(bidDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BidDTO(bid));
     }
 }
