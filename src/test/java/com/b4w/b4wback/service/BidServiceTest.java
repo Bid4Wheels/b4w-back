@@ -61,7 +61,7 @@ public class BidServiceTest {
 
     @Test
     void Test001_BidServiceWhenReceiveCreatedBidDTOWithValidDTOShouldCreateBid() {
-        Bid bid = bidService.CrateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
+        Bid bid = bidService.crateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
 
         assertEquals(10, bid.getAmount());
         assertEquals(users.get(1).getId(), bid.getBidder().getId());
@@ -72,7 +72,7 @@ public class BidServiceTest {
     @Test
     void Test002_BidServiceWhenReceiveCreatedBidDTOWithBidderEqualAuctionerShouldThrowBadRequestParametersException(){
         assertThrows(BadRequestParametersException.class,
-                ()->bidService.CrateBid(new CreateBidDTO(10, users.get(0).getId(), auction.getId())));
+                ()->bidService.crateBid(new CreateBidDTO(10, users.get(0).getId(), auction.getId())));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class BidServiceTest {
         auction.setStatus(AuctionStatus.FINISHED);
         auctionRepository.save(auction);
         assertThrows(BadRequestParametersException.class,
-                ()->bidService.CrateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId())));
+                ()->bidService.crateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId())));
     }
 
     @Test
@@ -88,13 +88,13 @@ public class BidServiceTest {
         auction.setStatus(AuctionStatus.AWATINGDELIVERY);
         auctionRepository.save(auction);
         assertThrows(BadRequestParametersException.class,
-                ()->bidService.CrateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId())));
+                ()->bidService.crateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId())));
     }
 
     @Test
     void Test005_BidServiceWhenReceiveCreateBidDTOWithLowerBidAmountShouldBadRequestParametersException(){
-        bidService.CrateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
+        bidService.crateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
         assertThrows(BadRequestParametersException.class,
-                ()->bidService.CrateBid(new CreateBidDTO(5, users.get(2).getId(), auction.getId())));
+                ()->bidService.crateBid(new CreateBidDTO(5, users.get(2).getId(), auction.getId())));
     }
 }

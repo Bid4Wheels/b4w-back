@@ -23,7 +23,7 @@ public class BidController {
 
     @PostMapping()
     public ResponseEntity<BidDTO> createUserAuction(@RequestBody @Valid CreateBidDTO bidDTO){
-        Bid bid = bidService.CrateBid(bidDTO);
+        Bid bid = bidService.crateBid(bidDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(new BidDTO(bid));
     }
 }
