@@ -15,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Getter
-public class Offer {
+public class Bid {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -33,7 +33,7 @@ public class Offer {
     @NotNull
     private Auction auction;
 
-    public Offer(Integer amount, User bidder, Auction auction){
+    public Bid(Integer amount, User bidder, Auction auction){
         date = Date.from(Instant.now());
         this.amount = amount;
         this.bidder = bidder;

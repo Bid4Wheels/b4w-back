@@ -1,7 +1,7 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
-import com.b4w.b4wback.dto.CreateOfferDTO;
+import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
@@ -12,7 +12,6 @@ import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
-import com.b4w.b4wback.service.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,10 +82,10 @@ public class BidControllerTest {
 
 
 
-    private HttpEntity<CreateOfferDTO> createHttpEntity(CreateOfferDTO offerDTO, CreateUserDTO userDTO){
+    private HttpEntity<CreateBidDTO> createHttpEntity(CreateBidDTO bidDTO, CreateUserDTO userDTO){
         HttpHeaders headers = createHeaderWithToken(userDTO);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        return new HttpEntity<>(offerDTO, headers);
+        return new HttpEntity<>(bidDTO, headers);
     }
 
     private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {
@@ -115,7 +114,7 @@ public class BidControllerTest {
         Optional<User> user = userRepository.findByEmail(userDTOS.get(userNumber).getEmail());
 
         ResponseEntity<?> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
-               createHttpEntity(new CreateOfferDTO(10, user.get().getId(), auctionId), userDTOS.get(userNumber)),
+               createHttpEntity(new CreateBidDTO(10, user.get().getId(), auctionId), userDTOS.get(userNumber)),
                 String.class);
 
         assertEquals(HttpStatus.CREATED, postBidResponse.getStatusCode());
@@ -127,7 +126,7 @@ public class BidControllerTest {
         Optional<User> user = userRepository.findByEmail(userDTOS.get(userNumber).getEmail());
 
         ResponseEntity<String> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
-                createHttpEntity(new CreateOfferDTO(10, user.get().getId(), auctionId), userDTOS.get(userNumber)),
+                createHttpEntity(new CreateBidDTO(10, user.get().getId(), auctionId), userDTOS.get(userNumber)),
                 String.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, postBidResponse.getStatusCode());
@@ -140,17 +139,17 @@ public class BidControllerTest {
         Optional<User> user = userRepository.findByEmail(userDTOS.get(userNumber).getEmail());
 
         restTemplate.exchange(baseUrl, HttpMethod.POST,
-                createHttpEntity(new CreateOfferDTO(10, user.get().getId(), auctionId), userDTOS.get(userNumber)),
+                createHttpEntity(new CreateBidDTO(10, user.get().getId(), auctionId), userDTOS.get(userNumber)),
                 String.class);
 
         userNumber = 2;
         user = userRepository.findByEmail(userDTOS.get(userNumber).getEmail());
         ResponseEntity<String> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
-                createHttpEntity(new CreateOfferDTO(5, user.get().getId(), auctionId), userDTOS.get(userNumber)),
+                createHttpEntity(new CreateBidDTO(5, user.get().getId(), auctionId), userDTOS.get(userNumber)),
                 String.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, postBidResponse.getStatusCode());
-        assertTrue(postBidResponse.getBody().contains("There is an offer with a higher amount"));
+        assertTrue(postBidResponse.getBody().contains("There is an bid with a higher amount"));
     }
 
     @Test
@@ -159,7 +158,7 @@ public class BidControllerTest {
         Optional<User> user = userRepository.findByEmail(userDTOS.get(userNumber).getEmail());
 
         ResponseEntity<String> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
-                createHttpEntity(new CreateOfferDTO(10, user.get().getId(), 10L), userDTOS.get(userNumber)),
+                createHttpEntity(new CreateBidDTO(10, user.get().getId(), 10L), userDTOS.get(userNumber)),
                 String.class);
 
         assertEquals(HttpStatus.NOT_FOUND, postBidResponse.getStatusCode());

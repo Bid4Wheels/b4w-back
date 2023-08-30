@@ -1,16 +1,16 @@
 package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.dto.CreateOfferDTO;
+import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.model.Offer;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
-import com.b4w.b4wback.repository.OfferRepository;
+import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
-import com.b4w.b4wback.service.interfaces.OfferService;
+import com.b4w.b4wback.service.interfaces.BidService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -19,23 +19,23 @@ import java.util.Optional;
 
 @Service
 @Validated
-public class OfferServiceImpl implements OfferService {
-    private final OfferRepository offerRepository;
+public class BidServiceImpl implements BidService {
+    private final BidRepository bidRepository;
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
 
-    public OfferServiceImpl(OfferRepository offerRepository, UserRepository userRepository,
-                            AuctionRepository auctionRepository) {
-        this.offerRepository = offerRepository;
+    public BidServiceImpl(BidRepository bidRepository, UserRepository userRepository,
+                          AuctionRepository auctionRepository) {
+        this.bidRepository = bidRepository;
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
     }
 
     @Override
-    public void CrateOffer(CreateOfferDTO offerDTO) {
-        Optional<User> userOptional = userRepository.findById(offerDTO.getUserId());
+    public void CrateBid(CreateBidDTO bidDTO) {
+        Optional<User> userOptional = userRepository.findById(bidDTO.getUserId());
         if (userOptional.isEmpty()) throw new EntityNotFoundException("The user could not be found");
-        Optional<Auction> auctionOptional = auctionRepository.findById(offerDTO.getAuctionId());
+        Optional<Auction> auctionOptional = auctionRepository.findById(bidDTO.getAuctionId());
         if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction could not be found");
 
         User user = userOptional.get();
@@ -47,13 +47,13 @@ public class OfferServiceImpl implements OfferService {
         if (auction.getUser().getId() == user.getId())
             throw new BadRequestParametersException("User can't bid in own auctions");
 
-        List<Offer> offers = offerRepository.getOfferByAuction(auction);
-        offers.forEach(o->{
-            if (o.getAmount() > offerDTO.getAmount())
-                throw new BadRequestParametersException("There is an offer with a higher amount");
+        List<Bid> bids = bidRepository.getBidByAuction(auction);
+        bids.forEach(o->{
+            if (o.getAmount() > bidDTO.getAmount())
+                throw new BadRequestParametersException("There is an bid with a higher amount");
         });
 
 
-        offerRepository.save(new Offer(offerDTO.getAmount(), user, auction));
+        bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
     }
 }
