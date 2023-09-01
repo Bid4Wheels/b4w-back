@@ -52,7 +52,7 @@ public class BidServiceTest {
         users.add(userRepository.save(new User(new CreateUserDTO("Rogelio", "Pil", "asdfasfd@gmail,com",
                 "+5491112345678", "Aa1bcdefgh"))));
 
-        auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A",
+        auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
                 LocalDateTime.of(2030, 10, 10, 10, 10), "Toyota",
                 "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
                 GearShiftType.AUTOMATIC));
