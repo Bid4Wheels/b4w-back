@@ -1,23 +1,31 @@
 package com.b4w.b4wback.service;
 
+import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
+import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.UserService;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.data.domain.Page;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +41,9 @@ public class AuctionServiceTest {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    UserRepository userRepository;
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -93,5 +104,54 @@ public class AuctionServiceTest {
         assertEquals(auctionDTO.getModelYear(),auction.getModelYear());
         assertEquals(auctionDTO.getStatus(),auction.getStatus());
         assertEquals(auction.getUser().getId(),auctionDTO.getUserId());
+    }
+
+    @Test
+    void Test005_AuctionServiceWhenGetAuctionsByUserIdShouldReturnAListOfAuctions() {
+        User user = userRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil","text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC);
+
+        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil","text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Ford",
+                "Focus", 120000, 10000, GasType.HYBRID, 2022, "Blue", 4, GearShiftType.MANUAL);
+
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO2);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L);
+        assertNotNull(actualAuctions, "Auction list for the user should not be null");
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+        assertEquals(1L, firstAuction.getId(), "Expected auction ID to match");
+        assertEquals("Subasta de automovil", firstAuction.getTitle(), "Expected auction title to match");
+        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(0, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
+        assertEquals( "OPEN", firstAuction.getStatus().toString(), "Expected auction status to match");
+
+        AuctionDTO secondAuction = auctionList.get(1);
+        assertEquals(2L, secondAuction.getId(), "Expected auction ID to match");
+        assertEquals("Subasta de automovil", secondAuction.getTitle(), "Expected auction title to match");
+        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), secondAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(0, secondAuction.getHighestBidAmount(), "Expected highest bid amount to match");
+        assertEquals( "OPEN", secondAuction.getStatus().toString(), "Expected auction status to match");
+
+
+    }
+
+    @Test
+    void Test006_AuctionServiceWhenGetAuctionsByIdAndUserHasNoAuctionsShouldReturnEmptyList() {
+        User user = userRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L);
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+        assertEquals(0, auctionList.size(), "Expected auction list to be empty");
+    }
+
+    @Test
+    void Test007_AuctionServiceWhenGetAuctionsByIdAndUserNotExistsShouldThrowException() {
+        assertThrows(EntityNotFoundException.class, () -> auctionService.getAuctionsByUserId(2L));
     }
 }

@@ -49,6 +49,7 @@ public class Auction {
     private Integer doorsAmount;
     @Column(nullable = false)
     private GearShiftType gearShiftType;
+
     private int highestBidAmount;
 
     @ManyToOne()
