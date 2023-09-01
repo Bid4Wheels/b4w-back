@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
@@ -47,6 +49,11 @@ public class AuctionControllerTest {
         ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
                 new HttpEntity<>(signInRequest), JwtResponse.class);
         return Objects.requireNonNull(response.getBody()).getToken();
+    }
+    private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(createUserDTO, headers);
     }
 
 
@@ -199,4 +206,30 @@ public class AuctionControllerTest {
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
     }
+    @Test
+    void Test017_UserControllerWhenGetAuctionsUserIDShouldReturnOK() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text", LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC);
+        ResponseEntity<String> createAuctionDTOResponseEntity = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                new HttpEntity<>(auctionDTO, headers), String.class);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/user/1", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test018_UserControllerWhenGetAuctionsUserIDShouldReturnNotFound() {
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/user/2", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, getAuctionsResponse.getStatusCode());
+    }
+
 }
