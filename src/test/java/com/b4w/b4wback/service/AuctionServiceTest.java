@@ -3,7 +3,6 @@ package com.b4w.b4wback.service;
 import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
@@ -14,7 +13,6 @@ import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.UserService;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +106,6 @@ public class AuctionServiceTest {
 
     @Test
     void Test005_AuctionServiceWhenGetAuctionsByUserIdShouldReturnAListOfAuctions() {
-        User user = userRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("User not found"));
         CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC);
@@ -144,7 +141,6 @@ public class AuctionServiceTest {
 
     @Test
     void Test006_AuctionServiceWhenGetAuctionsByIdAndUserHasNoAuctionsShouldReturnEmptyList() {
-        User user = userRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L);
         List<AuctionDTO> auctionList = actualAuctions.getContent();
         assertEquals(0, auctionList.size(), "Expected auction list to be empty");
