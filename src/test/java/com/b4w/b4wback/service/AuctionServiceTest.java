@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class AuctionServiceTest {
     @Autowired
-    AuctionService auctionService;;
+    AuctionService auctionService;
 
     @Autowired
     AuctionRepository auctionRepository;
@@ -66,7 +66,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test003_AuctionServiceWhenUserCreatesAuctionWithInvalidUserIdShouldThrowException() {
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(2L,"Subasta de automovil",
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(2L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
         assertThrows(BadRequestParametersException.class,()->auctionService.createAuction(auctionDTO));
