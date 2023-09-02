@@ -43,7 +43,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test001_AuctionServiceWhenReceiveCreatedAuctionDTOWithValidDTOShouldReturnCreateAuctionDTO() {
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil",
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
         CreateAuctionDTO auctionCreated=auctionService.createAuction(auctionDTO);
@@ -52,11 +52,11 @@ public class AuctionServiceTest {
 
     @Test
     void Test002_AuctionServiceWhenUserCreatesMoreThanOneValidAuctionShouldUserHaveMoreThanOneAuctions() {
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil",
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
 
-        CreateAuctionDTO auctionDTO2=new CreateAuctionDTO(1L,"Subasta de automovil",
+        CreateAuctionDTO auctionDTO2=new CreateAuctionDTO(1L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Ford",
                 "Focus",120000,10000, GasType.HYBRID,2022,"Blue",4, GearShiftType.MANUAL);
         auctionService.createAuction(auctionDTO);
@@ -66,7 +66,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test003_AuctionServiceWhenUserCreatesAuctionWithInvalidUserIdShouldThrowException() {
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(2L,"Subasta de automovil",
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(2L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
         assertThrows(BadRequestParametersException.class,()->auctionService.createAuction(auctionDTO));
@@ -74,7 +74,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test004_AuctionServiceCheckAllFieldsOfAuctionCreatedShouldReturnEquals(){
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil",
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
         auctionService.createAuction(auctionDTO);

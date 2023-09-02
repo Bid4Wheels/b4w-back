@@ -1,15 +1,15 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auction")
@@ -19,5 +19,9 @@ public class AuctionController {
     @PostMapping()
     public ResponseEntity<CreateAuctionDTO> createUserAuction(@RequestBody @Valid CreateAuctionDTO createAuctionDTO){
         return new ResponseEntity<>(auctionService.createAuction(createAuctionDTO), HttpStatus.CREATED);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAuctionById(@PathVariable long id){
+        return new ResponseEntity<GetAuctionDTO>(auctionService.getAuctionById(id),HttpStatus.OK);
     }
 }

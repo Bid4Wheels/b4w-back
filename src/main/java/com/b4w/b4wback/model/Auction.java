@@ -19,6 +19,9 @@ public class Auction {
     private long id;
 
     @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
@@ -52,6 +55,7 @@ public class Auction {
 
 
     public Auction (CreateAuctionDTO createAuctionDTO){
+        this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();
         this.deadline = createAuctionDTO.getDeadline();
         this.createdAt = createAuctionDTO.getCreatedAt();
