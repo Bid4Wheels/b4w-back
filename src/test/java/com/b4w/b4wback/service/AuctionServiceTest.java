@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class AuctionServiceTest {
     @Autowired
-    AuctionService auctionService;;
+    AuctionService auctionService;
 
     @Autowired
     AuctionRepository auctionRepository;

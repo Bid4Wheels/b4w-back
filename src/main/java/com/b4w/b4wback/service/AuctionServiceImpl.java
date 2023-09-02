@@ -5,6 +5,7 @@ import com.b4w.b4wback.dto.AuctionOwnerDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.exception.BadRequestParametersException;
+import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
@@ -39,7 +40,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     public GetAuctionDTO getAuctionById(long id) {
-        Auction auction = auctionRepository.findById(id).orElseThrow(()->new BadRequestParametersException("Auction with id "+id+" not found"));
+        Auction auction = auctionRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Auction with id "+id+" not found"));
         return GetAuctionDTO.builder().title(auction.getTitle()).description(auction.getDescription()).deadline(auction.getDeadline()).basePrice(auction.getBasePrice()).
                 brand(auction.getBrand()).model(auction.getModel()).status(auction.getStatus()).milage(auction.getMilage()).gasType(auction.getGasType())
                 .modelYear(auction.getModelYear()).color(auction.getColor()).doorsAmount(auction.getDoorsAmount()).gearShiftType(auction.getGearShiftType())

@@ -1,6 +1,8 @@
 package com.b4w.b4wback.controller;
 
+import com.b4w.b4wback.dto.BidDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
@@ -20,6 +22,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
@@ -37,8 +41,11 @@ public class AuctionControllerTest {
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
+        CreateUserDTO userDTO2 = new CreateUserDTO("Mico", "Vorja", "bejero@dusyum.com",
+                "+5491112345678", "1Afjfslkjfl");
         SignInRequest signInRequest=new SignInRequest(userDTO.getEmail(), userDTO.getPassword());
         userService.createUser(userDTO);
+        userService.createUser(userDTO2);
         token=authenticateAndGetToken(signInRequest);
     }
 
@@ -215,5 +222,34 @@ public class AuctionControllerTest {
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void Test015_AuctionControllerWhenGetAuctionByIdShouldReturnStatusOK(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,
+                "Subasta de automovil","text",LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
+                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+
+        ResponseEntity<CreateAuctionDTO> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
+                new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
+
+        ResponseEntity<String> bidDTOResponseEntity= restTemplate.exchange("/bid", HttpMethod.POST,
+                new HttpEntity<>(new CreateBidDTO(150000,2L,1L),headers),String.class);
+
+        ResponseEntity<String> getAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.GET,
+                new HttpEntity<>(headers),String.class);
+
+        assertEquals(HttpStatus.OK,getAuctionDTOResponseEntity.getStatusCode());
+    }
+
+    @Test
+    void Test016_AuctionControllerWhenGetAuctionByIdShouldReturnStatusNOT_FOUND(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        ResponseEntity<String> getAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.GET,
+                new HttpEntity<>(headers),String.class);
+        assertEquals(HttpStatus.NOT_FOUND,getAuctionDTOResponseEntity.getStatusCode());
     }
 }
