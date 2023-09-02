@@ -20,6 +20,6 @@ public class AuctionController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getAuctionById(@PathVariable long id){
-        return new ResponseEntity<GetAuctionDTO>(auctionService.getAuctionById(id),HttpStatus.OK);
+        return new ResponseEntity<>(auctionService.getAuctionById(id),HttpStatus.OK);
     }
 }

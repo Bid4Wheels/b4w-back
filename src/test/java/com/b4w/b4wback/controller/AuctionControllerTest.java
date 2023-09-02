@@ -1,6 +1,5 @@
 package com.b4w.b4wback.controller;
 
-import com.b4w.b4wback.dto.BidDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
@@ -235,8 +234,7 @@ public class AuctionControllerTest {
         ResponseEntity<CreateAuctionDTO> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
 
-        ResponseEntity<String> bidDTOResponseEntity= restTemplate.exchange("/bid", HttpMethod.POST,
-                new HttpEntity<>(new CreateBidDTO(150000,2L,1L),headers),String.class);
+        restTemplate.exchange("/bid", HttpMethod.POST, new HttpEntity<>(new CreateBidDTO(150000,2L,1L),headers),String.class);
 
         ResponseEntity<String> getAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.GET,
                 new HttpEntity<>(headers),String.class);
