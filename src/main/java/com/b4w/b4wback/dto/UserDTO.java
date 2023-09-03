@@ -5,7 +5,6 @@ import com.b4w.b4wback.model.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
-import java.net.URL;
 
 
 @Getter
