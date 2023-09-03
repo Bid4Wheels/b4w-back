@@ -5,8 +5,10 @@ import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import org.springframework.data.domain.Page;
@@ -14,16 +16,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 
 @Service
 @Validated
 public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
+    private final BidRepository bidRepository;
 
-    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository) {
+    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
+        this.bidRepository = bidRepository;
     }
 
     @Override
@@ -38,6 +44,16 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public Page<AuctionDTO> getAuctionsByUserId(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        return  auctionRepository.findByUser(user, pageable);
+        Page<AuctionDTO> auctions= auctionRepository.findByUser(user, pageable);
+        List<AuctionDTO> auctionDTOS = auctions.getContent();
+        for (AuctionDTO auctionDTO : auctionDTOS) {
+            Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")));
+            if (topBid == null){
+                auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")).getBasePrice());
+                continue;
+            }
+            auctionDTO.setHighestBidAmount(topBid.getAmount());
+        }
+        return  auctions;
     }
 }

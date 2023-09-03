@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -11,6 +12,7 @@ import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
+import com.b4w.b4wback.service.interfaces.BidService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,11 +45,17 @@ public class AuctionServiceTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    BidService bidService;
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
+        CreateUserDTO userDTO2 = new CreateUserDTO("Mateo", "Servi", "bejero@dusyum.com",
+                "+5491112345678", "1Afjfslkjfl");
         userService.createUser(userDTO);
+        userService.createUser(userDTO2);
     }
 
 
@@ -76,7 +84,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test003_AuctionServiceWhenUserCreatesAuctionWithInvalidUserIdShouldThrowException() {
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(2L,"Subasta de automovil","text",
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(3L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
         assertThrows(BadRequestParametersException.class,()->auctionService.createAuction(auctionDTO));
@@ -129,14 +137,14 @@ public class AuctionServiceTest {
         assertEquals(1L, firstAuction.getId(), "Expected auction ID to match");
         assertEquals("Subasta de automovil", firstAuction.getTitle(), "Expected auction title to match");
         assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
-        assertEquals(0, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
+        assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
         assertEquals( "OPEN", firstAuction.getStatus().toString(), "Expected auction status to match");
 
         AuctionDTO secondAuction = auctionList.get(1);
         assertEquals(2L, secondAuction.getId(), "Expected auction ID to match");
         assertEquals("Subasta de automovil", secondAuction.getTitle(), "Expected auction title to match");
         assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), secondAuction.getDeadline(), "Expected auction deadline to match");
-        assertEquals(0, secondAuction.getHighestBidAmount(), "Expected highest bid amount to match");
+        assertEquals(120000, secondAuction.getHighestBidAmount(), "Expected highest bid amount to match");
         assertEquals( "OPEN", secondAuction.getStatus().toString(), "Expected auction status to match");
 
 
@@ -153,6 +161,44 @@ public class AuctionServiceTest {
     @Test
     void Test007_AuctionServiceWhenGetAuctionsByIdAndUserNotExistsShouldThrowException() {
         Pageable pageable = PageRequest.of(0, 10);
-        assertThrows(EntityNotFoundException.class, () -> auctionService.getAuctionsByUserId(2L, pageable));
+        assertThrows(EntityNotFoundException.class, () -> auctionService.getAuctionsByUserId(3L, pageable));
+    }
+
+    @Test
+    void Test008_AuctionServiceWhenBidForAnAuctionAndGetAuctionsByIdShouldReturnAuctionWithHighestBidAmount() {
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC);
+
+        auctionService.createAuction(auctionDTO);
+
+        bidService.crateBid(CreateBidDTO.builder().auctionId(1L).amount(150000).userId(2L).build());
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L, pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+        assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected auction ID to match");
+    }
+
+    @Test
+    void Test009_AuctionServiceWhenGetAuctionsByIdShouldReturnAuctionWithHigestBidAmountEqualsBasePrice() {
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC);
+
+        auctionService.createAuction(auctionDTO);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L, pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+        assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected auction ID to match");
     }
 }
