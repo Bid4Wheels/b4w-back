@@ -44,16 +44,18 @@ public class AuctionServiceTest {
     UserService userService;
 
     @Autowired
-    UserRepository userRepository;
+    BidService bidService;
 
     @Autowired
-    BidService bidService;
+    UserRepository userRepository;
+
+
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
-        CreateUserDTO userDTO2 = new CreateUserDTO("Mateo", "Servi", "bejero@dusyum.com",
-                "+5491112345678", "1Afjfslkjfl");
+        CreateUserDTO userDTO2 = new CreateUserDTO("Esteban", "Chiquito", "bejero@dusyum,com","+5491112345678",
+                "1Afjfslkjfl");
         userService.createUser(userDTO);
         userService.createUser(userDTO2);
     }
@@ -112,6 +114,46 @@ public class AuctionServiceTest {
         assertEquals(auctionDTO.getStatus(),auction.getStatus());
         assertEquals(auction.getUser().getId(),auctionDTO.getUserId());
     }
+
+    @Test
+    void Test005_AuctionServiceWhenGetAuctionByIdShouldReturnGetAuctionDTO(){
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
+                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        CreateBidDTO bidDto=new CreateBidDTO(150000,2L,1L);
+        auctionService.createAuction(auctionDTO);
+        bidService.crateBid(bidDto);
+        assertEquals(auctionDTO.getTitle(),auctionService.getAuctionById(1L).getTitle());
+        assertEquals(auctionDTO.getDescription(),auctionService.getAuctionById(1L).getDescription());
+        assertEquals(auctionDTO.getDeadline(),auctionService.getAuctionById(1L).getDeadline());
+        assertEquals(auctionDTO.getBasePrice(),auctionService.getAuctionById(1L).getBasePrice());
+        assertEquals(auctionDTO.getBrand(),auctionService.getAuctionById(1L).getBrand());
+        assertEquals(auctionDTO.getModel(),auctionService.getAuctionById(1L).getModel());
+        assertEquals(auctionDTO.getStatus(),auctionService.getAuctionById(1L).getStatus());
+        assertEquals(auctionDTO.getMilage(),auctionService.getAuctionById(1L).getMilage());
+        assertEquals(auctionDTO.getGasType(),auctionService.getAuctionById(1L).getGasType());
+        assertEquals(auctionDTO.getModelYear(),auctionService.getAuctionById(1L).getModelYear());
+        assertEquals(auctionDTO.getColor(),auctionService.getAuctionById(1L).getColor());
+        assertEquals(auctionDTO.getDoorsAmount(),auctionService.getAuctionById(1L).getDoorsAmount());
+        assertEquals(auctionDTO.getGearShiftType(),auctionService.getAuctionById(1L).getGearShiftType());
+        assertEquals(auctionDTO.getUserId(),auctionService.getAuctionById(1L).getAuctionOwnerDTO().getId());
+
+        assertEquals(bidDto.getAmount(),auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getAmount());
+        assertEquals(bidDto.getUserId(),auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getUserId());
+        assertEquals("Esteban",auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getUserName());
+        assertEquals("Chiquito",auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getUserLastName());
+
+        assertEquals(1L,auctionService.getAuctionById(1L).getAuctionOwnerDTO().getId());
+        assertEquals("Nico",auctionService.getAuctionById(1L).getAuctionOwnerDTO().getName());
+        assertEquals("Borja",auctionService.getAuctionById(1L).getAuctionOwnerDTO().getLastName());
+
+    }
+
+    @Test
+    void Test006_AuctionServiceWhenGetAuctionByIdWithInvalidIdShouldThrowException(){
+        assertThrows(EntityNotFoundException.class,()->auctionService.getAuctionById(1L));
+    }
+
 
     @Test
     void Test005_AuctionServiceWhenGetAuctionsByUserIdShouldReturnAListOfAuctions() {

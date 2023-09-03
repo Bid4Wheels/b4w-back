@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
@@ -41,6 +42,11 @@ public class AuctionServiceImpl implements AuctionService {
         return createAuctionDTO;
     }
 
+    @Override
+    public GetAuctionDTO getAuctionById(long id) {
+        Auction auction = auctionRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Auction with id "+id+" not found"));
+        return auction.getAuctionToDTO(bidRepository);
+    }
     @Override
     public Page<AuctionDTO> getAuctionsByUserId(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));

@@ -19,6 +19,10 @@ public class AuctionController {
     public ResponseEntity<CreateAuctionDTO> createUserAuction(@RequestBody @Valid CreateAuctionDTO createAuctionDTO){
         return new ResponseEntity<>(auctionService.createAuction(createAuctionDTO), HttpStatus.CREATED);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAuctionById(@PathVariable long id){
+        return new ResponseEntity<>(auctionService.getAuctionById(id),HttpStatus.OK);
+    }
     @GetMapping("user/{userId}")
     public ResponseEntity<?> getAuctionsByUserId(@PathVariable long userId, Pageable pageable){
         val auctions = auctionService.getAuctionsByUserId(userId, pageable);
