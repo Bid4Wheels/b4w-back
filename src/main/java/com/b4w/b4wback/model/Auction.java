@@ -54,6 +54,8 @@ public class Auction {
     @Column(nullable = false)
     private GearShiftType gearShiftType;
 
+    private int highestBidAmount;
+
     @ManyToOne()
     private User user;
 
