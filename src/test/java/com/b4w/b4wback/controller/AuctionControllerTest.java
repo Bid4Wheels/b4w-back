@@ -272,7 +272,7 @@ public class AuctionControllerTest {
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
 
-        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/user/2", HttpMethod.GET,
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/user/3", HttpMethod.GET,
                 new HttpEntity<>(headers), String.class);
 
         assertEquals(HttpStatus.NOT_FOUND, getAuctionsResponse.getStatusCode());
