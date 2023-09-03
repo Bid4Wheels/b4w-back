@@ -6,6 +6,7 @@ import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.MailService;
+import com.b4w.b4wback.service.interfaces.S3Service;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,9 +31,11 @@ public class UserServiceImp implements UserService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final Random Random = new Random();
 
-    public UserServiceImp(UserRepository userRepository, MailService mailService) {
+    private final S3Service s3Service;
+    public UserServiceImp(UserRepository userRepository, MailService mailService,S3Service s3Service) {
         this.userRepository = userRepository;
         this.mailService = mailService;
+        this.s3Service=s3Service;
     }
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
@@ -52,7 +55,8 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).phoneNumber(user.getPhoneNumber()).build();
+        return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
+                phoneNumber(user.getPhoneNumber()).imgURL(s3Service.getDownloadURL(id)).build();
     }
 
     @Override
