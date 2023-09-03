@@ -6,10 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auction")
@@ -19,5 +16,9 @@ public class AuctionController {
     @PostMapping()
     public ResponseEntity<CreateAuctionDTO> createUserAuction(@RequestBody @Valid CreateAuctionDTO createAuctionDTO){
         return new ResponseEntity<>(auctionService.createAuction(createAuctionDTO), HttpStatus.CREATED);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAuctionById(@PathVariable long id){
+        return new ResponseEntity<>(auctionService.getAuctionById(id),HttpStatus.OK);
     }
 }

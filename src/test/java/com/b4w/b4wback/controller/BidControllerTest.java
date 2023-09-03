@@ -9,7 +9,6 @@ import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
@@ -70,7 +69,7 @@ public class BidControllerTest {
 
 
         Optional<User> user = userRepository.findByEmail(userDTOS.get(0).getEmail());
-        CreateAuctionDTO auctionDTO = auctionService.createAuction(new CreateAuctionDTO(user.get().getId(),"Subasta de automovil",
+        CreateAuctionDTO auctionDTO = auctionService.createAuction(new CreateAuctionDTO(user.get().getId(),"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",1,30000, GasType.GASOLINE,2022,"Silver",
                 4, GearShiftType.AUTOMATIC));
