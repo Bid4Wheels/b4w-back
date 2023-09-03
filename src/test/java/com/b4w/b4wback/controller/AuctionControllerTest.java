@@ -54,12 +54,6 @@ public class AuctionControllerTest {
                 new HttpEntity<>(signInRequest), JwtResponse.class);
         return Objects.requireNonNull(response.getBody()).getToken();
     }
-    private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new HttpEntity<>(createUserDTO, headers);
-    }
-
 
     @Test
     void Test001_AuctionControllerWhenReceivesValidAuctionShouldReturnStatusCREATED(){
@@ -233,8 +227,7 @@ public class AuctionControllerTest {
                 "Subasta de automovil","text",LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
 
-        ResponseEntity<CreateAuctionDTO> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
-                new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
+        restTemplate.exchange(baseUrl, HttpMethod.POST,new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
 
         restTemplate.exchange("/bid", HttpMethod.POST, new HttpEntity<>(new CreateBidDTO(150000,2L,1L),headers),String.class);
 
@@ -258,8 +251,7 @@ public class AuctionControllerTest {
         headers.set("Authorization", "Bearer " + token);
         CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text", LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC);
-        ResponseEntity<String> createAuctionDTOResponseEntity = restTemplate.exchange(baseUrl, HttpMethod.POST,
-                new HttpEntity<>(auctionDTO, headers), String.class);
+        restTemplate.exchange(baseUrl, HttpMethod.POST,new HttpEntity<>(auctionDTO, headers), String.class);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/user/1", HttpMethod.GET,
                 new HttpEntity<>(headers), String.class);
