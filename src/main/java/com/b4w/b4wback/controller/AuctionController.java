@@ -5,6 +5,7 @@ import com.b4w.b4wback.service.interfaces.AuctionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +20,8 @@ public class AuctionController {
         return new ResponseEntity<>(auctionService.createAuction(createAuctionDTO), HttpStatus.CREATED);
     }
     @GetMapping("user/{userId}")
-    public ResponseEntity<?> getAuctionsByUserId(@PathVariable long userId){
-        val auctions = auctionService.getAuctionsByUserId(userId);
+    public ResponseEntity<?> getAuctionsByUserId(@PathVariable long userId, Pageable pageable){
+        val auctions = auctionService.getAuctionsByUserId(userId, pageable);
         return ResponseEntity.status(HttpStatus.OK).body(auctions);
     }
 }

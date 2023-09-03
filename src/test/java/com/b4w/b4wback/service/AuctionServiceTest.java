@@ -20,6 +20,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
@@ -117,7 +119,9 @@ public class AuctionServiceTest {
         auctionService.createAuction(auctionDTO);
         auctionService.createAuction(auctionDTO2);
 
-        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L, pageable);
         assertNotNull(actualAuctions, "Auction list for the user should not be null");
 
         List<AuctionDTO> auctionList = actualAuctions.getContent();
@@ -141,13 +145,15 @@ public class AuctionServiceTest {
 
     @Test
     void Test006_AuctionServiceWhenGetAuctionsByIdAndUserHasNoAuctionsShouldReturnEmptyList() {
-        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L,pageable);
         List<AuctionDTO> auctionList = actualAuctions.getContent();
         assertEquals(0, auctionList.size(), "Expected auction list to be empty");
     }
 
     @Test
     void Test007_AuctionServiceWhenGetAuctionsByIdAndUserNotExistsShouldThrowException() {
-        assertThrows(EntityNotFoundException.class, () -> auctionService.getAuctionsByUserId(2L));
+        Pageable pageable = PageRequest.of(0, 10);
+        assertThrows(EntityNotFoundException.class, () -> auctionService.getAuctionsByUserId(2L, pageable));
     }
 }

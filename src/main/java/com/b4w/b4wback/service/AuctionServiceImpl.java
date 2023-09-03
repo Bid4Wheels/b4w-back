@@ -39,9 +39,8 @@ public class AuctionServiceImpl implements AuctionService {
     }
 
     @Override
-    public Page<AuctionDTO> getAuctionsByUserId(Long userId) {
+    public Page<AuctionDTO> getAuctionsByUserId(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        Pageable pageable = PageRequest.of(0, 10);
         return  auctionRepository.findByUser(user, pageable);
     }
 }
