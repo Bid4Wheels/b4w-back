@@ -1,9 +1,13 @@
 package com.b4w.b4wback.model;
 
+import com.b4w.b4wback.dto.AuctionHigestBidDTO;
+import com.b4w.b4wback.dto.AuctionOwnerDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
+import com.b4w.b4wback.repository.BidRepository;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -77,5 +81,27 @@ public class Auction {
                 return AuctionStatus.FINISHED;
 
         return status;
+    }
+    public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository){
+        Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
+
+        AuctionHigestBidDTO auctionHigestBidDTO = null;
+
+        if(topBid != null)
+            auctionHigestBidDTO = AuctionHigestBidDTO.builder()
+                    .amount(topBid.getAmount())
+                    .userId(topBid.getBidder().getId())
+                    .userName(topBid.getBidder().getName())
+                    .userLastName(topBid.getBidder().getLastName()).build();
+
+        return GetAuctionDTO.builder().title(this.getTitle()).description(this.getDescription()).deadline(this.getDeadline()).basePrice(this.getBasePrice()).
+                brand(this.getBrand()).model(this.getModel()).status(this.getStatus()).milage(this.getMilage()).gasType(this.getGasType())
+                .modelYear(this.getModelYear()).color(this.getColor()).doorsAmount(this.getDoorsAmount()).gearShiftType(this.getGearShiftType())
+                .auctionOwnerDTO(AuctionOwnerDTO.builder()
+                        .name(this.getUser().getName())
+                        .id(this.getUser().getId())
+                        .lastName(this.getUser().getLastName()).build())
+                .auctionHigestBidDTO(auctionHigestBidDTO)
+                .build();
     }
 }

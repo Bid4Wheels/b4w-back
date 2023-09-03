@@ -41,18 +41,6 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public GetAuctionDTO getAuctionById(long id) {
         Auction auction = auctionRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Auction with id "+id+" not found"));
-        return GetAuctionDTO.builder().title(auction.getTitle()).description(auction.getDescription()).deadline(auction.getDeadline()).basePrice(auction.getBasePrice()).
-                brand(auction.getBrand()).model(auction.getModel()).status(auction.getStatus()).milage(auction.getMilage()).gasType(auction.getGasType())
-                .modelYear(auction.getModelYear()).color(auction.getColor()).doorsAmount(auction.getDoorsAmount()).gearShiftType(auction.getGearShiftType())
-                .auctionOwnerDTO(AuctionOwnerDTO.builder()
-                        .name(auction.getUser().getName())
-                        .id(auction.getUser().getId())
-                        .lastName(auction.getUser().getLastName()).build())
-                .auctionHigestBidDTO(AuctionHigestBidDTO.builder()
-                        .amount(bidRepository.findTopByAuctionOrderByAmountDesc(auction).getAmount())
-                        .userId(bidRepository.findTopByAuctionOrderByAmountDesc(auction).getBidder().getId())
-                        .userName(bidRepository.findTopByAuctionOrderByAmountDesc(auction).getBidder().getName())
-                        .userLastName(bidRepository.findTopByAuctionOrderByAmountDesc(auction).getBidder().getLastName()).build())
-                .build();
+        return auction.getAuctionToDTO(bidRepository);
     }
 }
