@@ -1,5 +1,6 @@
 package com.b4w.b4wback.controller;
 
+import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.FilterAuctionDTO;
 import com.b4w.b4wback.model.Auction;
@@ -33,7 +34,7 @@ public class AuctionController {
     }
 
     @PostMapping("/filter")
-    public ResponseEntity<Page<Auction>> getAuctionsFiltered(@RequestBody FilterAuctionDTO filter, @RequestBody Pageable pageable){
+    public ResponseEntity<Page<AuctionDTO>> getAuctionsFiltered(@RequestBody FilterAuctionDTO filter, @RequestBody Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsFiltered(filter, pageable));
     }
 }
