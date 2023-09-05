@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.FilterAuctionDTO;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
@@ -15,13 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 
 
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest()
+@SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class AuctionServiceTest {
@@ -93,5 +96,16 @@ public class AuctionServiceTest {
         assertEquals(auctionDTO.getModelYear(),auction.getModelYear());
         assertEquals(auctionDTO.getStatus(),auction.getStatus());
         assertEquals(auction.getUser().getId(),auctionDTO.getUserId());
+    }
+
+    @Test
+    void TryingMyOwnMethod(){
+        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
+                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
+                4, GearShiftType.AUTOMATIC);
+        auctionService.createAuction(auctionDTO);
+        Page<Auction> page = auctionService.getAuctionsFiltered(FilterAuctionDTO.builder().build(), Pageable.ofSize(10));
+        assertEquals(1, page.getTotalElements());
     }
 }
