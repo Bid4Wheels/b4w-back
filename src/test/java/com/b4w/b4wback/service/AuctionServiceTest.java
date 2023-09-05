@@ -15,6 +15,7 @@ import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.BidService;
 import com.b4w.b4wback.service.interfaces.UserService;
+import com.b4w.b4wback.util.AuctionGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,13 +247,168 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void TryingMyOwnMethod(){
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
-                4, GearShiftType.AUTOMATIC);
-        auctionService.createAuction(auctionDTO);
-        Page<Auction> page = auctionService.getAuctionsFiltered(FilterAuctionDTO.builder().build(), Pageable.ofSize(10));
-        assertEquals(1, page.getTotalElements());
+    void Test010_AuctionServiceWhenFilterAllAuctionsThenGetAll(){
+        List<Auction> auctions = new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+        Page<AuctionDTO> page = auctionService.getAuctionsFiltered(FilterAuctionDTO.builder().build(), Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test011_AuctionServiceWhenFilterAllAuctionsWithMilageThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        int min = 5000;
+        int max = 50000;
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setMilageMin(min);
+        filter.setMilageMax(max);
+
+        auctions = auctions.stream().filter(a->(a.getMilage() >= min && a.getMilage() <= max)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test012_AuctionServiceWhenFilterAllAuctionsWithModelYearThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        int min = 2000;
+        int max = 2010;
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setModelYearMin(min);
+        filter.setModelYearMax(max);
+
+        auctions = auctions.stream().filter(a->(a.getModelYear() >= min && a.getModelYear() <= max)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test013_AuctionServiceWhenFilterAllAuctionsWithPriceAndNoBidsThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        int min = 2000;
+        int max = 5000;
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setPriceMin(min);
+        filter.setPriceMax(max);
+
+        auctions = auctions.stream().filter(a->(a.getBasePrice() >= min && a.getBasePrice() <= max)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test014_AuctionServiceWhenFilterAllAuctionsWithBrandThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        String value = "Toyota";
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setBrand(value);
+
+        auctions = auctions.stream().filter(a-> a.getBrand().equals(value)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test015_AuctionServiceWhenFilterAllAuctionsWithColorThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        String value = "Color";
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setColor(value);
+
+        auctions = auctions.stream().filter(a-> a.getColor().equals(value)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test016_AuctionServiceWhenFilterAllAuctionsWithGasTypeThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        GasType value = GasType.DIESEL;
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setGasType(value);
+
+        auctions = auctions.stream().filter(a-> a.getGasType().equals(value)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test017_AuctionServiceWhenFilterAllAuctionsWithGearshiftTypeThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        GearShiftType value = GearShiftType.MANUAL;
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setGearShiftType(value);
+
+        auctions = auctions.stream().filter(a-> a.getGearShiftType().equals(value)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test018_AuctionServiceWhenFilterAllAuctionsWithModeThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        String value = "2";
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setModel(value);
+
+        auctions = auctions.stream().filter(a-> a.getModel().equals(value)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+    @Test
+    void Test019_AuctionServiceWhenFilterAllAuctionsWithDoorsAmountThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        Integer value = 4;
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setDoorsAmount(value);
+
+        auctions = auctions.stream().filter(a-> a.getDoorsAmount().equals(value)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
     }
 }

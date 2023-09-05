@@ -9,7 +9,6 @@ import com.b4w.b4wback.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -21,9 +20,9 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
     Page<AuctionDTO> findByUser(User user, Pageable pageable);
 
 
-    @Query("SELECT auction, " +
-            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice) AS price" +
-            " FROM Auction auction WHERE " +
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
+            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
+            "FROM Auction auction WHERE " +
             "(:milageMin IS NULL OR auction.milage >= :milageMin) AND " +
             "(:milageMax IS NULL OR auction.milage <= :milageMax) AND " +
             "(:modelYearMin IS NULL OR auction.modelYear >= :modelYearMin) AND " +
@@ -41,7 +40,7 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                 "MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice " +
             ") <= :priceMax)"
     )
-    Page<Auction> findWithFilter(@Param("milageMin") Integer milageMin, @Param("milageMax") Integer milageMax,
+    Page<AuctionDTO> findWithFilter(@Param("milageMin") Integer milageMin, @Param("milageMax") Integer milageMax,
                                     @Param("modelYearMin") Integer modelYearMin, @Param("modelYearMax") Integer modelYearMax,
                                     @Param("priceMin") Integer priceMin, @Param("priceMax") Integer priceMax,
                                     @Param("brand") String brand,

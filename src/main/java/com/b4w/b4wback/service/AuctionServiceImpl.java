@@ -64,7 +64,7 @@ public class AuctionServiceImpl implements AuctionService {
         return  auctions;
     }
     @Override
-    public Page<Auction> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable) {
+    public Page<AuctionDTO> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable) {
         return auctionRepository.findWithFilter(filter.getMilageMin(), filter.getMilageMax(),
                 filter.getModelYearMin(), filter.getModelYearMax(),
                 filter.getPriceMin(), filter.getPriceMax(),
