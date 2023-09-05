@@ -1,9 +1,13 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.FilterAuctionDTO;
+import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,5 +23,10 @@ public class AuctionController {
     @PostMapping()
     public ResponseEntity<CreateAuctionDTO> createUserAuction(@RequestBody @Valid CreateAuctionDTO createAuctionDTO){
         return new ResponseEntity<>(auctionService.createAuction(createAuctionDTO), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/filter")
+    public ResponseEntity<Page<Auction>> getAuctionsFiltered(@RequestBody FilterAuctionDTO filter, @RequestBody Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsFiltered(filter, pageable));
     }
 }
