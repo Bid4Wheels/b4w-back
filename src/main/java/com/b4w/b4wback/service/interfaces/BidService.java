@@ -5,4 +5,5 @@ import com.b4w.b4wback.model.Bid;
 
 public interface BidService {
     Bid crateBid(CreateBidDTO createBidDTO);
+
 }

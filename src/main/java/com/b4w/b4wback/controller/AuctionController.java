@@ -6,14 +6,12 @@ import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import lombok.val;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auction")
@@ -23,6 +21,15 @@ public class AuctionController {
     @PostMapping()
     public ResponseEntity<CreateAuctionDTO> createUserAuction(@RequestBody @Valid CreateAuctionDTO createAuctionDTO){
         return new ResponseEntity<>(auctionService.createAuction(createAuctionDTO), HttpStatus.CREATED);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getAuctionById(@PathVariable long id){
+        return new ResponseEntity<>(auctionService.getAuctionById(id),HttpStatus.OK);
+    }
+    @GetMapping("user/{userId}")
+    public ResponseEntity<?> getAuctionsByUserId(@PathVariable long userId, Pageable pageable){
+        val auctions = auctionService.getAuctionsByUserId(userId, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(auctions);
     }
 
     @PostMapping("/filter")
