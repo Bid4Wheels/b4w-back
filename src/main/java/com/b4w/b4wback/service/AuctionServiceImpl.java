@@ -12,6 +12,7 @@ import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
+import com.b4w.b4wback.service.interfaces.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,11 +27,13 @@ public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final BidRepository bidRepository;
+    private final S3Service s3Service;
 
-    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository) {
+    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository, S3Service s3Service, S3Service s3Service1) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
+        this.s3Service = s3Service;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public GetAuctionDTO getAuctionById(long id) {
         Auction auction = auctionRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Auction with id "+id+" not found"));
-        return auction.getAuctionToDTO(bidRepository);
+        return auction.getAuctionToDTO(bidRepository,s3Service);
     }
     @Override
     public Page<AuctionDTO> getAuctionsByUserId(Long userId, Pageable pageable) {
