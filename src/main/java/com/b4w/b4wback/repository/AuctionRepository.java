@@ -27,12 +27,13 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
             "(:milageMax IS NULL OR auction.milage <= :milageMax) AND " +
             "(:modelYearMin IS NULL OR auction.modelYear >= :modelYearMin) AND " +
             "(:modelYearMax IS NULL OR auction.modelYear <= :modelYearMax) AND " +
-            "(:brand IS NULL OR auction.brand = :brand) AND " +
-            "(:color IS NULL OR auction.color = :color) AND " +
+            "(:brand IS NULL OR lower(auction.brand) = lower(:brand)) AND " +
+            "(:color IS NULL OR lower(auction.color) = lower(:color)) AND " +
             "(:gasType IS NULL OR auction.gasType = :gasType) AND " +
             "(:doorsAmount IS NULL OR auction.doorsAmount = :doorsAmount) AND " +
             "(:gearShiftType IS NULL OR auction.gearShiftType = :gearShiftType) AND " +
-            "(:model IS NULL OR auction.model = :model) AND " +
+            "(:model IS NULL OR lower(auction.model) = lower(:model)) AND " +
+            "auction.status = com.b4w.b4wback.enums.AuctionStatus.OPEN AND " +
             "(:priceMin IS NULL OR COALESCE((SELECT " +
                 "MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice " +
             ") >= :priceMin) AND" +
