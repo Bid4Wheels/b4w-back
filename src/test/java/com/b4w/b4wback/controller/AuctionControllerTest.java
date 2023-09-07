@@ -1,24 +1,28 @@
 package com.b4w.b4wback.controller;
 
-import com.b4w.b4wback.dto.CreateAuctionDTO;
-import com.b4w.b4wback.dto.CreateBidDTO;
-import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
+import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
+import com.b4w.b4wback.util.AuctionGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +38,10 @@ public class AuctionControllerTest {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AuctionRepository auctionRepository;
 
     private String token;
     @BeforeEach
@@ -270,4 +278,16 @@ public class AuctionControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, getAuctionsResponse.getStatusCode());
     }
 
+    @Test
+    void Test019_AuctionControllerWhenAuctionFilterWithAllOkShouldReturnOK(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/filter", HttpMethod.POST,
+                new HttpEntity<>(FilterAuctionDTO.builder().build(), headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
 }

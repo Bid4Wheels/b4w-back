@@ -3,6 +3,7 @@ package com.b4w.b4wback.service;
 import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
+import com.b4w.b4wback.dto.FilterAuctionDTO;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
@@ -62,4 +63,13 @@ public class AuctionServiceImpl implements AuctionService {
         }
         return  auctions;
     }
+    @Override
+    public Page<AuctionDTO> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable) {
+        return auctionRepository.findWithFilter(filter.getMilageMin(), filter.getMilageMax(),
+                filter.getModelYearMin(), filter.getModelYearMax(),
+                filter.getPriceMin(), filter.getPriceMax(),
+                filter.getBrand(), filter.getColor(), filter.getGasType(), filter.getDoorsAmount(),
+                filter.getGearShiftType(), filter.getModel(), pageable);
+    }
+
 }
