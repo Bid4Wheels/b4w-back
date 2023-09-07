@@ -13,5 +13,5 @@ public class AuctionOwnerDTO {
     private long id;
     private String name;
     private String lastName;
-    //private profilePicture profilePicture;
+    private String profilePicture;
 }
