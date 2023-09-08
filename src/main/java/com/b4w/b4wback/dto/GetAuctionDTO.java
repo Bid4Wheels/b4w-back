@@ -26,4 +26,5 @@ public class GetAuctionDTO {
     private GearShiftType gearShiftType;
     private AuctionOwnerDTO auctionOwnerDTO;
     private AuctionHigestBidDTO auctionHigestBidDTO;
+    //private List<String> tags;
 }

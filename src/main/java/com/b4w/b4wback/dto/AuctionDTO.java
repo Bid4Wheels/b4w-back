@@ -15,6 +15,7 @@ public class AuctionDTO {
     private LocalDateTime deadline;
     private int highestBidAmount;
     private AuctionStatus status;
+    //private List<String> tags;
 
     public AuctionDTO(Long id, String title, LocalDateTime deadline,  AuctionStatus status, Integer highestBidAmount) {
         this.id = id;
@@ -22,5 +23,6 @@ public class AuctionDTO {
         this.deadline = deadline;
         this.highestBidAmount = highestBidAmount;
         this.status = status;
+        //this.tags = tags;
     }
 }
