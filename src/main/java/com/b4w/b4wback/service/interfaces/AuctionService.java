@@ -17,4 +17,6 @@ public interface AuctionService {
     Page<AuctionDTO> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable);
 
     Page<AuctionDTO> getAuctionsEnding(Pageable pageable);
+
+    Page<AuctionDTO> getAuctionsNew(Pageable pageable);
 }

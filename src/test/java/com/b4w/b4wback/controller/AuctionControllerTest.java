@@ -290,4 +290,30 @@ public class AuctionControllerTest {
 
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
     }
+
+    @Test
+    void Test020_AuctionControllerWhenGetAuctionsEndingWithAllOkShouldReturnOK() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/ending", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test021_AuctionControllerWhenGetAuctionsNewWithAllOkShouldReturnOK(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/new", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
 }

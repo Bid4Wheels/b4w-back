@@ -82,4 +82,10 @@ public class AuctionServiceImpl implements AuctionService {
         return auctionRepository.findUpcomingAuctions(currentDateTime, pageable);
     }
 
+    @Override
+    public Page<AuctionDTO> getAuctionsNew(Pageable pageable) {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        return auctionRepository.findNewAuctions(currentDateTime, pageable);
+    }
+
 }

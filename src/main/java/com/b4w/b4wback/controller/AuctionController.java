@@ -41,4 +41,9 @@ public class AuctionController {
     public ResponseEntity<Page<AuctionDTO>> getAuctionsEnding(Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsEnding(pageable));
     }
+
+    @GetMapping("/new")
+    public ResponseEntity<Page<AuctionDTO>> getAuctionsNew(Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsNew(pageable));
+    }
 }

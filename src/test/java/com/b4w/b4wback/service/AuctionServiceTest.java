@@ -423,10 +423,30 @@ public class AuctionServiceTest {
         List<AuctionDTO> auctionList = actualAuctions.getContent();
 
         AuctionDTO firstAuction = auctionList.get(0);
-        System.out.println(firstAuction.getDeadline());
         for (AuctionDTO auctionDTO : auctionList) {
             assertTrue(auctionDTO.getDeadline().isAfter(LocalDateTime.now()));
-            System.out.println(auctionDTO.getDeadline());
         }
+    }
+
+    @Test
+    void Test021_AuctionServiceWhenFilterAllAuctionsWithNewAuctionsThenGetFew(){
+        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        Pageable pageable = PageRequest.of(0, 100);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsNew(pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+
+        LocalDateTime createdAt = auctionRepository.findById(firstAuction.getId()).get().getCreatedAt();
+        System.out.println(createdAt);
+        for (int i = 1; i < auctionList.size(); i++) {
+            AuctionDTO auctionDTO = auctionList.get(i);
+            System.out.println(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt());
+            assertTrue(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt().isAfter(createdAt));
+        }
+
     }
 }
