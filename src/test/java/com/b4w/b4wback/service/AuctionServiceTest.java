@@ -414,8 +414,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test020_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew(){
-        List<Auction> auctions = new AuctionGenerator(userRepository)
-                .generateAndSaveListOfAuctions(100, auctionRepository);
+        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
 
         Pageable pageable = PageRequest.of(0, 100);
 
@@ -424,7 +423,7 @@ public class AuctionServiceTest {
         List<AuctionDTO> auctionList = actualAuctions.getContent();
 
         AuctionDTO firstAuction = auctionList.get(0);
-        System.out.println(firstAuction.getDeadline());;
+        System.out.println(firstAuction.getDeadline());
         for (AuctionDTO auctionDTO : auctionList) {
             assertTrue(auctionDTO.getDeadline().isAfter(LocalDateTime.now()));
             System.out.println(auctionDTO.getDeadline());
