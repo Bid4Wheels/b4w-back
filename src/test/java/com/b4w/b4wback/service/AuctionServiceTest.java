@@ -411,4 +411,23 @@ public class AuctionServiceTest {
                 .getAuctionsFiltered(filter, Pageable.ofSize(10));
         assertEquals(auctions.size(), page.getTotalElements());
     }
+
+    @Test
+    void Test020_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew(){
+        List<Auction> auctions = new AuctionGenerator(userRepository)
+                .generateAndSaveListOfAuctions(100, auctionRepository);
+
+        Pageable pageable = PageRequest.of(0, 100);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsEnding(pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+        System.out.println(firstAuction.getDeadline());;
+        for (AuctionDTO auctionDTO : auctionList) {
+            assertTrue(auctionDTO.getDeadline().isAfter(LocalDateTime.now()));
+            System.out.println(auctionDTO.getDeadline());
+        }
+    }
 }

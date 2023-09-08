@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AuctionRepository extends JpaRepository<Auction,Long> {
@@ -51,4 +52,9 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                                     @Param("gearShiftType") GearShiftType gearShiftType,
                                     @Param("model") String model,
                                     Pageable pageable);
+
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
+            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
+            "FROM Auction auction WHERE auction.deadline > :currentDateTime ORDER BY auction.deadline ASC")
+    Page<AuctionDTO> findUpcomingAuctions(@Param("currentDateTime") LocalDateTime currentDateTime,Pageable pageable);
 }

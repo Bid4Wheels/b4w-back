@@ -37,4 +37,9 @@ public class AuctionController {
     public ResponseEntity<Page<AuctionDTO>> getAuctionsFiltered(@RequestBody FilterAuctionDTO filter, Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsFiltered(filter, pageable));
     }
+
+    @GetMapping("/ending")
+    public ResponseEntity<Page<AuctionDTO>> getAuctionsEnding(Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsEnding(pageable));
+    }
 }

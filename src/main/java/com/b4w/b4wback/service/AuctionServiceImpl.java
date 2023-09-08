@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -73,6 +74,12 @@ public class AuctionServiceImpl implements AuctionService {
                 filter.getPriceMin(), filter.getPriceMax(),
                 filter.getBrand(), filter.getColor(), filter.getGasType(), filter.getDoorsAmount(),
                 filter.getGearShiftType(), filter.getModel(), pageable);
+    }
+
+    @Override
+    public Page<AuctionDTO> getAuctionsEnding(Pageable pageable) {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        return auctionRepository.findUpcomingAuctions(currentDateTime, pageable);
     }
 
 }
