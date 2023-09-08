@@ -5,7 +5,6 @@ import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
-import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
@@ -16,13 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
