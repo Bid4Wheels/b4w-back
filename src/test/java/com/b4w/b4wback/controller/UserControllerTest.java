@@ -6,6 +6,7 @@ import com.b4w.b4wback.dto.auth.SignInRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -29,6 +30,8 @@ public class UserControllerTest {
     private PasswordChangerDTO passwordChangerDTO;
     private ChangePasswordDTO changePasswordDTO;
 
+    @Value("${default-url-user}")
+    private String userImageUrl;
     @BeforeEach
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -241,7 +244,7 @@ public class UserControllerTest {
         ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/2",
                 HttpMethod.GET, new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
-        assertEquals(getUserResponse.getBody(),"User not found.");
+        assertEquals("User not found", getUserResponse.getBody());
     }
 
     @Test
@@ -315,7 +318,7 @@ public class UserControllerTest {
         ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl ,
                 HttpMethod.PATCH, new HttpEntity<>(passwordChangerDTO), String.class);
         assertEquals(HttpStatus.NOT_FOUND, checkPasswordResponse.getStatusCode());
-        assertEquals(checkPasswordResponse.getBody(),"User not found.");
+        assertEquals("User not found", checkPasswordResponse.getBody());
     }
 
 
@@ -353,6 +356,22 @@ public class UserControllerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, checkPasswordCodeResponse.getStatusCode());
         assertEquals(checkPasswordCodeResponse.getBody(),"Password code does not match");
+    }
+
+
+    @Test
+    void Test017_UserControllerWhenGetUserByIdWithValidIdAndExistingImageShouldRespondWithAnExistsUserImageURL() {
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
+        ResponseEntity<UserDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
+                HttpMethod.GET, new HttpEntity<>(headers), UserDTO.class);
+        assertTrue(getUserResponse.getBody().getImgURL().startsWith(userImageUrl));
     }
 
 }
