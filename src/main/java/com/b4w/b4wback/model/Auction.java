@@ -8,11 +8,16 @@ import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.BidRepository;
+import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.service.interfaces.S3Service;
+import com.b4w.b4wback.util.TagUtil;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -60,8 +65,16 @@ public class Auction {
     @ManyToOne()
     private User user;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "auction_tag",
+            joinColumns = @JoinColumn(name = "auction_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags;
 
-    public Auction (CreateAuctionDTO createAuctionDTO){
+
+    public Auction (CreateAuctionDTO createAuctionDTO, TagRepository tagRepository){
         this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();
         this.deadline = createAuctionDTO.getDeadline();
@@ -76,6 +89,17 @@ public class Auction {
         this.color = createAuctionDTO.getColor();
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
+
+        //tags
+        if (createAuctionDTO.getTags() != null) {
+            List<String> tagsString = createAuctionDTO.getTags().stream().map(String::toLowerCase).collect(Collectors.toList());
+            tags = tagRepository.findAllByTagNameIn(tagsString);
+
+            if (tagsString.size() == tags.size()) return;
+            TagUtil.removeExistentTagsInListFromStringList(tags, tagsString);
+            tags.addAll(tagRepository.saveAll(TagUtil.createTagsFromStringList(tagsString)));
+        }
+        else tags = new ArrayList<>();
     }
 
     public AuctionStatus getStatus(){
@@ -108,6 +132,7 @@ public class Auction {
                         .profilePicture(s3Service.getDownloadURL(this.getUser().getId()))
                         .build())
                 .auctionHigestBidDTO(auctionHigestBidDTO)
+                .tags(tags)
                 .build();
     }
 }
