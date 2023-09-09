@@ -57,19 +57,19 @@ public class S3ServiceTest {
 
     @Test
     void Test001_S3ServiceGetUploadURLWhenUserExistsAndIsAuthenticatedShouldReturnValidUrl(){
-        String url= s3Service.getUploadURL("Bearer "+token);
+        String url= userService.createUrlForUploadingImage("Bearer "+token);
         assertTrue(url.startsWith(userImageUrl));
     }
 
     @Test
     void Test002_S3ServiceGetDownloadURLWhenUserExists(){
-        String url= s3Service.getDownloadURL(1);
+        String url= s3Service.generatePresignedDownloadImageUrl(1,3600000);
         assertTrue(url.startsWith(userImageUrl));
     }
 
     @Test
     void Test002_S3ServiceGetDownloadURLWhenUserNotExists(){
-        String url= s3Service.getDownloadURL(99999999);
+        String url= s3Service.generatePresignedDownloadImageUrl(99999999,3600000);
         assertEquals(url,"default");
     }
 }

@@ -17,12 +17,6 @@ import java.util.Date;
 @Service
 @Validated
 public class S3ServiceImpl implements S3Service {
-    private final JwtService jwtService;
-
-    private final UserRepository userRepository;
-
-    @Value("${expiration.time.image.url}")
-    private Integer expirationTime;
 
     @Value("${aws.bucket.name}")
     private String bucketName;
@@ -32,25 +26,20 @@ public class S3ServiceImpl implements S3Service {
 
     private final AmazonS3 amazonS3;
 
-    public S3ServiceImpl(JwtService jwtService, UserRepository userRepository,AmazonS3 amazonS3) {
-        this.jwtService = jwtService;
-        this.userRepository = userRepository;
+    public S3ServiceImpl(AmazonS3 amazonS3) {
         this.amazonS3=amazonS3;
     }
 
     @Override
-    public String getUploadURL(String token) {
-        String email= jwtService.extractUsername(token.substring(7));
-        long userId= userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User not found")).getId();
-        String userUrl=usersObjectKey+ userId;
+    public String generatePresignedUploadImageUrl(String url,Integer expirationTime) {
         Date expiration=new Date(System.currentTimeMillis() + expirationTime);
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, userUrl)
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, url)
                 .withExpiration(expiration).withMethod(HttpMethod.PUT);
         return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
     }
 
     @Override
-    public String getDownloadURL(long id) {
+    public String generatePresignedDownloadImageUrl(long id, Integer expirationTime) {
         String userUrl=usersObjectKey+ id;
         Date expiration=new Date(System.currentTimeMillis() + expirationTime);
         if (amazonS3.doesObjectExist(bucketName,userUrl)){

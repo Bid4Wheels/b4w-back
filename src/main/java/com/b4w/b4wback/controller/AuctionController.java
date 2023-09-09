@@ -3,7 +3,6 @@ package com.b4w.b4wback.controller;
 import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.FilterAuctionDTO;
-import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

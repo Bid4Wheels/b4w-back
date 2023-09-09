@@ -105,7 +105,7 @@ public class Auction {
                         .name(this.getUser().getName())
                         .id(this.getUser().getId())
                         .lastName(this.getUser().getLastName())
-                        .profilePicture(s3Service.getDownloadURL(this.getUser().getId()))
+                        .profilePicture(s3Service.generatePresignedDownloadImageUrl(this.getUser().getId(),3600000))
                         .build())
                 .auctionHigestBidDTO(auctionHigestBidDTO)
                 .build();

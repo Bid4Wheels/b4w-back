@@ -1,7 +1,6 @@
 package com.b4w.b4wback.repository;
 
 import com.b4w.b4wback.dto.AuctionDTO;
-import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -12,7 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 
 public interface AuctionRepository extends JpaRepository<Auction,Long> {
 
