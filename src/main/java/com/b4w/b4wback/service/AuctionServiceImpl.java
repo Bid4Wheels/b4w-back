@@ -15,11 +15,14 @@ import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.S3Service;
 import com.b4w.b4wback.service.interfaces.UserService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -32,11 +35,19 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final UserService userService;
 
-    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,UserService userService) {
+    private final S3Service s3Service;
+
+    @Value("${aws.auction.objectKey}")
+    private String auctionObjectKey;
+
+    @Value("${expiration.time.image.url}")
+    private Integer expirationTimeImageUrl;
+    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,UserService userService,S3Service s3Service) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
         this.userService=userService;
+        this.s3Service=s3Service;
     }
 
     @Override
@@ -50,7 +61,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public GetAuctionDTO getAuctionById(long id) {
         Auction auction = auctionRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Auction with id "+id+" not found"));
-        return auction.getAuctionToDTO(bidRepository,userService);
+        return new GetAuctionDTO(auction.getAuctionToDTO(bidRepository,userService),createUrlsForDownloadingImages(id));
     }
     @Override
     public Page<AuctionDTO> getAuctionsByUserId(Long userId, Pageable pageable) {
@@ -76,4 +87,29 @@ public class AuctionServiceImpl implements AuctionService {
                 filter.getGearShiftType(), filter.getModel(), pageable);
     }
 
+    @Override
+    public List<String> createUrlsForUploadingImages(long auctionId) {
+        Auction auction = auctionRepository.findById(auctionId).orElseThrow(()->new EntityNotFoundException("Auction with id "+auctionId+" not found"));
+        if (!auction.isAlreadySentImageUrl()){
+            List<String> auctionImageUrls=new ArrayList<>();
+            for (int i = 0; i < 7; i++) {
+                String url= auctionObjectKey+auctionId+"/img"+i;
+                auctionImageUrls.add(s3Service.generatePresignedUploadImageUrl(url,expirationTimeImageUrl));
+            }
+            auction.setAlreadySentImageUrl(true);
+            auctionRepository.save(auction);
+            return auctionImageUrls;
+        }
+        throw new BadRequestParametersException("Auction Urls already sent");
+    }
+
+    @Override
+    public List<String> createUrlsForDownloadingImages(long auctionId) {
+        List<String> auctionImageUrls=new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            String url= auctionObjectKey+auctionId+"/img"+i;
+            auctionImageUrls.add(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
+        }
+        return auctionImageUrls;
+    }
 }

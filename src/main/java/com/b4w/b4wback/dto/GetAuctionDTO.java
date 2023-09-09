@@ -3,9 +3,12 @@ package com.b4w.b4wback.dto;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,4 +29,26 @@ public class GetAuctionDTO {
     private GearShiftType gearShiftType;
     private AuctionOwnerDTO auctionOwnerDTO;
     private AuctionHigestBidDTO auctionHigestBidDTO;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<String> auctionImageUrl;
+
+    public GetAuctionDTO(GetAuctionDTO getAuctionDTO,List<String> auctionImageUrl){
+        this.title=getAuctionDTO.getTitle();
+        this.description=getAuctionDTO.getDescription();
+        this.deadline=getAuctionDTO.getDeadline();
+        this.basePrice=getAuctionDTO.getBasePrice();
+        this.brand=getAuctionDTO.getBrand();
+        this.model=getAuctionDTO.getModel();
+        this.status=getAuctionDTO.getStatus();
+        this.milage=getAuctionDTO.getMilage();
+        this.gasType=getAuctionDTO.getGasType();
+        this.modelYear=getAuctionDTO.getModelYear();
+        this.color=getAuctionDTO.getColor();
+        this.doorsAmount=getAuctionDTO.getDoorsAmount();
+        this.gearShiftType=getAuctionDTO.getGearShiftType();
+        this.auctionOwnerDTO=getAuctionDTO.getAuctionOwnerDTO();
+        this.auctionHigestBidDTO=getAuctionDTO.getAuctionHigestBidDTO();
+        this.auctionImageUrl=auctionImageUrl;
+    }
+
 }

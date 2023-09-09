@@ -18,9 +18,6 @@ public class S3ServiceImpl implements S3Service {
     @Value("${aws.bucket.name}")
     private String bucketName;
 
-    @Value("${aws.users.objectKey}")
-    private String usersObjectKey;
-
     private final AmazonS3 amazonS3;
 
     public S3ServiceImpl(AmazonS3 amazonS3) {

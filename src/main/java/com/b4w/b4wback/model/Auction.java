@@ -61,7 +61,7 @@ public class Auction {
     @ManyToOne()
     private User user;
 
-
+    private boolean alreadySentImageUrl;
     public Auction (CreateAuctionDTO createAuctionDTO){
         this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();
@@ -77,6 +77,7 @@ public class Auction {
         this.color = createAuctionDTO.getColor();
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
+        this.alreadySentImageUrl=false;
     }
 
     public AuctionStatus getStatus(){
