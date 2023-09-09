@@ -63,13 +63,13 @@ public class S3ServiceTest {
 
     @Test
     void Test002_S3ServiceGetDownloadURLWhenUserExists(){
-        String url= s3Service.generatePresignedDownloadImageUrl(1,3600000);
+        String url= userService.createUrlForDownloadingImage(1L);
         assertTrue(url.startsWith(userImageUrl));
     }
 
     @Test
-    void Test002_S3ServiceGetDownloadURLWhenUserNotExists(){
-        String url= s3Service.generatePresignedDownloadImageUrl(99999999,3600000);
+    void Test003_S3ServiceGetDownloadURLWhenUserNotExists(){
+        String url= s3Service.generatePresignedDownloadImageUrl(userImageUrl+999999999,3600000);
         assertEquals(url,"default");
     }
 }

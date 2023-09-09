@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Date;
 import java.util.Objects;
 import java.util.Random;
 
@@ -64,7 +65,7 @@ public class UserServiceImp implements UserService {
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
-                phoneNumber(user.getPhoneNumber()).imgURL(s3Service.generatePresignedDownloadImageUrl(id,expirationTimeImageUrl)).build();
+                phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).build();
     }
 
     @Override
@@ -115,5 +116,9 @@ public class UserServiceImp implements UserService {
         long userId= userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User not found")).getId();
         return s3Service.generatePresignedUploadImageUrl(usersObjectKey+userId,expirationTimeImageUrl);
     }
-
+    @Override
+    public String createUrlForDownloadingImage(Long userID) {
+        String userUrl=usersObjectKey + userID;
+        return s3Service.generatePresignedDownloadImageUrl(userUrl,expirationTimeImageUrl);
+    }
 }

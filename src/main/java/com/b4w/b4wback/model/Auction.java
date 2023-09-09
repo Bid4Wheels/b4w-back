@@ -9,6 +9,7 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.service.interfaces.S3Service;
+import com.b4w.b4wback.service.interfaces.UserService;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -85,7 +86,7 @@ public class Auction {
 
         return status;
     }
-    public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, S3Service s3Service){
+    public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, UserService userService){
         Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
 
 
@@ -105,7 +106,7 @@ public class Auction {
                         .name(this.getUser().getName())
                         .id(this.getUser().getId())
                         .lastName(this.getUser().getLastName())
-                        .profilePicture(s3Service.generatePresignedDownloadImageUrl(this.getUser().getId(),3600000))
+                        .profilePicture(userService.createUrlForDownloadingImage(user.getId()))
                         .build())
                 .auctionHigestBidDTO(auctionHigestBidDTO)
                 .build();

@@ -4,9 +4,6 @@ import com.amazonaws.HttpMethod;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.b4w.b4wback.exception.EntityNotFoundException;
-import com.b4w.b4wback.repository.UserRepository;
-import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.S3Service;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -39,11 +36,10 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public String generatePresignedDownloadImageUrl(long id, Integer expirationTime) {
-        String userUrl=usersObjectKey+ id;
+    public String generatePresignedDownloadImageUrl(String url, Integer expirationTime) {
         Date expiration=new Date(System.currentTimeMillis() + expirationTime);
-        if (amazonS3.doesObjectExist(bucketName,userUrl)){
-            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, userUrl)
+        if (amazonS3.doesObjectExist(bucketName,url)){
+            GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, url)
                     .withExpiration(expiration).withMethod(HttpMethod.GET);
             return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
         }
