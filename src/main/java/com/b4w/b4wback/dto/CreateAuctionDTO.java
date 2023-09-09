@@ -4,6 +4,7 @@ import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.validation.DurationMinAfterCreation;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,6 +16,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class CreateAuctionDTO {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long auctionId;
     @NotNull(message = "User id can't be blank.")
     private Long userId;
     @NotBlank(message = "Title can't be blank.")
@@ -71,5 +74,22 @@ public class CreateAuctionDTO {
         this.color = color;
         this.doorsAmount = doorsAmount;
         this.gearShiftType = gearShiftType;
+    }
+    public CreateAuctionDTO(){}
+    public CreateAuctionDTO(Long auctionId, CreateAuctionDTO auctionDTO){
+        this.auctionId=auctionId;
+        this.userId=auctionDTO.getUserId();
+        this.title=auctionDTO.getTitle();
+        this.description=auctionDTO.getDescription();
+        this.deadline=auctionDTO.getDeadline();
+        this.brand=auctionDTO.getBrand();
+        this.model=auctionDTO.getModel();
+        this.basePrice=auctionDTO.getBasePrice();
+        this.milage=auctionDTO.getMilage();
+        this.gasType=auctionDTO.getGasType();
+        this.modelYear=auctionDTO.getModelYear();
+        this.color=auctionDTO.getColor();
+        this.doorsAmount=auctionDTO.getDoorsAmount();
+        this.gearShiftType=auctionDTO.getGearShiftType();
     }
 }

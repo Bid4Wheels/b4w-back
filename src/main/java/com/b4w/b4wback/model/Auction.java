@@ -110,4 +110,8 @@ public class Auction {
                 .auctionHigestBidDTO(auctionHigestBidDTO)
                 .build();
     }
+
+    public CreateAuctionDTO toDTO( CreateAuctionDTO auctionDTO){
+        return new CreateAuctionDTO(this.getId(), auctionDTO);
+    }
 }

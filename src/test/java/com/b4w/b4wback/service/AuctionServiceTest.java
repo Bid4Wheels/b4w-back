@@ -1,10 +1,6 @@
 package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.dto.AuctionDTO;
-import com.b4w.b4wback.dto.CreateAuctionDTO;
-import com.b4w.b4wback.dto.CreateBidDTO;
-import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.FilterAuctionDTO;
+import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
@@ -65,11 +61,11 @@ public class AuctionServiceTest {
 
     @Test
     void Test001_AuctionServiceWhenReceiveCreatedAuctionDTOWithValidDTOShouldReturnCreateAuctionDTO() {
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
+        CreateAuctionDTO auctionDTOWithID=new CreateAuctionDTO(1L,new CreateAuctionDTO(1L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
-        CreateAuctionDTO auctionCreated=auctionService.createAuction(auctionDTO);
-        assertEquals(auctionCreated,auctionDTO);
+                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC));
+        CreateAuctionDTO auctionCreated=auctionService.createAuction(auctionDTOWithID);
+        assertEquals(auctionCreated.getAuctionId(),auctionDTOWithID.getAuctionId());
     }
 
     @Test
@@ -83,7 +79,7 @@ public class AuctionServiceTest {
                 "Focus",120000,10000, GasType.HYBRID,2022,"Blue",4, GearShiftType.MANUAL);
         auctionService.createAuction(auctionDTO);
         auctionService.createAuction(auctionDTO2);
-        assertEquals(2,auctionRepository.findAllByUserId(1L).size());
+        assertEquals(2,auctionRepository.findByUser(userRepository.findById(1L).get(),null).getSize());
     }
 
     @Test
@@ -125,29 +121,31 @@ public class AuctionServiceTest {
         CreateBidDTO bidDto=new CreateBidDTO(150000,2L,1L);
         auctionService.createAuction(auctionDTO);
         bidService.crateBid(bidDto);
-        assertEquals(auctionDTO.getTitle(),auctionService.getAuctionById(1L).getTitle());
-        assertEquals(auctionDTO.getDescription(),auctionService.getAuctionById(1L).getDescription());
-        assertEquals(auctionDTO.getDeadline(),auctionService.getAuctionById(1L).getDeadline());
-        assertEquals(auctionDTO.getBasePrice(),auctionService.getAuctionById(1L).getBasePrice());
-        assertEquals(auctionDTO.getBrand(),auctionService.getAuctionById(1L).getBrand());
-        assertEquals(auctionDTO.getModel(),auctionService.getAuctionById(1L).getModel());
-        assertEquals(auctionDTO.getStatus(),auctionService.getAuctionById(1L).getStatus());
-        assertEquals(auctionDTO.getMilage(),auctionService.getAuctionById(1L).getMilage());
-        assertEquals(auctionDTO.getGasType(),auctionService.getAuctionById(1L).getGasType());
-        assertEquals(auctionDTO.getModelYear(),auctionService.getAuctionById(1L).getModelYear());
-        assertEquals(auctionDTO.getColor(),auctionService.getAuctionById(1L).getColor());
-        assertEquals(auctionDTO.getDoorsAmount(),auctionService.getAuctionById(1L).getDoorsAmount());
-        assertEquals(auctionDTO.getGearShiftType(),auctionService.getAuctionById(1L).getGearShiftType());
-        assertEquals(auctionDTO.getUserId(),auctionService.getAuctionById(1L).getAuctionOwnerDTO().getId());
+        //Improve perfomance of this test.
+        GetAuctionDTO auction=auctionService.getAuctionById(1L);
+        assertEquals(auctionDTO.getTitle(),auction.getTitle());
+        assertEquals(auctionDTO.getDescription(),auction.getDescription());
+        assertEquals(auctionDTO.getDeadline(),auction.getDeadline());
+        assertEquals(auctionDTO.getBasePrice(),auction.getBasePrice());
+        assertEquals(auctionDTO.getBrand(),auction.getBrand());
+        assertEquals(auctionDTO.getModel(),auction.getModel());
+        assertEquals(auctionDTO.getStatus(),auction.getStatus());
+        assertEquals(auctionDTO.getMilage(),auction.getMilage());
+        assertEquals(auctionDTO.getGasType(),auction.getGasType());
+        assertEquals(auctionDTO.getModelYear(),auction.getModelYear());
+        assertEquals(auctionDTO.getColor(),auction.getColor());
+        assertEquals(auctionDTO.getDoorsAmount(),auction.getDoorsAmount());
+        assertEquals(auctionDTO.getGearShiftType(),auction.getGearShiftType());
+        assertEquals(auctionDTO.getUserId(),auction.getAuctionOwnerDTO().getId());
 
-        assertEquals(bidDto.getAmount(),auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getAmount());
-        assertEquals(bidDto.getUserId(),auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getUserId());
-        assertEquals("Esteban",auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getUserName());
-        assertEquals("Chiquito",auctionService.getAuctionById(1L).getAuctionHigestBidDTO().getUserLastName());
+        assertEquals(bidDto.getAmount(),auction.getAuctionHigestBidDTO().getAmount());
+        assertEquals(bidDto.getUserId(),auction.getAuctionHigestBidDTO().getUserId());
+        assertEquals("Esteban",auction.getAuctionHigestBidDTO().getUserName());
+        assertEquals("Chiquito",auction.getAuctionHigestBidDTO().getUserLastName());
 
-        assertEquals(1L,auctionService.getAuctionById(1L).getAuctionOwnerDTO().getId());
-        assertEquals("Nico",auctionService.getAuctionById(1L).getAuctionOwnerDTO().getName());
-        assertEquals("Borja",auctionService.getAuctionById(1L).getAuctionOwnerDTO().getLastName());
+        assertEquals(1L,auction.getAuctionOwnerDTO().getId());
+        assertEquals("Nico",auction.getAuctionOwnerDTO().getName());
+        assertEquals("Borja",auction.getAuctionOwnerDTO().getLastName());
 
     }
 
