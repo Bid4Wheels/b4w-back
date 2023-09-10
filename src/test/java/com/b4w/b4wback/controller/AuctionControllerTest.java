@@ -1,12 +1,14 @@
 package com.b4w.b4wback.controller;
 
-import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.CreateBidDTO;
+import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.FilterAuctionDTO;
 import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.AuctionRepository;
-import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.TagService;
 import com.b4w.b4wback.service.interfaces.UserService;
@@ -283,11 +285,11 @@ public class AuctionControllerTest {
         assertTrue(createAuctionDTOResponseEntity.getBody().getTags().containsAll(tags));
     }
     @Test
-    void Test021_AuctionControllerWhenGetAuctionsEndingWithAllOkShouldReturnOK() {
+    void Test021_AuctionControllerWhenGetAuctionsEndingWithAllOkShouldReturnOK() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/ending", HttpMethod.GET,
                 new HttpEntity<>(headers), String.class);
@@ -296,11 +298,11 @@ public class AuctionControllerTest {
     }
 
     @Test
-    void Test022_AuctionControllerWhenGetAuctionsNewWithAllOkShouldReturnOK(){
+    void Test022_AuctionControllerWhenGetAuctionsNewWithAllOkShouldReturnOK() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/new", HttpMethod.GET,
                 new HttpEntity<>(headers), String.class);

@@ -482,8 +482,8 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test023_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew(){
-        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+    void Test023_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew() throws Exception {
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         Pageable pageable = PageRequest.of(0, 100);
 
@@ -499,8 +499,8 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test024_AuctionServiceWhenFilterAllAuctionsWithNewAuctionsThenGetFew(){
-        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+    void Test024_AuctionServiceWhenFilterAllAuctionsWithNewAuctionsThenGetFew() throws Exception {
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         Pageable pageable = PageRequest.of(0, 100);
 
