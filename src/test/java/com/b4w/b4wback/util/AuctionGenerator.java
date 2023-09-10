@@ -8,13 +8,14 @@ import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.TagService;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class AuctionGenerator {
     private UserRepository userRepository;
-    private TagRepository tagRepository;
+    private TagService tagService;
     private List<String> titles;
     private List<String> brands;
     private List<String> models;
@@ -33,7 +34,7 @@ public class AuctionGenerator {
 
     private final static Random random = new Random();
 
-    public AuctionGenerator(UserRepository userRepository, TagRepository tagRepository){
+    public AuctionGenerator(UserRepository userRepository, TagService tagService){
         this.userRepository = userRepository;
 
         titles = new ArrayList<>(List.of(new String[]{"On sale", "Fallout", "Linux"}));
@@ -50,7 +51,7 @@ public class AuctionGenerator {
         maxModelYear = 2023;
         minDoorsAmount = 2;
         maxDoorsAmount = 5;
-        this.tagRepository = tagRepository;
+        this.tagService = tagService;
     }
 
     public List<Auction> generateAndSaveListOfAuctions(int amount, AuctionRepository auctionRepository) throws Exception {
@@ -75,6 +76,7 @@ public class AuctionGenerator {
     }
 
     public Auction generateRandomAuction() throws Exception {
+        List<String> tagsAux = pickRandomTags(random.nextInt(tags.isEmpty() ? 0 : tags.size() > 6? 6 : tags.size() - 1));
         return new Auction(new CreateAuctionDTO(
                 getRandomUserId(),
                 titles.get(random.nextInt(titles.size()-1)),
@@ -89,8 +91,8 @@ public class AuctionGenerator {
                 colors.get(random.nextInt(colors.size()-1)),
                 random.nextInt(minDoorsAmount, maxDoorsAmount),
                 GearShiftType.values()[random.nextInt(GearShiftType.values().length)],
-                pickRandomTags(random.nextInt(tags.isEmpty() ? 0 : tags.size() > 6? 6 : tags.size() - 1))),
-                tagRepository);
+                tagsAux),
+                tagService.getOrCreateTagsFromStringList(tagsAux));
     }
 
     private LocalDateTime generateRandomTime(){

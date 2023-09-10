@@ -12,6 +12,7 @@ import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.BidService;
+import com.b4w.b4wback.service.interfaces.TagService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.util.AuctionGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +29,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,6 +50,8 @@ public class AuctionServiceTest {
 
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    private TagService tagService;
     @Autowired
     private TagRepository tagRepository;
 
@@ -246,7 +248,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test010_AuctionServiceWhenFilterAllAuctionsThenGetAll() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
         Page<AuctionDTO> page = auctionService.getAuctionsFiltered(FilterAuctionDTO.builder().build(), Pageable.ofSize(10));
         assertEquals(auctions.size(), page.getTotalElements());
@@ -254,7 +256,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test011_AuctionServiceWhenFilterAllAuctionsWithMilageThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         int min = 5000;
@@ -273,7 +275,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test012_AuctionServiceWhenFilterAllAuctionsWithModelYearThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         int min = 2000;
@@ -292,7 +294,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test013_AuctionServiceWhenFilterAllAuctionsWithPriceAndNoBidsThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         int min = 2000;
@@ -311,7 +313,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test014_AuctionServiceWhenFilterAllAuctionsWithBrandThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         String value = "Toyota";
@@ -328,7 +330,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test015_AuctionServiceWhenFilterAllAuctionsWithColorThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         String value = "Color";
@@ -345,7 +347,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test016_AuctionServiceWhenFilterAllAuctionsWithGasTypeThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         GasType value = GasType.DIESEL;
@@ -362,7 +364,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test017_AuctionServiceWhenFilterAllAuctionsWithGearshiftTypeThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         GearShiftType value = GearShiftType.MANUAL;
@@ -379,7 +381,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test018_AuctionServiceWhenFilterAllAuctionsWithModeThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         String value = "2";
@@ -396,7 +398,7 @@ public class AuctionServiceTest {
 
     @Test
     void Test019_AuctionServiceWhenFilterAllAuctionsWithDoorsAmountThenGetFew() throws Exception {
-        List<Auction> auctions = new AuctionGenerator(userRepository, tagRepository)
+        List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
         Integer value = 4;

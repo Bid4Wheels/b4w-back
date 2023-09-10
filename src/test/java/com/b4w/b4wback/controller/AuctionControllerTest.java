@@ -9,6 +9,7 @@ import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.TagService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.util.AuctionGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,7 @@ public class AuctionControllerTest {
     @Autowired
     private AuctionRepository auctionRepository;
     @Autowired
-    private TagRepository tagRepository;
+    private TagService tagService;
 
     private String token;
     private CreateAuctionDTO auctionDTO;
@@ -264,7 +265,7 @@ public class AuctionControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        new AuctionGenerator(userRepository, tagRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/filter", HttpMethod.POST,
                 new HttpEntity<>(FilterAuctionDTO.builder().build(), headers), String.class);

@@ -8,16 +8,13 @@ import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.BidRepository;
-import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.service.interfaces.S3Service;
-import com.b4w.b4wback.util.TagUtil;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Entity
 @Getter
@@ -74,7 +71,7 @@ public class Auction {
     private List<Tag> tags;
 
 
-    public Auction (CreateAuctionDTO createAuctionDTO, TagRepository tagRepository){
+    public Auction (CreateAuctionDTO createAuctionDTO, List<Tag> tags){
         this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();
         this.deadline = createAuctionDTO.getDeadline();
@@ -90,16 +87,7 @@ public class Auction {
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
 
-        //tags
-        if (createAuctionDTO.getTags() != null) {
-            List<String> tagsString = createAuctionDTO.getTags().stream().map(String::toLowerCase).collect(Collectors.toList());
-            tags = tagRepository.findAllByTagNameIn(tagsString);
-
-            if (tagsString.size() == tags.size()) return;
-            TagUtil.removeExistentTagsInListFromStringList(tags, tagsString);
-            tags.addAll(tagRepository.saveAll(TagUtil.createTagsFromStringList(tagsString)));
-        }
-        else tags = new ArrayList<>();
+        this.tags = tags;
     }
 
     public AuctionStatus getStatus(){

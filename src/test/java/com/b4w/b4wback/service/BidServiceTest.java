@@ -58,7 +58,7 @@ public class BidServiceTest {
         auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
                 LocalDateTime.of(2030, 10, 10, 10, 10), "Toyota",
                 "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
-                GearShiftType.AUTOMATIC, null), tagRepository);
+                GearShiftType.AUTOMATIC, null), null);
         auction.setUser(users.get(0));
         auction = auctionRepository.save(auction);
     }
