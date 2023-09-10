@@ -49,8 +49,7 @@ public class AuctionServiceTest {
     UserRepository userRepository;
 
 
-    @Value("${default-url}")
-    private String defaultUrl;
+
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -435,7 +434,7 @@ public class AuctionServiceTest {
         auctionRepository.save(auction);
         List<String> urls=auctionService.createUrlsForUploadingImages(1);
         List<String> downloadUrls=auctionService.createUrlsForDownloadingImages(1);
-        assertEquals(urls.size(),downloadUrls.size());;
+        assertEquals(urls.size(),downloadUrls.size());
     }
 
 }

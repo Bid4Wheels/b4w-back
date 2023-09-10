@@ -8,7 +8,6 @@ import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.BidRepository;
-import com.b4w.b4wback.service.interfaces.S3Service;
 import com.b4w.b4wback.service.interfaces.UserService;
 import jakarta.persistence.*;
 import lombok.*;
