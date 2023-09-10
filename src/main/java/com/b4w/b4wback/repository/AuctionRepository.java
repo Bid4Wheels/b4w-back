@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AuctionRepository extends JpaRepository<Auction,Long> {
-    List<CreateAuctionDTO> findAllByUserId(Long id);
+    List<AuctionDTO> findAllByUserId(Long id);
 
     Page<AuctionDTO> findByUser(User user, Pageable pageable);
 

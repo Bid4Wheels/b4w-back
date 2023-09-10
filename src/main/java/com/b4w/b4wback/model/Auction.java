@@ -13,6 +13,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -60,8 +62,16 @@ public class Auction {
     @ManyToOne()
     private User user;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "auction_tag",
+            joinColumns = @JoinColumn(name = "auction_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags;
 
-    public Auction (CreateAuctionDTO createAuctionDTO){
+
+    public Auction (CreateAuctionDTO createAuctionDTO, List<Tag> tags){
         this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();
         this.deadline = createAuctionDTO.getDeadline();
@@ -76,6 +86,8 @@ public class Auction {
         this.color = createAuctionDTO.getColor();
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
+
+        this.tags = tags;
     }
 
     public AuctionStatus getStatus(){
@@ -108,6 +120,7 @@ public class Auction {
                         .profilePicture(s3Service.getDownloadURL(this.getUser().getId()))
                         .build())
                 .auctionHigestBidDTO(auctionHigestBidDTO)
+                .tags(tags)
                 .build();
     }
 }
