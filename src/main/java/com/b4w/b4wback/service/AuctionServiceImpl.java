@@ -6,6 +6,7 @@ import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.dto.FilterAuctionDTO;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.exception.UrlAlreadySentException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
@@ -100,7 +101,7 @@ public class AuctionServiceImpl implements AuctionService {
             auctionRepository.save(auction);
             return auctionImageUrls;
         }
-        throw new BadRequestParametersException("Auction Urls already sent");
+        throw new UrlAlreadySentException("Auction Urls already sent");
     }
 
     @Override

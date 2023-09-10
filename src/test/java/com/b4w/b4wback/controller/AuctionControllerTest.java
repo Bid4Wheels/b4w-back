@@ -16,11 +16,13 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -287,5 +289,29 @@ public class AuctionControllerTest {
                 new HttpEntity<>(FilterAuctionDTO.builder().build(), headers), String.class);
 
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test020_AuctionControllerWhenGenerateAuctionImageUrlWithAllOkShouldReturnOk(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(5, auctionRepository);
+        ResponseEntity<List<String>> getAuctionsResponse = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
+                new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                });
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test021_AuctionControllerWhenGenerateAuctionImageUrlAndAlreadySentAnUploadRequestShouldReturnBadRequest(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(5, auctionRepository);
+        restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+        ResponseEntity<String> getAuctionsResponse2 = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
+                new HttpEntity<>(headers), String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());
     }
 }

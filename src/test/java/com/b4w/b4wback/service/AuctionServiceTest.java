@@ -5,6 +5,7 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.exception.UrlAlreadySentException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
@@ -15,6 +16,7 @@ import com.b4w.b4wback.util.AuctionGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -25,7 +27,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
@@ -48,6 +49,8 @@ public class AuctionServiceTest {
     UserRepository userRepository;
 
 
+    @Value("${default-url}")
+    private String defaultUrl;
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -409,4 +412,30 @@ public class AuctionServiceTest {
                 .getAuctionsFiltered(filter, Pageable.ofSize(10));
         assertEquals(auctions.size(), page.getTotalElements());
     }
+
+    @Test
+    void Test020_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionShouldReturnValidUrls(){
+        Auction auction = new AuctionGenerator(userRepository).generateRandomAuction();
+        auctionRepository.save(auction);
+        List<String> urls=auctionService.createUrlsForUploadingImages(1);
+        assertEquals(urls.size(),7);
+    }
+
+    @Test
+    void Test021_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionAndAlreadySentImageUrlShouldReturnUrlAlreadySentException(){
+        Auction auction = new AuctionGenerator(userRepository).generateRandomAuction();
+        auctionRepository.save(auction);
+        auctionService.createUrlsForUploadingImages(1);
+        //Making the same request, should return exception.
+        assertThrows(UrlAlreadySentException.class, () -> auctionService.createUrlsForUploadingImages(1));
+    }
+    @Test
+    void Test022_AuctionServiceWhenCreateAuctionUrlForDownloadingImageWithAnExistingAuctionUrls(){
+        Auction auction = new AuctionGenerator(userRepository).generateRandomAuction();
+        auctionRepository.save(auction);
+        List<String> urls=auctionService.createUrlsForUploadingImages(1);
+        List<String> downloadUrls=auctionService.createUrlsForDownloadingImages(1);
+        assertEquals(urls.size(),downloadUrls.size());;
+    }
+
 }

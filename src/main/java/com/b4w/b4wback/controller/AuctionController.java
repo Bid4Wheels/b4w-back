@@ -38,7 +38,7 @@ public class AuctionController {
     }
 
     @PostMapping("/image-url/{auctionId}")
-    public ResponseEntity<?> getAuctionImageUrl(@PathVariable long auctionId){
+    public ResponseEntity<?> generateAuctionImageUrl(@PathVariable long auctionId){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.createUrlsForUploadingImages(auctionId));
     }
 }
