@@ -115,4 +115,6 @@ public class AuctionGenerator {
             randomTags.add(tags.get(random.nextInt(tags.size() - 1)));
         return randomTags.stream().toList();
     }
-}
+
+    }
+

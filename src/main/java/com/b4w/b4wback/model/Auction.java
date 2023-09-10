@@ -63,7 +63,6 @@ public class Auction {
     private User user;
 
     private boolean alreadySentImageUrl;
-    public Auction (CreateAuctionDTO createAuctionDTO){
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "auction_tag",
@@ -71,6 +70,7 @@ public class Auction {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private List<Tag> tags;
+
 
 
     public Auction (CreateAuctionDTO createAuctionDTO, List<Tag> tags){

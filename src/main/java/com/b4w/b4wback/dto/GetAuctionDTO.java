@@ -51,8 +51,7 @@ public class GetAuctionDTO {
         this.gearShiftType=getAuctionDTO.getGearShiftType();
         this.auctionOwnerDTO=getAuctionDTO.getAuctionOwnerDTO();
         this.auctionHigestBidDTO=getAuctionDTO.getAuctionHigestBidDTO();
+        this.tags=getAuctionDTO.getTags();
         this.auctionImageUrl=auctionImageUrl;
     }
-
-
 }

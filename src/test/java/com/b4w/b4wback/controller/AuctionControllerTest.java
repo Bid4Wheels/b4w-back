@@ -275,11 +275,11 @@ public class AuctionControllerTest {
 
     @Test
 
-    void Test020_AuctionControllerWhenGenerateAuctionImageUrlWithAllOkShouldReturnOk(){
+    void Test020_AuctionControllerWhenGenerateAuctionImageUrlWithAllOkShouldReturnOk() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(5, auctionRepository);
+        new AuctionGenerator(userRepository,tagService).generateAndSaveListOfAuctions(5, auctionRepository);
         ResponseEntity<List<String>> getAuctionsResponse = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
                 new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
                 });
@@ -287,16 +287,17 @@ public class AuctionControllerTest {
     }
 
     @Test
-    void Test021_AuctionControllerWhenGenerateAuctionImageUrlAndAlreadySentAnUploadRequestShouldReturnBadRequest(){
+    void Test021_AuctionControllerWhenGenerateAuctionImageUrlAndAlreadySentAnUploadRequestShouldReturnBadRequest() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(5, auctionRepository);
+        new AuctionGenerator(userRepository,tagService).generateAndSaveListOfAuctions(5, auctionRepository);
         restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
         ResponseEntity<String> getAuctionsResponse2 = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
                 new HttpEntity<>(headers), String.class);
-        assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());
-      
+        assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());}
+
+
     void Test022_AuctionControllerWhenCreateAuctionWithTagsThenGetAuctionWithTags(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);

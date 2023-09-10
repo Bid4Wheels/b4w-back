@@ -12,7 +12,6 @@ import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
-import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.S3Service;
@@ -48,25 +47,18 @@ public class AuctionServiceImpl implements AuctionService {
     private Integer expirationTimeImageUrl;
   
     private final TagService tagService;
-  
-    private final S3Service s3Service;
-  
-    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,UserService userService,S3Service s3Service) {
+
+
+    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,UserService userService,S3Service s3Service,TagService tagService) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
         this.userService=userService;
         this.s3Service=s3Service;
+        this.tagService=tagService;
+    }
     
 
-    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository,
-                              BidRepository bidRepository, S3Service s3Service, TagService tagService) {
-        this.auctionRepository = auctionRepository;
-        this.userRepository = userRepository;
-        this.bidRepository = bidRepository;
-        this.s3Service = s3Service;
-        this.tagService = tagService;
-    }
 
     @Override
     public CreateAuctionDTO createAuction(CreateAuctionDTO createAuctionDTO)  {

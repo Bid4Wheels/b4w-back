@@ -77,13 +77,11 @@ public class AuctionServiceTest {
 
     @Test
     void Test001_AuctionServiceWhenReceiveCreatedAuctionDTOWithValidDTOShouldReturnCreateAuctionDTO() {
-        CreateAuctionDTO auctionDTOWithID=new CreateAuctionDTO(1L,new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC));
-        CreateAuctionDTO auctionCreated=auctionService.createAuction(auctionDTOWithID);
-        assertEquals(auctionCreated.getAuctionId(),auctionDTOWithID.getAuctionId());
-        CreateAuctionDTO auctionCreated=auctionService.createAuction(auctionDTO);
-        assertEquals(auctionCreated,auctionDTO);
+        CreateAuctionDTO auctionDTOWithID = new CreateAuctionDTO(1L, new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC, null));
+        CreateAuctionDTO auctionCreated = auctionService.createAuction(auctionDTOWithID);
+        assertEquals(auctionCreated.getAuctionId(), auctionDTOWithID.getAuctionId());
     }
 
     @Test
@@ -421,24 +419,24 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test020_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionShouldReturnValidUrls(){
-        Auction auction = new AuctionGenerator(userRepository).generateRandomAuction();
+    void Test020_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionShouldReturnValidUrls() throws Exception {
+        Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
         auctionRepository.save(auction);
         List<String> urls=auctionService.createUrlsForUploadingImages(1);
         assertEquals(urls.size(),7);
     }
 
     @Test
-    void Test021_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionAndAlreadySentImageUrlShouldReturnUrlAlreadySentException(){
-        Auction auction = new AuctionGenerator(userRepository).generateRandomAuction();
+    void Test021_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionAndAlreadySentImageUrlShouldReturnUrlAlreadySentException() throws Exception {
+        Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
         auctionRepository.save(auction);
         auctionService.createUrlsForUploadingImages(1);
         //Making the same request, should return exception.
         assertThrows(UrlAlreadySentException.class, () -> auctionService.createUrlsForUploadingImages(1));
     }
     @Test
-    void Test022_AuctionServiceWhenCreateAuctionUrlForDownloadingImageWithAnExistingAuctionUrls(){
-        Auction auction = new AuctionGenerator(userRepository).generateRandomAuction();
+    void Test022_AuctionServiceWhenCreateAuctionUrlForDownloadingImageWithAnExistingAuctionUrls() throws Exception {
+        Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
         auctionRepository.save(auction);
         List<String> urls=auctionService.createUrlsForUploadingImages(1);
         List<String> downloadUrls=auctionService.createUrlsForDownloadingImages(1);
@@ -509,6 +507,5 @@ public class AuctionServiceTest {
 
         List<String> auctionTags = new ArrayList<>();
         auction.getTags().forEach(t->auctionTags.add(t.getTagName()));
-        assertTrue(auctionTags.containsAll(tags));
-    }
+        assertTrue(auctionTags.containsAll(tags));}
 }
