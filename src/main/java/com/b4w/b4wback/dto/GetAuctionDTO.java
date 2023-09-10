@@ -4,6 +4,8 @@ import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.b4w.b4wback.model.Tag;
+
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -29,6 +31,7 @@ public class GetAuctionDTO {
     private GearShiftType gearShiftType;
     private AuctionOwnerDTO auctionOwnerDTO;
     private AuctionHigestBidDTO auctionHigestBidDTO;
+    private List<Tag> tags;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> auctionImageUrl;
 
@@ -50,5 +53,6 @@ public class GetAuctionDTO {
         this.auctionHigestBidDTO=getAuctionDTO.getAuctionHigestBidDTO();
         this.auctionImageUrl=auctionImageUrl;
     }
+
 
 }

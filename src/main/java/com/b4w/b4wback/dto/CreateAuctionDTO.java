@@ -13,6 +13,8 @@ import lombok.*;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Setter
 public class CreateAuctionDTO {
@@ -58,9 +60,12 @@ public class CreateAuctionDTO {
     @NotNull(message = "Gear type can't be blank.")
     private GearShiftType gearShiftType;
 
+    private List<String> tags;
+
     public CreateAuctionDTO(Long userId,String title, String description, LocalDateTime deadline, String brand, String model,
                             Integer basePrice, Integer milage, GasType gasType, Integer modelYear,
-                            String color, Integer doorsAmount, GearShiftType gearShiftType) {
+                            String color, Integer doorsAmount, GearShiftType gearShiftType,
+                            List<String> tags) {
         this.userId = userId;
         this.title = title;
         this.description = description;
@@ -74,6 +79,7 @@ public class CreateAuctionDTO {
         this.color = color;
         this.doorsAmount = doorsAmount;
         this.gearShiftType = gearShiftType;
+        this.tags = tags;
     }
     public CreateAuctionDTO(){}
     public CreateAuctionDTO(Long auctionId, CreateAuctionDTO auctionDTO){

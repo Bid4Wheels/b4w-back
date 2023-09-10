@@ -12,6 +12,7 @@ import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.BidService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,8 @@ public class BidServiceTest {
     private UserRepository userRepository;
     @Autowired
     private AuctionRepository auctionRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     private List<User> users;
     private Auction auction;
@@ -55,16 +58,16 @@ public class BidServiceTest {
         auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
                 LocalDateTime.of(2030, 10, 10, 10, 10), "Toyota",
                 "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
-                GearShiftType.AUTOMATIC));
+                GearShiftType.AUTOMATIC, null), null);
         auction.setUser(users.get(0));
         auction = auctionRepository.save(auction);
     }
 
     @Test
     void Test001_BidServiceWhenReceiveCreatedBidDTOWithValidDTOShouldCreateBid() {
-        Bid bid = bidService.crateBid(new CreateBidDTO(10, users.get(1).getId(), auction.getId()));
+        Bid bid = bidService.crateBid(new CreateBidDTO(auction.getBasePrice()+1, users.get(1).getId(), auction.getId()));
 
-        assertEquals(10, bid.getAmount());
+        assertEquals(auction.getBasePrice()+1, bid.getAmount());
         assertEquals(users.get(1).getId(), bid.getBidder().getId());
         assertEquals(auction.getId(), bid.getAuction().getId());
         assertNotNull(bid.getDate());

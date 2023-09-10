@@ -15,6 +15,8 @@ import org.springframework.data.repository.query.Param;
 public interface AuctionRepository extends JpaRepository<Auction,Long> {
 
 
+    List<AuctionDTO> findAllByUserId(Long id);
+
     Page<AuctionDTO> findByUser(User user, Pageable pageable);
 
 

@@ -12,11 +12,15 @@ import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
+import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.S3Service;
+
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Value;
+
+import com.b4w.b4wback.service.interfaces.TagService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,18 +46,33 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Value("${expiration.time.image.url}")
     private Integer expirationTimeImageUrl;
+  
+    private final TagService tagService;
+  
+    private final S3Service s3Service;
+  
     public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,UserService userService,S3Service s3Service) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
         this.userService=userService;
         this.s3Service=s3Service;
+    
+
+    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository,
+                              BidRepository bidRepository, S3Service s3Service, TagService tagService) {
+        this.auctionRepository = auctionRepository;
+        this.userRepository = userRepository;
+        this.bidRepository = bidRepository;
+        this.s3Service = s3Service;
+        this.tagService = tagService;
     }
 
     @Override
     public CreateAuctionDTO createAuction(CreateAuctionDTO createAuctionDTO)  {
         User user = userRepository.findById(createAuctionDTO.getUserId()).orElseThrow(()->new BadRequestParametersException("User with id "+createAuctionDTO.getUserId()+" not found"));
-        Auction auction=new Auction(createAuctionDTO);
+
+        Auction auction= new Auction(createAuctionDTO, tagService.getOrCreateTagsFromStringList(createAuctionDTO.getTags()));
         auction.setUser(user);
         return auctionRepository.save(auction).toDTO(createAuctionDTO);
     }

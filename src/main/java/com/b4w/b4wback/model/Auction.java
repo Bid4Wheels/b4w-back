@@ -13,6 +13,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -62,6 +64,16 @@ public class Auction {
 
     private boolean alreadySentImageUrl;
     public Auction (CreateAuctionDTO createAuctionDTO){
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "auction_tag",
+            joinColumns = @JoinColumn(name = "auction_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags;
+
+
+    public Auction (CreateAuctionDTO createAuctionDTO, List<Tag> tags){
         this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();
         this.deadline = createAuctionDTO.getDeadline();
@@ -77,6 +89,7 @@ public class Auction {
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
         this.alreadySentImageUrl=false;
+        this.tags = tags;
     }
 
     public AuctionStatus getStatus(){
@@ -109,6 +122,7 @@ public class Auction {
                         .profilePicture(userService.createUrlForDownloadingImage(user.getId()))
                         .build())
                 .auctionHigestBidDTO(auctionHigestBidDTO)
+                .tags(tags)
                 .build();
     }
 
