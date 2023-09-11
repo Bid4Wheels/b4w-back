@@ -22,7 +22,8 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
 
 
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
-            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
+            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)," +
+            "(SELECT tagAuction.tag.tagName FROM TagAuction tagAuction WHERE tagAuction.auction.id = auction.id)) " +
             "FROM Auction auction WHERE " +
             "(:milageMin IS NULL OR auction.milage >= :milageMin) AND " +
             "(:milageMax IS NULL OR auction.milage <= :milageMax) AND " +
@@ -53,13 +54,19 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                                     @Param("model") String model,
                                     Pageable pageable);
 
-    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
-            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
-            "FROM Auction auction WHERE auction.deadline > :currentDateTime ORDER BY auction.deadline ASC")
-    Page<AuctionDTO> findUpcomingAuctions(@Param("currentDateTime") LocalDateTime currentDateTime,Pageable pageable);
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status, " +
+            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice), " +
+            "(SELECT tagAuction.tag.tagName FROM TagAuction tagAuction WHERE tagAuction.auction.id = auction.id)) " +
+            "FROM Auction auction " +
+            "WHERE auction.deadline > :currentDateTime " +
+            "ORDER BY auction.deadline ASC")
+    Page<AuctionDTO> findUpcomingAuctions(@Param("currentDateTime") LocalDateTime currentDateTime, Pageable pageable);
 
-    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
-            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
-            "FROM Auction auction WHERE auction.createdAt < :currentDateTime ORDER BY auction.createdAt ASC")
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status, " +
+            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice), " +
+            "(SELECT tagAuction.tag.tagName FROM TagAuction tagAuction WHERE tagAuction.auction.id = auction.id)) " +
+            "FROM Auction auction " +
+            "WHERE auction.deadline < :currentDateTime " +
+            "ORDER BY auction.deadline ASC")
     Page<AuctionDTO> findNewAuctions(@Param("currentDateTime") LocalDateTime currentDateTime,Pageable pageable);
 }

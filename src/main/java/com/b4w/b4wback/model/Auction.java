@@ -13,6 +13,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -59,6 +60,9 @@ public class Auction {
 
     private int highestBidAmount;
 
+    @OneToMany(mappedBy = "auction")
+    private List<TagAuction> tagAuctions = new ArrayList<>();
+
     @ManyToOne()
     private User user;
 
@@ -99,7 +103,6 @@ public class Auction {
     }
     public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, S3Service s3Service){
         Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
-
 
         AuctionHigestBidDTO auctionHigestBidDTO = null;
 
