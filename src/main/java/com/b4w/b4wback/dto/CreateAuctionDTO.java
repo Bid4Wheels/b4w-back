@@ -97,5 +97,6 @@ public class CreateAuctionDTO {
         this.color=auctionDTO.getColor();
         this.doorsAmount=auctionDTO.getDoorsAmount();
         this.gearShiftType=auctionDTO.getGearShiftType();
+        this.tags=auctionDTO.getTags();
     }
 }

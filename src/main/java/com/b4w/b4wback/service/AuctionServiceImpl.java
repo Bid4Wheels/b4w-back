@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.b4w.b4wback.service.interfaces.TagService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -63,7 +64,6 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public CreateAuctionDTO createAuction(CreateAuctionDTO createAuctionDTO)  {
         User user = userRepository.findById(createAuctionDTO.getUserId()).orElseThrow(()->new BadRequestParametersException("User with id "+createAuctionDTO.getUserId()+" not found"));
-
         Auction auction= new Auction(createAuctionDTO, tagService.getOrCreateTagsFromStringList(createAuctionDTO.getTags()));
         auction.setUser(user);
         return auctionRepository.save(auction).toDTO(createAuctionDTO);
@@ -86,16 +86,27 @@ public class AuctionServiceImpl implements AuctionService {
                 continue;
             }
             auctionDTO.setHighestBidAmount(topBid.getAmount());
+            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
+            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
         }
-        return  auctions;
+        return auctions;
     }
     @Override
     public Page<AuctionDTO> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable) {
-        return auctionRepository.findWithFilter(filter.getMilageMin(), filter.getMilageMax(),
+        Page<AuctionDTO> auctionDTOPage=auctionRepository.findWithFilter(filter.getMilageMin(), filter.getMilageMax(),
                 filter.getModelYearMin(), filter.getModelYearMax(),
                 filter.getPriceMin(), filter.getPriceMax(),
                 filter.getBrand(), filter.getColor(), filter.getGasType(), filter.getDoorsAmount(),
                 filter.getGearShiftType(), filter.getModel(), pageable);
+        List<AuctionDTO> auctions=auctionDTOPage.getContent();
+        long totalElements=auctionDTOPage.getTotalElements();
+        List<AuctionDTO> auctionsWithImage=new ArrayList<>();
+        for (AuctionDTO auction: auctions) {
+            String url=auctionObjectKey+auction.getId()+"/img1";
+            auction.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
+            auctionsWithImage.add(auction);
+        }
+        return new PageImpl<>(auctionsWithImage,pageable,totalElements);
     }
 
     @Override
