@@ -1,7 +1,7 @@
 FROM openjdk:17-jdk-slim-buster AS build
 WORKDIR /app
 COPY . .
-RUN ./gradlew build
+RUN ./gradlew build -x test
 FROM openjdk:17-jdk-slim-buster
 WORKDIR /app
 COPY --from=build /app/build/libs/app.jar app.jar
