@@ -79,17 +79,21 @@ public class AuctionServiceImpl implements AuctionService {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Page<AuctionDTO> auctions= auctionRepository.findByUser(user, pageable);
         List<AuctionDTO> auctionDTOS = auctions.getContent();
+        long totalElements= auctions.getTotalElements();
+        List<AuctionDTO> auctionWithImages=new ArrayList<>();
         for (AuctionDTO auctionDTO : auctionDTOS) {
+            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
+            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
+            auctionWithImages.add(auctionDTO);
             Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")));
             if (topBid == null){
                 auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")).getBasePrice());
                 continue;
             }
             auctionDTO.setHighestBidAmount(topBid.getAmount());
-            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
-            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
         }
-        return auctions;
+
+        return new PageImpl<>(auctionWithImages,pageable,totalElements);
     }
     @Override
     public Page<AuctionDTO> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable) {
