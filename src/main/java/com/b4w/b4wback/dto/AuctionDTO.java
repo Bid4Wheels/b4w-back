@@ -1,11 +1,16 @@
 package com.b4w.b4wback.dto;
 
 import com.b4w.b4wback.enums.AuctionStatus;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.SqlResultSetMapping;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+
+
 @Getter
 @Setter
 public class AuctionDTO {

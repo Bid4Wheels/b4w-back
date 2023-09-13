@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.sql.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -507,5 +508,43 @@ public class AuctionServiceTest {
 
         List<String> auctionTags = new ArrayList<>();
         auction.getTags().forEach(t->auctionTags.add(t.getTagName()));
-        assertTrue(auctionTags.containsAll(tags));}
+        assertTrue(auctionTags.containsAll(tags));
+    }
+
+    @Test
+    void Test028_AuctionServiceWhenFilterAuctionWithExistingTags() throws Exception {
+        AuctionGenerator auctionGenerator = new AuctionGenerator(userRepository, tagService);
+        List<String> tagsNames = auctionGenerator.GetTags();
+        List<Tag> tags = tagService.getOrCreateTagsFromStringList(tagsNames.subList(0,2));
+
+        List<Auction> auctions = auctionGenerator.generateAndSaveListOfAuctions(100, auctionRepository);
+
+        FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
+        filter.setTags(tags.stream().map(Tag::getId).toList());
+
+        auctions = auctions.stream().filter(a-> a.getTags().containsAll(tags)).toList();
+
+        Page<AuctionDTO> page = auctionService
+                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(auctions.size(), page.getTotalElements());
+    }
+
+
+    //TODO: delete this test
+
+    @Test
+    void TestAux2(){
+        List<String> tagsNames = List.of("tag1", "tag2", "tag3");
+        List<Tag> tags = tagService.getOrCreateTagsFromStringList(tagsNames);
+
+        auctionDTO.setTags(tagsNames);
+        auctionService.createAuction(auctionDTO);
+
+        List<Long> tagsList = tags.stream().map(Tag::getId).toList();
+        tagsList = new ArrayList<>();
+        Page<AuctionDTO> auctionsGot = auctionRepository.findWithFilter(null, null,
+                null, null, null, null, null, null,
+                null, null, null,null, tagsList, Pageable.ofSize(10));
+        assertEquals(1, auctionsGot.getTotalElements());
+    }
 }

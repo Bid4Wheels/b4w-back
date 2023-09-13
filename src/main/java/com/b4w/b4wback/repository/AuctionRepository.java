@@ -22,6 +22,7 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
     Page<AuctionDTO> findByUser(User user, Pageable pageable);
 
 
+    /**
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
             "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
             "FROM Auction auction WHERE " +
@@ -41,7 +42,8 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
             ") >= :priceMin) AND" +
             "(:priceMax IS NULL OR COALESCE((SELECT " +
                 "MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice " +
-            ") <= :priceMax)"
+            ") <= :priceMax) AND " +
+            "(:tagsIds IS NULL OR auction.tags IN (SELECT t FROM Tag t WHERE t.id IN :tagsIds))"
     )
     Page<AuctionDTO> findWithFilter(@Param("milageMin") Integer milageMin, @Param("milageMax") Integer milageMax,
                                     @Param("modelYearMin") Integer modelYearMin, @Param("modelYearMax") Integer modelYearMax,
@@ -52,5 +54,21 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                                     @Param("doorsAmount") Integer doorsAmount,
                                     @Param("gearShiftType") GearShiftType gearShiftType,
                                     @Param("model") String model,
+                                    @Param("tagsIds") List<Long> tagsIds,
                                     Pageable pageable);
+     **/
+
+    @Query(name = "getAuctionDTOWithFilter", nativeQuery = true)
+    Page<AuctionDTO> findWithFilter(@Param("milageMin") Integer milageMin, @Param("milageMax") Integer milageMax,
+                                    @Param("modelYearMin") Integer modelYearMin, @Param("modelYearMax") Integer modelYearMax,
+                                    @Param("priceMin") Integer priceMin, @Param("priceMax") Integer priceMax,
+                                    @Param("brand") String brand,
+                                    @Param("color") String color,
+                                    @Param("gasType") GasType gasType,
+                                    @Param("doorsAmount") Integer doorsAmount,
+                                    @Param("gearShiftType") GearShiftType gearShiftType,
+                                    @Param("model") String model,
+                                    @Param("tagsIds") List<Long> tagsIds,
+                                    Pageable pageable);
+
 }

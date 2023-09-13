@@ -97,14 +97,19 @@ public class AuctionServiceImpl implements AuctionService {
     }
     @Override
     public Page<AuctionDTO> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable) {
+        if (filter.getTags() == null)
+            filter.setTags(new ArrayList<>());
+
         Page<AuctionDTO> auctionDTOPage=auctionRepository.findWithFilter(filter.getMilageMin(), filter.getMilageMax(),
                 filter.getModelYearMin(), filter.getModelYearMax(),
                 filter.getPriceMin(), filter.getPriceMax(),
                 filter.getBrand(), filter.getColor(), filter.getGasType(), filter.getDoorsAmount(),
-                filter.getGearShiftType(), filter.getModel(), pageable);
+                filter.getGearShiftType(), filter.getModel(), filter.getTags(), pageable);
+
         List<AuctionDTO> auctions=auctionDTOPage.getContent();
         long totalElements=auctionDTOPage.getTotalElements();
         List<AuctionDTO> auctionsWithImage=new ArrayList<>();
+
         for (AuctionDTO auction: auctions) {
             String url=auctionObjectKey+auction.getId()+"/img1";
             auction.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));

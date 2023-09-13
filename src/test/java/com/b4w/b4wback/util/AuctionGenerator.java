@@ -34,6 +34,10 @@ public class AuctionGenerator {
 
     private final static Random random = new Random();
 
+    public List<String> GetTags() {
+        return tags;
+    }
+
     public AuctionGenerator(UserRepository userRepository, TagService tagService){
         this.userRepository = userRepository;
 
