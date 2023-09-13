@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-
 @Getter
 @Setter
 public class AuctionDTO {
@@ -15,7 +14,7 @@ public class AuctionDTO {
     private LocalDateTime deadline;
     private int highestBidAmount;
     private AuctionStatus status;
-
+    private String firstImageUrl;
     public AuctionDTO(Long id, String title, LocalDateTime deadline,  AuctionStatus status, Integer highestBidAmount) {
         this.id = id;
         this.title = title;

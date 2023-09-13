@@ -8,7 +8,7 @@ import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.BidRepository;
-import com.b4w.b4wback.service.interfaces.S3Service;
+import com.b4w.b4wback.service.interfaces.UserService;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -62,6 +62,7 @@ public class Auction {
     @ManyToOne()
     private User user;
 
+    private boolean alreadySentImageUrl;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "auction_tag",
@@ -69,6 +70,7 @@ public class Auction {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private List<Tag> tags;
+
 
 
     public Auction (CreateAuctionDTO createAuctionDTO, List<Tag> tags){
@@ -86,7 +88,7 @@ public class Auction {
         this.color = createAuctionDTO.getColor();
         this.doorsAmount = createAuctionDTO.getDoorsAmount();
         this.gearShiftType = createAuctionDTO.getGearShiftType();
-
+        this.alreadySentImageUrl=false;
         this.tags = tags;
     }
 
@@ -97,7 +99,7 @@ public class Auction {
 
         return status;
     }
-    public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, S3Service s3Service){
+    public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, UserService userService){
         Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
 
 
@@ -117,10 +119,14 @@ public class Auction {
                         .name(this.getUser().getName())
                         .id(this.getUser().getId())
                         .lastName(this.getUser().getLastName())
-                        .profilePicture(s3Service.getDownloadURL(this.getUser().getId()))
+                        .profilePicture(userService.createUrlForDownloadingImage(user.getId()))
                         .build())
                 .auctionHigestBidDTO(auctionHigestBidDTO)
                 .tags(tags)
                 .build();
+    }
+
+    public CreateAuctionDTO toDTO( CreateAuctionDTO auctionDTO){
+        return new CreateAuctionDTO(this.getId(), auctionDTO);
     }
 }

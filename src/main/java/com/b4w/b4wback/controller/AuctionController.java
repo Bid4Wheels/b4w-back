@@ -3,7 +3,6 @@ package com.b4w.b4wback.controller;
 import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.FilterAuctionDTO;
-import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,5 +35,10 @@ public class AuctionController {
     @PostMapping("/filter")
     public ResponseEntity<Page<AuctionDTO>> getAuctionsFiltered(@RequestBody FilterAuctionDTO filter, Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsFiltered(filter, pageable));
+    }
+
+    @PostMapping("/image-url/{auctionId}")
+    public ResponseEntity<?> generateAuctionImageUrl(@PathVariable long auctionId){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.createUrlsForUploadingImages(auctionId));
     }
 }

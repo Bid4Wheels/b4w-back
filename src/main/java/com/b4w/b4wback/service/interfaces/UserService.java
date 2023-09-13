@@ -25,4 +25,8 @@ public interface UserService {
     void checkPasswordCode(GetPasswordCodeDTO email);
 
     void changePassword(ChangePasswordDTO passwordChangerDTO);
+
+    String createUrlForUploadingImage(String token);
+
+    String createUrlForDownloadingImage(Long userID);
 }
