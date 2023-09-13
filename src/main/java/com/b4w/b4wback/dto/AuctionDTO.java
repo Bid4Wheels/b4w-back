@@ -2,7 +2,6 @@ package com.b4w.b4wback.dto;
 
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.model.Auction;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
