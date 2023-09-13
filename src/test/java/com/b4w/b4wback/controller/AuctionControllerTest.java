@@ -5,7 +5,6 @@ import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
-import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
@@ -18,7 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.data.domain.Page;
+
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -274,7 +274,31 @@ public class AuctionControllerTest {
     }
 
     @Test
-    void Test020_AuctionControllerWhenCreateAuctionWithTagsThenGetAuctionWithTags(){
+
+    void Test020_AuctionControllerWhenGenerateAuctionImageUrlWithAllOkShouldReturnOk() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository,tagService).generateAndSaveListOfAuctions(5, auctionRepository);
+        ResponseEntity<List<String>> getAuctionsResponse = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
+                new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                });
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test021_AuctionControllerWhenGenerateAuctionImageUrlAndAlreadySentAnUploadRequestShouldReturnBadRequest() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository,tagService).generateAndSaveListOfAuctions(5, auctionRepository);
+        restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+        ResponseEntity<String> getAuctionsResponse2 = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
+                new HttpEntity<>(headers), String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());}
+
+
+    void Test022_AuctionControllerWhenCreateAuctionWithTagsThenGetAuctionWithTags(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
         List<String> tags = new ArrayList<>(List.of("tag1", "tag2", "tag3"));
