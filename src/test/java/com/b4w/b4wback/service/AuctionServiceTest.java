@@ -5,6 +5,7 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.exception.UrlAlreadySentException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Tag;
 import com.b4w.b4wback.repository.AuctionRepository;
@@ -29,7 +30,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
@@ -58,6 +58,7 @@ public class AuctionServiceTest {
     private CreateAuctionDTO auctionDTO;
 
 
+
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -76,8 +77,11 @@ public class AuctionServiceTest {
 
     @Test
     void Test001_AuctionServiceWhenReceiveCreatedAuctionDTOWithValidDTOShouldReturnCreateAuctionDTO() {
-        CreateAuctionDTO auctionCreated=auctionService.createAuction(auctionDTO);
-        assertEquals(auctionCreated,auctionDTO);
+        CreateAuctionDTO auctionDTOWithID = new CreateAuctionDTO(1L, new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC, null));
+        CreateAuctionDTO auctionCreated = auctionService.createAuction(auctionDTOWithID);
+        assertEquals(auctionCreated.getAuctionId(), auctionDTOWithID.getAuctionId());
     }
 
     @Test
@@ -88,7 +92,7 @@ public class AuctionServiceTest {
                 4, GearShiftType.MANUAL, null);
         auctionService.createAuction(auctionDTO);
         auctionService.createAuction(auctionDTO2);
-        assertEquals(2,auctionRepository.findAllByUserId(1L).size());
+        assertEquals(2,auctionRepository.findByUser(userRepository.findById(1L).get(),null).getSize());
     }
 
     @Test
@@ -122,30 +126,31 @@ public class AuctionServiceTest {
         CreateBidDTO bidDto=new CreateBidDTO(150000,2L,1L);
         auctionService.createAuction(auctionDTO);
         bidService.crateBid(bidDto);
-        GetAuctionDTO auction = auctionService.getAuctionById(1L);
-        assertEquals(auctionDTO.getTitle(), auction.getTitle());
-        assertEquals(auctionDTO.getDescription(), auction.getDescription());
-        assertEquals(auctionDTO.getDeadline(), auction.getDeadline());
-        assertEquals(auctionDTO.getBasePrice(), auction.getBasePrice());
-        assertEquals(auctionDTO.getBrand(), auction.getBrand());
-        assertEquals(auctionDTO.getModel(), auction.getModel());
-        assertEquals(auctionDTO.getStatus(), auction.getStatus());
-        assertEquals(auctionDTO.getMilage(), auction.getMilage());
-        assertEquals(auctionDTO.getGasType(), auction.getGasType());
-        assertEquals(auctionDTO.getModelYear(), auction.getModelYear());
-        assertEquals(auctionDTO.getColor(), auction.getColor());
-        assertEquals(auctionDTO.getDoorsAmount(), auction.getDoorsAmount());
-        assertEquals(auctionDTO.getGearShiftType(), auction.getGearShiftType());
-        assertEquals(auctionDTO.getUserId(), auction.getAuctionOwnerDTO().getId());
+      
+        GetAuctionDTO auction=auctionService.getAuctionById(1L);
+        assertEquals(auctionDTO.getTitle(),auction.getTitle());
+        assertEquals(auctionDTO.getDescription(),auction.getDescription());
+        assertEquals(auctionDTO.getDeadline(),auction.getDeadline());
+        assertEquals(auctionDTO.getBasePrice(),auction.getBasePrice());
+        assertEquals(auctionDTO.getBrand(),auction.getBrand());
+        assertEquals(auctionDTO.getModel(),auction.getModel());
+        assertEquals(auctionDTO.getStatus(),auction.getStatus());
+        assertEquals(auctionDTO.getMilage(),auction.getMilage());
+        assertEquals(auctionDTO.getGasType(),auction.getGasType());
+        assertEquals(auctionDTO.getModelYear(),auction.getModelYear());
+        assertEquals(auctionDTO.getColor(),auction.getColor());
+        assertEquals(auctionDTO.getDoorsAmount(),auction.getDoorsAmount());
+        assertEquals(auctionDTO.getGearShiftType(),auction.getGearShiftType());
+        assertEquals(auctionDTO.getUserId(),auction.getAuctionOwnerDTO().getId());
 
-        assertEquals(bidDto.getAmount(), auction.getAuctionHigestBidDTO().getAmount());
-        assertEquals(bidDto.getUserId(), auction.getAuctionHigestBidDTO().getUserId());
-        assertEquals("Esteban", auction.getAuctionHigestBidDTO().getUserName());
-        assertEquals("Chiquito", auction.getAuctionHigestBidDTO().getUserLastName());
+        assertEquals(bidDto.getAmount(),auction.getAuctionHigestBidDTO().getAmount());
+        assertEquals(bidDto.getUserId(),auction.getAuctionHigestBidDTO().getUserId());
+        assertEquals("Esteban",auction.getAuctionHigestBidDTO().getUserName());
+        assertEquals("Chiquito",auction.getAuctionHigestBidDTO().getUserLastName());
 
-        assertEquals(1L, auction.getAuctionOwnerDTO().getId());
-        assertEquals("Nico", auction.getAuctionOwnerDTO().getName());
-        assertEquals("Borja", auction.getAuctionOwnerDTO().getLastName());
+        assertEquals(1L,auction.getAuctionOwnerDTO().getId());
+        assertEquals("Nico",auction.getAuctionOwnerDTO().getName());
+        assertEquals("Borja",auction.getAuctionOwnerDTO().getLastName());
 
     }
 
@@ -414,7 +419,31 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test020_AuctionServiceWhenCreateAuctionWithNonExistentTagsThenGetAuctionWithAllItsTags(){
+    void Test020_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionShouldReturnValidUrls() throws Exception {
+        Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
+        auctionRepository.save(auction);
+        List<String> urls=auctionService.createUrlsForUploadingImages(1);
+        assertEquals(urls.size(),7);
+    }
+
+    @Test
+    void Test021_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionAndAlreadySentImageUrlShouldReturnUrlAlreadySentException() throws Exception {
+        Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
+        auctionRepository.save(auction);
+        auctionService.createUrlsForUploadingImages(1);
+        //Making the same request, should return exception.
+        assertThrows(UrlAlreadySentException.class, () -> auctionService.createUrlsForUploadingImages(1));
+    }
+    @Test
+    void Test022_AuctionServiceWhenCreateAuctionUrlForDownloadingImageWithAnExistingAuctionUrls() throws Exception {
+        Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
+        auctionRepository.save(auction);
+        List<String> urls=auctionService.createUrlsForUploadingImages(1);
+        List<String> downloadUrls=auctionService.createUrlsForDownloadingImages(1);
+        assertEquals(urls.size(),downloadUrls.size());
+    }
+    @Test
+    void Test023_AuctionServiceWhenCreateAuctionWithNonExistentTagsThenGetAuctionWithAllItsTags(){
         List<String> tags = List.of("Tag1", "Tag2", "Tag3", "Tag4", "Tag5");
         auctionDTO.setTags(tags);
         auctionService.createAuction(auctionDTO);
@@ -434,7 +463,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test021_AuctionServiceWhenCreateAuctionWithSomeExistentTagsThenGetAuctionWithAllItsTags(){
+    void Test024_AuctionServiceWhenCreateAuctionWithSomeExistentTagsThenGetAuctionWithAllItsTags(){
         List<String> existingTags = new ArrayList<>(List.of("tag1", "tag2", "tag3"));
         tagRepository.saveAll(existingTags.stream().map(Tag::new).toList());
 
@@ -460,7 +489,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test022_AuctionServiceWhenCreateAuctionWithAllExistentTagsThenGetAuctionWithAllItsTags(){
+    void Test025_AuctionServiceWhenCreateAuctionWithAllExistentTagsThenGetAuctionWithAllItsTags(){
         List<String> tags = List.of("Tag1", "Tag2", "Tag3", "Tag4", "Tag5");
         tagRepository.saveAll(tags.stream().map(Tag::new).toList());
 
@@ -478,6 +507,5 @@ public class AuctionServiceTest {
 
         List<String> auctionTags = new ArrayList<>();
         auction.getTags().forEach(t->auctionTags.add(t.getTagName()));
-        assertTrue(auctionTags.containsAll(tags));
-    }
+        assertTrue(auctionTags.containsAll(tags));}
 }
