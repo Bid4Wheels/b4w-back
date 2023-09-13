@@ -5,9 +5,10 @@ import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
-import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.TagService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.util.AuctionGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,16 +17,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.data.domain.Page;
+
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -42,8 +46,11 @@ public class AuctionControllerTest {
     private UserRepository userRepository;
     @Autowired
     private AuctionRepository auctionRepository;
+    @Autowired
+    private TagService tagService;
 
     private String token;
+    private CreateAuctionDTO auctionDTO;
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -54,6 +61,11 @@ public class AuctionControllerTest {
         userService.createUser(userDTO);
         userService.createUser(userDTO2);
         token=authenticateAndGetToken(signInRequest);
+
+        auctionDTO= new CreateAuctionDTO(1L,"Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
+                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
+                4, GearShiftType.AUTOMATIC, null);
     }
 
     private String authenticateAndGetToken(SignInRequest signInRequest) {
@@ -67,8 +79,6 @@ public class AuctionControllerTest {
     void Test001_AuctionControllerWhenReceivesValidAuctionShouldReturnStatusCREATED(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil", "text",LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
         ResponseEntity<CreateAuctionDTO> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.CREATED);
@@ -77,9 +87,7 @@ public class AuctionControllerTest {
     void Test002_AuctionControllerWhenReceivesAuctionWithEmptyTitleShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setTitle("");
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -88,9 +96,7 @@ public class AuctionControllerTest {
     void Test003_AuctionControllerWhenReceivesAuctionWithEmptyDescriptionShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setDescription("");
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -99,9 +105,7 @@ public class AuctionControllerTest {
     void Test004_AuctionControllerWhenReceivesAuctionWithEmptyBrandShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setBrand("");
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -111,8 +115,7 @@ public class AuctionControllerTest {
     void Test005_AuctionControllerWhenReceivesAuctionWithEmptyModelShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil", "text",LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                null,150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setModel(null);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -122,8 +125,7 @@ public class AuctionControllerTest {
     void Test006_AuctionControllerWhenReceivesAuctionWithEmptyBasePriceShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil", "text",LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",null,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setBasePrice(null);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -134,21 +136,17 @@ public class AuctionControllerTest {
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
         LocalDateTime auctionDateTime = LocalDateTime.now().minus(23, ChronoUnit.HOURS);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                auctionDateTime,"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setDeadline(auctionDateTime);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
-        assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
+        assertEquals(HttpStatus.BAD_REQUEST, createAuctionDTOResponseEntity.getStatusCode());
     }
 
     @Test
     void Test008_AuctionControllerWhenReceivesAuctionWithEmptyMilageShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,null, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setMilage(null);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -158,9 +156,7 @@ public class AuctionControllerTest {
     void Test009_AuctionControllerWhenReceivesAuctionWithEmptyGasTypeShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, null,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setGasType(null);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -170,9 +166,7 @@ public class AuctionControllerTest {
     void Test010_AuctionControllerWhenReceivesAuctionWithEmptyModelYearShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,null,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setModelYear(null);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -182,9 +176,7 @@ public class AuctionControllerTest {
     void Test011_AuctionControllerWhenReceivesAuctionWithEmptyColorShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setColor("");
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -194,9 +186,7 @@ public class AuctionControllerTest {
     void Test012_AuctionControllerWhenReceivesAuctionWithEmptyDoorsAmountShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",null, GearShiftType.AUTOMATIC);
+        auctionDTO.setDoorsAmount(null);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -205,9 +195,7 @@ public class AuctionControllerTest {
     void Test013_AuctionControllerWhenReceivesAuctionWithEmptyGearShiftTypeShouldReturnStatusBAD_REQUEST(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,
-                "Subasta de automovil","text",LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, null);
+        auctionDTO.setGearShiftType(null);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -220,8 +208,7 @@ public class AuctionControllerTest {
                 "Experimenta la emoción de conducir con este auto que combina elegancia, rendimiento y comodidad en un solo paquete.";
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,"Subasta de automovil", text,LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
+        auctionDTO.setDescription(text);
         ResponseEntity<String> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
                 new HttpEntity<>(auctionDTO,headers),String.class);
         assert createAuctionDTOResponseEntity.getStatusCode().equals(HttpStatus.BAD_REQUEST);
@@ -231,9 +218,6 @@ public class AuctionControllerTest {
     void Test015_AuctionControllerWhenGetAuctionByIdShouldReturnStatusOK(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
-        CreateAuctionDTO auctionDTO=new CreateAuctionDTO(1L,
-                "Subasta de automovil","text",LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
-                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",4, GearShiftType.AUTOMATIC);
 
         restTemplate.exchange(baseUrl, HttpMethod.POST,new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
 
@@ -257,8 +241,6 @@ public class AuctionControllerTest {
     void Test017_UserControllerWhenGetAuctionsUserIDShouldReturnOK() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
-        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text", LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
-                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver", 4, GearShiftType.AUTOMATIC);
         restTemplate.exchange(baseUrl, HttpMethod.POST,new HttpEntity<>(auctionDTO, headers), String.class);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/user/1", HttpMethod.GET,
@@ -279,15 +261,51 @@ public class AuctionControllerTest {
     }
 
     @Test
-    void Test019_AuctionControllerWhenAuctionFilterWithAllOkShouldReturnOK(){
+    void Test019_AuctionControllerWhenAuctionFilterWithAllOkShouldReturnOK() throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        new AuctionGenerator(userRepository).generateAndSaveListOfAuctions(100, auctionRepository);
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/filter", HttpMethod.POST,
                 new HttpEntity<>(FilterAuctionDTO.builder().build(), headers), String.class);
 
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+
+    void Test020_AuctionControllerWhenGenerateAuctionImageUrlWithAllOkShouldReturnOk() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository,tagService).generateAndSaveListOfAuctions(5, auctionRepository);
+        ResponseEntity<List<String>> getAuctionsResponse = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
+                new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
+                });
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test021_AuctionControllerWhenGenerateAuctionImageUrlAndAlreadySentAnUploadRequestShouldReturnBadRequest() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository,tagService).generateAndSaveListOfAuctions(5, auctionRepository);
+        restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST, new HttpEntity<>(headers), new ParameterizedTypeReference<>() {});
+        ResponseEntity<String> getAuctionsResponse2 = restTemplate.exchange(baseUrl + "/image-url/1", HttpMethod.POST,
+                new HttpEntity<>(headers), String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());}
+
+
+    void Test022_AuctionControllerWhenCreateAuctionWithTagsThenGetAuctionWithTags(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        List<String> tags = new ArrayList<>(List.of("tag1", "tag2", "tag3"));
+        auctionDTO.setTags(tags);
+        ResponseEntity<CreateAuctionDTO> createAuctionDTOResponseEntity= restTemplate.exchange(baseUrl, HttpMethod.POST,
+                new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
+        assertEquals(HttpStatus.CREATED, createAuctionDTOResponseEntity.getStatusCode());
+        assertTrue(createAuctionDTOResponseEntity.getBody().getTags().containsAll(tags));
     }
 }

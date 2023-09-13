@@ -6,19 +6,22 @@ import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.TagService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class AuctionGenerator {
     private UserRepository userRepository;
+    private TagService tagService;
     private List<String> titles;
     private List<String> brands;
     private List<String> models;
     private List<String> colors;
+
+    private List<String> tags;
     private int basePriceMin;
     private int basePriceMax;
     private int milageMin;
@@ -31,13 +34,15 @@ public class AuctionGenerator {
 
     private final static Random random = new Random();
 
-    public AuctionGenerator(UserRepository userRepository){
+    public AuctionGenerator(UserRepository userRepository, TagService tagService){
         this.userRepository = userRepository;
 
         titles = new ArrayList<>(List.of(new String[]{"On sale", "Fallout", "Linux"}));
         brands = new ArrayList<>(List.of(new String[]{"Audi", "Toyota", "Fiat"}));
         models = new ArrayList<>(List.of(new String[]{"1", "2", "3"}));
         colors = new ArrayList<>(List.of(new String[]{"Black", "White", "Blue", "Green"}));
+        tags = new ArrayList<>(List.of("tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10"));
+
         basePriceMin = 1000;
         basePriceMax = 100000;
         milageMin = 0;
@@ -46,9 +51,10 @@ public class AuctionGenerator {
         maxModelYear = 2023;
         minDoorsAmount = 2;
         maxDoorsAmount = 5;
+        this.tagService = tagService;
     }
 
-    public List<Auction> generateAndSaveListOfAuctions(int amount, AuctionRepository auctionRepository){
+    public List<Auction> generateAndSaveListOfAuctions(int amount, AuctionRepository auctionRepository) throws Exception {
         List<Auction> auctions = new ArrayList<>();
         while (amount>0){
             auctions.add(generateAndSaveRandomAuction(auctionRepository));
@@ -56,7 +62,7 @@ public class AuctionGenerator {
         }
         return auctions;
     }
-    public List<Auction> generateListOfAuctions(int amount){
+    public List<Auction> generateListOfAuctions(int amount) throws Exception {
         List<Auction> auctions = new ArrayList<>();
         while (amount>0){
             auctions.add(generateRandomAuction());
@@ -65,11 +71,12 @@ public class AuctionGenerator {
         return auctions;
     }
 
-    public Auction generateAndSaveRandomAuction(AuctionRepository auctionRepository){
+    public Auction generateAndSaveRandomAuction(AuctionRepository auctionRepository) throws Exception {
         return auctionRepository.save(generateRandomAuction());
     }
 
-    public Auction generateRandomAuction(){
+    public Auction generateRandomAuction() throws Exception {
+        List<String> tagsAux = pickRandomTags(random.nextInt(tags.isEmpty() ? 0 : tags.size() > 6? 6 : tags.size() - 1));
         return new Auction(new CreateAuctionDTO(
                 getRandomUserId(),
                 titles.get(random.nextInt(titles.size()-1)),
@@ -83,7 +90,9 @@ public class AuctionGenerator {
                 random.nextInt(minModelYear, maxModelYear),
                 colors.get(random.nextInt(colors.size()-1)),
                 random.nextInt(minDoorsAmount, maxDoorsAmount),
-                GearShiftType.values()[random.nextInt(GearShiftType.values().length)]));
+                GearShiftType.values()[random.nextInt(GearShiftType.values().length)],
+                tagsAux),
+                tagService.getOrCreateTagsFromStringList(tagsAux));
     }
 
     private LocalDateTime generateRandomTime(){
@@ -94,8 +103,18 @@ public class AuctionGenerator {
                random.nextInt(60));
     }
 
-    private long getRandomUserId(){
+    private long getRandomUserId() throws Exception {
         List<User> users = userRepository.findAll();
-        return users.get(random.nextInt(users.size())).getId();
+        if (users.isEmpty()) throw new Exception("There must be at least one user in the user repository");
+        return users.get(random.nextInt(users.size()-1)).getId();
     }
-}
+
+    private List<String> pickRandomTags(int tagsAmount){
+        Set<String> randomTags = new HashSet<>(tagsAmount);
+        while (tagsAmount > randomTags.size())
+            randomTags.add(tags.get(random.nextInt(tags.size() - 1)));
+        return randomTags.stream().toList();
+    }
+
+    }
+

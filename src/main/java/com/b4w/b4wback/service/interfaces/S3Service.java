@@ -3,7 +3,7 @@ package com.b4w.b4wback.service.interfaces;
 
 
 public interface S3Service {
-    String getUploadURL(String userEmail);
+    String generatePresignedUploadImageUrl(String url,Integer expirationTime);
 
-    String getDownloadURL(long id);
+    String generatePresignedDownloadImageUrl(String url ,Integer expirationTime);
 }

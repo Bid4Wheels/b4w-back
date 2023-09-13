@@ -56,4 +56,9 @@ public class DefaultExceptionHandler {
     protected ResponseEntity<String> handleCredentialsException(BadRequestParametersException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
+
+    @ExceptionHandler(UrlAlreadySentException.class)
+    protected ResponseEntity<String> handleUrlAlreadySentException(UrlAlreadySentException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
 }
