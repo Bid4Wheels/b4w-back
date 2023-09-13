@@ -19,7 +19,7 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
 
     List<AuctionDTO> findAllByUserId(Long id);
 
-    Page<AuctionDTO> findByUser(User user, Pageable pageable);
+    Page<Auction> findByUser(User user, Pageable pageable);
 
 
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
