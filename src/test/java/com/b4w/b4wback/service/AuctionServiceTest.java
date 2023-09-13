@@ -161,7 +161,7 @@ public class AuctionServiceTest {
 
 
     @Test
-    void Test005_AuctionServiceWhenGetAuctionsByUserIdShouldReturnAListOfAuctions() {
+    void Test007_AuctionServiceWhenGetAuctionsByUserIdShouldReturnAListOfAuctions() {
         auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
@@ -198,7 +198,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test006_AuctionServiceWhenGetAuctionsByIdAndUserHasNoAuctionsShouldReturnEmptyList() {
+    void Test008_AuctionServiceWhenGetAuctionsByIdAndUserHasNoAuctionsShouldReturnEmptyList() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L,pageable);
         List<AuctionDTO> auctionList = actualAuctions.getContent();
@@ -206,13 +206,13 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test007_AuctionServiceWhenGetAuctionsByIdAndUserNotExistsShouldThrowException() {
+    void Test009_AuctionServiceWhenGetAuctionsByIdAndUserNotExistsShouldThrowException() {
         Pageable pageable = PageRequest.of(0, 10);
         assertThrows(EntityNotFoundException.class, () -> auctionService.getAuctionsByUserId(3L, pageable));
     }
 
     @Test
-    void Test008_AuctionServiceWhenBidForAnAuctionAndGetAuctionsByIdShouldReturnAuctionWithHighestBidAmount() {
+    void Test010_AuctionServiceWhenBidForAnAuctionAndGetAuctionsByIdShouldReturnAuctionWithHighestBidAmount() {
         CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
@@ -233,7 +233,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test009_AuctionServiceWhenGetAuctionsByIdShouldReturnAuctionWithHigestBidAmountEqualsBasePrice() {
+    void Test011_AuctionServiceWhenGetAuctionsByIdShouldReturnAuctionWithHigestBidAmountEqualsBasePrice() {
         CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
@@ -252,7 +252,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test010_AuctionServiceWhenFilterAllAuctionsThenGetAll() throws Exception {
+    void Test012_AuctionServiceWhenFilterAllAuctionsThenGetAll() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
         Page<AuctionDTO> page = auctionService.getAuctionsFiltered(FilterAuctionDTO.builder().build(), Pageable.ofSize(10));
@@ -260,7 +260,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test011_AuctionServiceWhenFilterAllAuctionsWithMilageThenGetFew() throws Exception {
+    void Test013_AuctionServiceWhenFilterAllAuctionsWithMilageThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -279,7 +279,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test012_AuctionServiceWhenFilterAllAuctionsWithModelYearThenGetFew() throws Exception {
+    void Test014_AuctionServiceWhenFilterAllAuctionsWithModelYearThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -298,7 +298,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test013_AuctionServiceWhenFilterAllAuctionsWithPriceAndNoBidsThenGetFew() throws Exception {
+    void Test015_AuctionServiceWhenFilterAllAuctionsWithPriceAndNoBidsThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -317,7 +317,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test014_AuctionServiceWhenFilterAllAuctionsWithBrandThenGetFew() throws Exception {
+    void Test016_AuctionServiceWhenFilterAllAuctionsWithBrandThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -334,7 +334,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test015_AuctionServiceWhenFilterAllAuctionsWithColorThenGetFew() throws Exception {
+    void Test017_AuctionServiceWhenFilterAllAuctionsWithColorThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -351,7 +351,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test016_AuctionServiceWhenFilterAllAuctionsWithGasTypeThenGetFew() throws Exception {
+    void Test018_AuctionServiceWhenFilterAllAuctionsWithGasTypeThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -368,7 +368,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test017_AuctionServiceWhenFilterAllAuctionsWithGearshiftTypeThenGetFew() throws Exception {
+    void Test019_AuctionServiceWhenFilterAllAuctionsWithGearshiftTypeThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -385,7 +385,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test018_AuctionServiceWhenFilterAllAuctionsWithModeThenGetFew() throws Exception {
+    void Test020_AuctionServiceWhenFilterAllAuctionsWithModeThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -402,7 +402,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test019_AuctionServiceWhenFilterAllAuctionsWithDoorsAmountThenGetFew() throws Exception {
+    void Test021_AuctionServiceWhenFilterAllAuctionsWithDoorsAmountThenGetFew() throws Exception {
         List<Auction> auctions = new AuctionGenerator(userRepository, tagService)
                 .generateAndSaveListOfAuctions(100, auctionRepository);
 
@@ -419,7 +419,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test020_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionShouldReturnValidUrls() throws Exception {
+    void Test022_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionShouldReturnValidUrls() throws Exception {
         Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
         auctionRepository.save(auction);
         List<String> urls=auctionService.createUrlsForUploadingImages(1);
@@ -427,7 +427,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test021_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionAndAlreadySentImageUrlShouldReturnUrlAlreadySentException() throws Exception {
+    void Test023_AuctionServiceWhenCreateAuctionUrlForUploadingImageWithAnExistingAuctionAndAlreadySentImageUrlShouldReturnUrlAlreadySentException() throws Exception {
         Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
         auctionRepository.save(auction);
         auctionService.createUrlsForUploadingImages(1);
@@ -435,7 +435,7 @@ public class AuctionServiceTest {
         assertThrows(UrlAlreadySentException.class, () -> auctionService.createUrlsForUploadingImages(1));
     }
     @Test
-    void Test022_AuctionServiceWhenCreateAuctionUrlForDownloadingImageWithAnExistingAuctionUrls() throws Exception {
+    void Test024_AuctionServiceWhenCreateAuctionUrlForDownloadingImageWithAnExistingAuctionUrls() throws Exception {
         Auction auction = new AuctionGenerator(userRepository,tagService).generateRandomAuction();
         auctionRepository.save(auction);
         List<String> urls=auctionService.createUrlsForUploadingImages(1);
@@ -443,7 +443,7 @@ public class AuctionServiceTest {
         assertEquals(urls.size(),downloadUrls.size());
     }
     @Test
-    void Test023_AuctionServiceWhenCreateAuctionWithNonExistentTagsThenGetAuctionWithAllItsTags(){
+    void Test025_AuctionServiceWhenCreateAuctionWithNonExistentTagsThenGetAuctionWithAllItsTags(){
         List<String> tags = List.of("Tag1", "Tag2", "Tag3", "Tag4", "Tag5");
         auctionDTO.setTags(tags);
         auctionService.createAuction(auctionDTO);
@@ -463,7 +463,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test024_AuctionServiceWhenCreateAuctionWithSomeExistentTagsThenGetAuctionWithAllItsTags(){
+    void Test026_AuctionServiceWhenCreateAuctionWithSomeExistentTagsThenGetAuctionWithAllItsTags(){
         List<String> existingTags = new ArrayList<>(List.of("tag1", "tag2", "tag3"));
         tagRepository.saveAll(existingTags.stream().map(Tag::new).toList());
 
@@ -489,7 +489,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test025_AuctionServiceWhenCreateAuctionWithAllExistentTagsThenGetAuctionWithAllItsTags(){
+    void Test027_AuctionServiceWhenCreateAuctionWithAllExistentTagsThenGetAuctionWithAllItsTags(){
         List<String> tags = List.of("Tag1", "Tag2", "Tag3", "Tag4", "Tag5");
         tagRepository.saveAll(tags.stream().map(Tag::new).toList());
 
