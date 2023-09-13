@@ -522,6 +522,7 @@ public class AuctionServiceTest {
         for (int i = 1; i < auctionList.size(); i++) {
             AuctionDTO auctionDTO = auctionList.get(i);
             assertTrue(auctionDTO.getDeadline().isAfter(currentTime));
+            currentTime = auctionDTO.getDeadline();
         }
     }
 
@@ -538,11 +539,12 @@ public class AuctionServiceTest {
         AuctionDTO firstAuction = auctionList.get(0);
 
         LocalDateTime createdAt = auctionRepository.findById(firstAuction.getId()).get().getCreatedAt();
+
         for (int i = 1; i < auctionList.size(); i++) {
             AuctionDTO auctionDTO = auctionList.get(i);
-            assertTrue(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt().isAfter(createdAt));
+            assertTrue(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt().isBefore(createdAt));
+            createdAt = auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt();
         }
-
     }
 }
 

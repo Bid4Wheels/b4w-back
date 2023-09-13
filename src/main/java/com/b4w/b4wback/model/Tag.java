@@ -19,9 +19,6 @@ public class Tag {
     @Column(unique = true)
     private String tagName;
 
-    @OneToMany(mappedBy = "tag")
-    private List<TagAuction> tagAuctions = new ArrayList<>();
-
     public Tag(String tagName){
         this.tagName = tagName;
     }

@@ -60,9 +60,6 @@ public class Auction {
 
     private int highestBidAmount;
 
-    @OneToMany(mappedBy = "auction")
-    private List<TagAuction> tagAuctions = new ArrayList<>();
-
     @ManyToOne()
     private User user;
 
