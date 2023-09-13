@@ -47,4 +47,9 @@ public class TagServiceImp implements TagService {
         tagsString.forEach(ts->tags.add(new Tag(ts)));
         return tags;
     }
+
+    @Override
+    public List<Tag> getAllTags() {
+        return tagRepository.findAll();
+    }
 }

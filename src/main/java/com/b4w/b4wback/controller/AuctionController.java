@@ -37,6 +37,11 @@ public class AuctionController {
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsFiltered(filter, pageable));
     }
 
+    @PostMapping("/image-url/{auctionId}")
+    public ResponseEntity<?> generateAuctionImageUrl(@PathVariable long auctionId){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.createUrlsForUploadingImages(auctionId));
+    }
+
     @GetMapping("/ending")
     public ResponseEntity<Page<AuctionDTO>> getAuctionsEnding(Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsEnding(pageable));
