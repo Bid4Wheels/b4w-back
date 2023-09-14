@@ -18,22 +18,25 @@ import java.util.List;
         name = "getAuctionDTOWithFilter",
         query = "SELECT DISTINCT auction.id AS id, auction.title AS title, auction.deadline AS deadline, auction.status AS status," +
                 "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price) AS highestBidAmount " +
-                "FROM Auction auction " +
-                "LEFT JOIN auction_tag at ON auction.id = at.auction_id WHERE" +
-                ":tagsIds IS NULL OR at.tag_id IN :tagsIds AND " +
-                ":milageMin IS NULL OR auction.milage >= :milageMin AND " +
-                ":milageMax IS NULL OR auction.milage <= :milageMax AND " +
-                ":modelYearMin IS NULL OR auction.model_year >= :modelYearMin AND " +
-                ":modelYearMax IS NULL OR auction.model_year <= :modelYearMax AND " +
-                ":brand IS NULL OR lower(auction.brand) = lower(:brand) AND " +
-                ":color IS NULL OR lower(auction.color) = lower(:color) AND " +
-                ":gasType IS NULL OR auction.gas_type = :gasType AND " +
-                ":doorsAmount IS NULL OR auction.doors_amount = :doorsAmount AND " +
-                ":gearShiftType IS NULL OR auction.gear_shift_type = :gearShiftType AND " +
-                ":model IS NULL OR lower(auction.model) = lower(:model) AND " +
+                "FROM Auction auction WHERE " +
+                "(:tagsIds IS NULL OR NOT EXISTS (SELECT 1 FROM Auction_tag auct_t " +
+                    "WHERE NOT EXISTS (SELECT 1 FROM Tag tag " +
+                        "WHERE (auct_t.auction_id = auction.id) AND " +
+                            "(auct_t.tag_id = tag.id) AND " +
+                            "(tag.id IN :tagsIds)))) AND " +
+                "(:milageMin IS NULL OR auction.milage >= :milageMin) AND " +
+                "(:milageMax IS NULL OR auction.milage <= :milageMax) AND " +
+                "(:modelYearMin IS NULL OR auction.model_year >= :modelYearMin) AND " +
+                "(:modelYearMax IS NULL OR auction.model_year <= :modelYearMax) AND " +
+                "(:brand IS NULL OR lower(auction.brand) = lower(:brand)) AND " +
+                "(:color IS NULL OR lower(auction.color) = lower(:color)) AND " +
+                "(:gasType IS NULL OR auction.gas_type = :gasType) AND " +
+                "(:doorsAmount IS NULL OR auction.doors_amount = :doorsAmount) AND " +
+                "(:gearShiftType IS NULL OR auction.gear_shift_type = :gearShiftType) AND " +
+                "(:model IS NULL OR lower(auction.model) = lower(:model)) AND " +
                 "(:priceMin IS NULL OR COALESCE((SELECT " +
                     "MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price " +
-                ") >= :priceMin) AND" +
+                ") >= :priceMin) AND " +
                 "(:priceMax IS NULL OR COALESCE((SELECT " +
                     "MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price " +
                 ") <= :priceMax) AND " +

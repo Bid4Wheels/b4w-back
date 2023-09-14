@@ -541,7 +541,7 @@ public class AuctionServiceTest {
         auctionService.createAuction(auctionDTO);
 
         List<Long> tagsList = tags.stream().map(Tag::getId).toList();
-        tagsList = new ArrayList<>();
+        //tagsList = new ArrayList<>();
         Page<AuctionDTO> auctionsGot = auctionRepository.findWithFilter(null, null,
                 null, null, null, null, null, null,
                 null, null, null,null, tagsList, Pageable.ofSize(10));
