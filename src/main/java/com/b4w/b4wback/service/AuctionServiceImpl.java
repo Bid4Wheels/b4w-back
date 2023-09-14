@@ -77,8 +77,11 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public Page<AuctionDTO> getAuctionsByUserId(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        Page<AuctionDTO> auctions= auctionRepository.findByUser(user, pageable);
-        List<AuctionDTO> auctionDTOS = auctions.getContent();
+        Page<Auction> auctions= auctionRepository.findByUser(user, pageable);
+        List<AuctionDTO> auctionDTOS = new ArrayList<>();
+        for (Auction auction : auctions){
+            auctionDTOS.add((new AuctionDTO(auction)));
+        }
         long totalElements= auctions.getTotalElements();
         List<AuctionDTO> auctionWithImages=new ArrayList<>();
         for (AuctionDTO auctionDTO : auctionDTOS) {
