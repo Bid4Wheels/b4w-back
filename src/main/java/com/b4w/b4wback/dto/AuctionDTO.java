@@ -2,6 +2,7 @@ package com.b4w.b4wback.dto;
 
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.model.Auction;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +17,7 @@ public class AuctionDTO {
     private LocalDateTime deadline;
     private int highestBidAmount;
     private AuctionStatus status;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String firstImageUrl;
     private List<String> tagNames;
     public AuctionDTO(Long id, String title, LocalDateTime deadline,  AuctionStatus status, Integer highestBidAmount) {

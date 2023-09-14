@@ -555,7 +555,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test028_AuctionServiceWhenGetAuctionByIDAndHasTagsShouldReturnAAuctionWithAListWithAllTags(){
+    void Test030_AuctionServiceWhenGetAuctionByIDAndHasTagsShouldReturnAAuctionWithAListWithAllTags(){
         List<String> tags = List.of("tag1", "tag2", "tag3", "tag4", "tag5");
         tagRepository.saveAll(tags.stream().map(Tag::new).toList());
 
@@ -572,5 +572,44 @@ public class AuctionServiceTest {
         assertEquals(tags.get(3), auction.getTags().get(3).getTagName(), "Expected auction tags to match");
         assertEquals(tags.get(4), auction.getTags().get(4).getTagName(), "Expected auction tags to match");
 
+    }
+
+    @Test
+    void Test031_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew() throws Exception {
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        Pageable pageable = PageRequest.of(0, 100);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsEnding(pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        LocalDateTime currentTime = auctionList.get(0).getDeadline();
+        for (int i = 1; i < auctionList.size(); i++) {
+            AuctionDTO auctionDTO = auctionList.get(i);
+            assertTrue(auctionDTO.getDeadline().isAfter(currentTime));
+            currentTime = auctionDTO.getDeadline();
+        }
+    }
+
+    @Test
+    void Test032_AuctionServiceWhenFilterAllAuctionsWithNewAuctionsThenGetFew() throws Exception {
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        Pageable pageable = PageRequest.of(0, 100);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsNew(pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+
+        LocalDateTime createdAt = auctionRepository.findById(firstAuction.getId()).get().getCreatedAt();
+
+        for (int i = 1; i < auctionList.size(); i++) {
+            AuctionDTO auctionDTO = auctionList.get(i);
+            assertTrue(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt().isBefore(createdAt));
+            createdAt = auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt();
+        }
     }
 }
