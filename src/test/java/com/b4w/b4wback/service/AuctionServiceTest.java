@@ -58,6 +58,7 @@ public class AuctionServiceTest {
     private CreateAuctionDTO auctionDTO;
 
 
+
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -125,7 +126,7 @@ public class AuctionServiceTest {
         CreateBidDTO bidDto=new CreateBidDTO(150000,2L,1L);
         auctionService.createAuction(auctionDTO);
         bidService.crateBid(bidDto);
-
+      
         GetAuctionDTO auction=auctionService.getAuctionById(1L);
         assertEquals(auctionDTO.getTitle(),auction.getTitle());
         assertEquals(auctionDTO.getDescription(),auction.getDescription());
@@ -510,7 +511,71 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test028_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew() throws Exception {
+    void Test028_AuctionServiceWhenGetAuctionByUSerIDAndHasTagsShouldReturnAAuctionWithAListWithAllTags(){
+        List<String> tags = List.of("tag1", "tag2", "tag3", "tag4", "tag5");
+        tagRepository.saveAll(tags.stream().map(Tag::new).toList());
+
+        auctionDTO.setTags(tags);
+
+        auctionService.createAuction(auctionDTO);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L, pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+        assertEquals(1L, firstAuction.getId(), "Expected auction ID to match");
+        assertEquals("Subasta de automovil", firstAuction.getTitle(), "Expected auction title to match");
+        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
+        assertEquals( "OPEN", firstAuction.getStatus().toString(), "Expected auction status to match");
+        assertEquals(tags.size(), firstAuction.getTagNames().size(), "Expected auction tags to match");
+        assertEquals(tags, firstAuction.getTagNames(), "Expected auction tags to match");
+    }
+
+    @Test
+    void Test029_AuctionServiceWhenGetAuctionByUSerIDAndHasNoTagsShouldReturnAAuctionWithAListWithAllTags(){
+        auctionService.createAuction(auctionDTO);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsByUserId(1L, pageable);
+
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+
+        AuctionDTO firstAuction = auctionList.get(0);
+        assertEquals(1L, firstAuction.getId(), "Expected auction ID to match");
+        assertEquals("Subasta de automovil", firstAuction.getTitle(), "Expected auction title to match");
+        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
+        assertEquals( "OPEN", firstAuction.getStatus().toString(), "Expected auction status to match");
+        assertEquals(0, firstAuction.getTagNames().size(), "Expected auction tags to match");
+    }
+
+    @Test
+    void Test030_AuctionServiceWhenGetAuctionByIDAndHasTagsShouldReturnAAuctionWithAListWithAllTags(){
+        List<String> tags = List.of("tag1", "tag2", "tag3", "tag4", "tag5");
+        tagRepository.saveAll(tags.stream().map(Tag::new).toList());
+
+        auctionDTO.setTags(tags);
+
+        auctionService.createAuction(auctionDTO);
+
+        GetAuctionDTO auction = auctionService.getAuctionById(1L);
+
+        assertEquals(tags.size(), auction.getTags().size(), "Expected auction tags to match");
+        assertEquals(tags.get(0), auction.getTags().get(0).getTagName(), "Expected auction tags to match");
+        assertEquals(tags.get(1), auction.getTags().get(1).getTagName(), "Expected auction tags to match");
+        assertEquals(tags.get(2), auction.getTags().get(2).getTagName(), "Expected auction tags to match");
+        assertEquals(tags.get(3), auction.getTags().get(3).getTagName(), "Expected auction tags to match");
+        assertEquals(tags.get(4), auction.getTags().get(4).getTagName(), "Expected auction tags to match");
+
+    }
+
+    @Test
+    void Test031_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew() throws Exception {
         new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         Pageable pageable = PageRequest.of(0, 100);
@@ -528,7 +593,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test029_AuctionServiceWhenFilterAllAuctionsWithNewAuctionsThenGetFew() throws Exception {
+    void Test032_AuctionServiceWhenFilterAllAuctionsWithNewAuctionsThenGetFew() throws Exception {
         new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         Pageable pageable = PageRequest.of(0, 100);
@@ -548,4 +613,3 @@ public class AuctionServiceTest {
         }
     }
 }
-

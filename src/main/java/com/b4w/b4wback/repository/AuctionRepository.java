@@ -17,9 +17,11 @@ import java.util.List;
 
 public interface AuctionRepository extends JpaRepository<Auction,Long> {
 
+
     List<AuctionDTO> findAllByUserId(Long id);
 
     Page<Auction> findByUser(User user, Pageable pageable);
+
 
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
             "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +

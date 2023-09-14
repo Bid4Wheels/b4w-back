@@ -26,7 +26,6 @@ public class AuctionDTO {
         this.deadline = deadline;
         this.highestBidAmount = highestBidAmount;
         this.status = status;
-
     }
 
     public AuctionDTO(Auction auction){

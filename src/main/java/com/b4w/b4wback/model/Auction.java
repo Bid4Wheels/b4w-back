@@ -103,6 +103,7 @@ public class Auction {
     public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, UserService userService){
         Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
 
+
         AuctionHigestBidDTO auctionHigestBidDTO = null;
 
         if(topBid != null)
@@ -129,7 +130,6 @@ public class Auction {
     public CreateAuctionDTO toDTO( CreateAuctionDTO auctionDTO){
         return new CreateAuctionDTO(this.getId(), auctionDTO);
     }
-
 
     public List<String> getTagNames(){
         List<String> tagNames = new ArrayList<>();
