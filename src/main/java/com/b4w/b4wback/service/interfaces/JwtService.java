@@ -5,6 +5,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 public interface JwtService {
     String extractUsername(String token);
 
-    String generateToken(String email);
+    String generateToken(String email,Long userID);
     boolean isTokenValid(String token, UserDetails userDetails);
 }

@@ -1,5 +1,6 @@
 package com.b4w.b4wback.service;
 
+import com.b4w.b4wback.service.interfaces.UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -35,6 +36,7 @@ class JwtServiceImplTest {
     @Mock
     private UserDetails userDetails;
 
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -50,7 +52,7 @@ class JwtServiceImplTest {
 
     @Test
     void Test002_JwtServiceImplWhenGenerateTokenShouldAssertNotNull() {
-        String token = jwtService.generateToken("user@example.com");
+        String token = jwtService.generateToken("user@example.com",1L);
         assertNotNull(token);
     }
 

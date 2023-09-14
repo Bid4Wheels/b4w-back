@@ -26,8 +26,8 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateToken(String email) {
-        return generateToken(new HashMap<>(),email);
+    public String generateToken(String email,Long userID) {
+        return toGenerateToken(email,userID);
     }
 
     @Override
@@ -51,8 +51,11 @@ public class JwtServiceImpl implements JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private String generateToken(Map<String, Object> extraClaims, String email) {
-        return Jwts.builder().setClaims(extraClaims).setSubject(email)
+    private String toGenerateToken(String email,Long userID) {
+        Claims claims=Jwts.claims();
+        claims.put("userID",userID);
+
+        return Jwts.builder().setClaims(claims).setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
