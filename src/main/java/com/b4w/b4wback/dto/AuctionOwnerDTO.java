@@ -1,11 +1,9 @@
 package com.b4w.b4wback.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
-@AllArgsConstructor
 @Getter
 public class AuctionOwnerDTO {
     private long id;

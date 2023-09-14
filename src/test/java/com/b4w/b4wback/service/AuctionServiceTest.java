@@ -508,6 +508,7 @@ public class AuctionServiceTest {
         auction.getTags().forEach(t->auctionTags.add(t.getTagName()));
         assertTrue(auctionTags.containsAll(tags));
     }
+
     @Test
     void Test028_AuctionServiceWhenFilterAllAuctionsWithUpcomingDeadlineThenGetFew() throws Exception {
         new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
