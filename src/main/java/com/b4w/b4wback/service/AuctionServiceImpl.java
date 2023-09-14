@@ -149,7 +149,20 @@ public class AuctionServiceImpl implements AuctionService {
             Auction reusableAuction = auctionRepository.findById(auction.getId()).orElseThrow(() -> new EntityNotFoundException("Auction not found")) ;
             auctionDTOS.add((new AuctionDTO(reusableAuction)));
         }
-        return new PageImpl<>(auctionDTOS,pageable,auctions.getTotalElements());
+        long totalElements= auctions.getTotalElements();
+        List<AuctionDTO> auctionWithImages=new ArrayList<>();
+        for (AuctionDTO auctionDTO : auctionDTOS) {
+            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
+            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
+            auctionWithImages.add(auctionDTO);
+            Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")));
+            if (topBid == null){
+                auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")).getBasePrice());
+                continue;
+            }
+            auctionDTO.setHighestBidAmount(topBid.getAmount());
+        }
+        return new PageImpl<>(auctionDTOS,pageable,totalElements);
     }
 
     @Override
@@ -161,6 +174,19 @@ public class AuctionServiceImpl implements AuctionService {
             Auction reusableAuction = auctionRepository.findById(auction.getId()).orElseThrow(() -> new EntityNotFoundException("Auction not found")) ;
             auctionDTOS.add((new AuctionDTO(reusableAuction)));
         }
-        return new PageImpl<>(auctionDTOS,pageable,auctions.getTotalElements());
+        long totalElements= auctions.getTotalElements();
+        List<AuctionDTO> auctionWithImages=new ArrayList<>();
+        for (AuctionDTO auctionDTO : auctionDTOS) {
+            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
+            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
+            auctionWithImages.add(auctionDTO);
+            Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")));
+            if (topBid == null){
+                auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")).getBasePrice());
+                continue;
+            }
+            auctionDTO.setHighestBidAmount(topBid.getAmount());
+        }
+        return new PageImpl<>(auctionDTOS,pageable,totalElements);
     }
 }
