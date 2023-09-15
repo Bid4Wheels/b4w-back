@@ -296,7 +296,7 @@ public class AuctionControllerTest {
                 new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());}
 
-
+    @Test
     void Test022_AuctionControllerWhenCreateAuctionWithTagsThenGetAuctionWithTags(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
