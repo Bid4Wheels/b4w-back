@@ -3,12 +3,14 @@ package com.b4w.b4wback.dto;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
+import com.b4w.b4wback.model.Bid;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.b4w.b4wback.model.Tag;
 
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -33,8 +35,10 @@ public class GetAuctionDTO {
     private List<Tag> tags;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> auctionImageUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<AuctionHigestBidDTO> topBids;
 
-    public GetAuctionDTO(GetAuctionDTO getAuctionDTO,List<String> auctionImageUrl){
+    public GetAuctionDTO(GetAuctionDTO getAuctionDTO,List<String> auctionImageUrl, List<AuctionHigestBidDTO> topBids){
         this.title=getAuctionDTO.getTitle();
         this.description=getAuctionDTO.getDescription();
         this.deadline=getAuctionDTO.getDeadline();
@@ -52,5 +56,6 @@ public class GetAuctionDTO {
         this.auctionHigestBidDTO=getAuctionDTO.getAuctionHigestBidDTO();
         this.tags=getAuctionDTO.getTags();
         this.auctionImageUrl=auctionImageUrl;
+        this.topBids=topBids;
     }
 }

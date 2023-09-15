@@ -612,4 +612,27 @@ public class AuctionServiceTest {
             createdAt = auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt();
         }
     }
+
+    @Test
+    void Test033_AuctionServiceWhenGetAuctionByIdShouldReturnGetAuctionDTOWithTop5NewestBids() throws Exception {
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(1, auctionRepository);
+        CreateBidDTO bidDto=new CreateBidDTO(150000,2L,1L);
+        bidService.crateBid(bidDto);
+        CreateBidDTO bidDto2=new CreateBidDTO(160000,2L,1L);
+        bidService.crateBid(bidDto2);
+        CreateBidDTO bidDto3=new CreateBidDTO(170000,2L,1L);
+        bidService.crateBid(bidDto3);
+        CreateBidDTO bidDto4=new CreateBidDTO(180000,2L,1L);
+        bidService.crateBid(bidDto4);
+        CreateBidDTO bidDto5=new CreateBidDTO(190000,2L,1L);
+        bidService.crateBid(bidDto5);
+
+        GetAuctionDTO auction=auctionService.getAuctionById(1L);
+        assertEquals(5,auction.getTopBids().size());
+        assertEquals(190000,auction.getTopBids().get(0).getAmount());
+        assertEquals(180000,auction.getTopBids().get(1).getAmount());
+        assertEquals(170000,auction.getTopBids().get(2).getAmount());
+        assertEquals(160000,auction.getTopBids().get(3).getAmount());
+        assertEquals(150000,auction.getTopBids().get(4).getAmount());
+    }
 }
