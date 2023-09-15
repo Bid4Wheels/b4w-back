@@ -73,12 +73,12 @@ public class AuctionServiceImpl implements AuctionService {
         for(int i = 0; i < 5; i++){
             if(bids.size()<=i)break;
             top5.add(AuctionHigestBidDTO.builder()
-                    .amount(bids.get(i).getAmount())
-                    .userId(bids.get(i).getBidder().getId())
-                    .userName(bids.get(i).getBidder().getUsername())
-                    .userLastName(bids.get(i).getBidder().getLastName())
+                    .amount(bids.get(bids.size() -1 -i).getAmount())
+                    .userId(bids.get(bids.size()-1 -i).getBidder().getId())
+                    .userName(bids.get(bids.size()-1 -i).getBidder().getUsername())
+                    .userLastName(bids.get(bids.size()-1 -i).getBidder().getLastName())
                     .build());
-        }
+            }
         return new GetAuctionDTO(auction.getAuctionToDTO(bidRepository,userService),createUrlsForDownloadingImages(id),top5);
     }
     @Override

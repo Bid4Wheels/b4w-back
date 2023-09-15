@@ -122,7 +122,6 @@ public class Auction {
                         .lastName(this.getUser().getLastName())
                         .profilePicture(userService.createUrlForDownloadingImage(user.getId()))
                         .build())
-                .auctionHigestBidDTO(auctionHigestBidDTO)
                 .tags(tags)
                 .build();
     }

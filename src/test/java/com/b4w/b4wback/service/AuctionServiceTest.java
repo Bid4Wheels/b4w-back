@@ -143,10 +143,6 @@ public class AuctionServiceTest {
         assertEquals(auctionDTO.getGearShiftType(),auction.getGearShiftType());
         assertEquals(auctionDTO.getUserId(),auction.getAuctionOwnerDTO().getId());
 
-        assertEquals(bidDto.getAmount(),auction.getAuctionHigestBidDTO().getAmount());
-        assertEquals(bidDto.getUserId(),auction.getAuctionHigestBidDTO().getUserId());
-        assertEquals("Esteban",auction.getAuctionHigestBidDTO().getUserName());
-        assertEquals("Chiquito",auction.getAuctionHigestBidDTO().getUserLastName());
 
         assertEquals(1L,auction.getAuctionOwnerDTO().getId());
         assertEquals("Nico",auction.getAuctionOwnerDTO().getName());
@@ -615,8 +611,12 @@ public class AuctionServiceTest {
 
     @Test
     void Test033_AuctionServiceWhenGetAuctionByIdShouldReturnGetAuctionDTOWithTop5NewestBids() throws Exception {
-        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(1, auctionRepository);
-        CreateBidDTO bidDto=new CreateBidDTO(150000,2L,1L);
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO);
+        CreateBidDTO bidDto=new CreateBidDTO(150001,2L,1L);
         bidService.crateBid(bidDto);
         CreateBidDTO bidDto2=new CreateBidDTO(160000,2L,1L);
         bidService.crateBid(bidDto2);
@@ -633,6 +633,6 @@ public class AuctionServiceTest {
         assertEquals(180000,auction.getTopBids().get(1).getAmount());
         assertEquals(170000,auction.getTopBids().get(2).getAmount());
         assertEquals(160000,auction.getTopBids().get(3).getAmount());
-        assertEquals(150000,auction.getTopBids().get(4).getAmount());
+        assertEquals(150001,auction.getTopBids().get(4).getAmount());
     }
 }

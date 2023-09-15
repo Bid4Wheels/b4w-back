@@ -29,7 +29,6 @@ public class GetAuctionDTO {
     private int doorsAmount;
     private GearShiftType gearShiftType;
     private AuctionOwnerDTO auctionOwnerDTO;
-    private AuctionHigestBidDTO auctionHigestBidDTO;
     private List<Tag> tags;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> auctionImageUrl;
@@ -51,7 +50,6 @@ public class GetAuctionDTO {
         this.doorsAmount=getAuctionDTO.getDoorsAmount();
         this.gearShiftType=getAuctionDTO.getGearShiftType();
         this.auctionOwnerDTO=getAuctionDTO.getAuctionOwnerDTO();
-        this.auctionHigestBidDTO=getAuctionDTO.getAuctionHigestBidDTO();
         this.tags=getAuctionDTO.getTags();
         this.auctionImageUrl=auctionImageUrl;
         this.topBids=topBids;
