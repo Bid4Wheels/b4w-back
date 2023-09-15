@@ -1,6 +1,5 @@
 package com.b4w.b4wback.model;
 
-import com.b4w.b4wback.dto.AuctionHigestBidDTO;
 import com.b4w.b4wback.dto.AuctionOwnerDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
@@ -101,7 +100,6 @@ public class Auction {
         return status;
     }
     public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, UserService userService){
-        Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
 
         return GetAuctionDTO.builder().title(this.getTitle()).description(this.getDescription()).deadline(this.getDeadline()).basePrice(this.getBasePrice()).
                 brand(this.getBrand()).model(this.getModel()).status(this.getStatus()).milage(this.getMilage()).gasType(this.getGasType())
