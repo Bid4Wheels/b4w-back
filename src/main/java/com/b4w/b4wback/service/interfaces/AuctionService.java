@@ -21,4 +21,8 @@ public interface AuctionService {
     List<String> createUrlsForUploadingImages(long auctionId);
 
     List<String> createUrlsForDownloadingImages(long auctionId);
+
+    Page<AuctionDTO> getAuctionsEnding(Pageable pageable);
+
+    Page<AuctionDTO> getAuctionsNew(Pageable pageable);
 }

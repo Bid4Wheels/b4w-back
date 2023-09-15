@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -167,5 +168,13 @@ public class Auction {
 
     public CreateAuctionDTO toDTO( CreateAuctionDTO auctionDTO){
         return new CreateAuctionDTO(this.getId(), auctionDTO);
+    }
+
+    public List<String> getTagNames(){
+        List<String> tagNames = new ArrayList<>();
+        for (Tag tag : tags) {
+            tagNames.add(tag.getTagName());
+        }
+        return tagNames;
     }
 }
