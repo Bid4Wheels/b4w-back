@@ -3,14 +3,12 @@ package com.b4w.b4wback.dto;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
-import com.b4w.b4wback.model.Bid;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.b4w.b4wback.model.Tag;
 
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Builder
