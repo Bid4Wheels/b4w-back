@@ -3,7 +3,6 @@ package com.b4w.b4wback.service;
 import com.b4w.b4wback.model.Tag;
 import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.service.interfaces.TagService;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
