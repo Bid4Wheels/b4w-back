@@ -332,4 +332,27 @@ public class AuctionControllerTest {
 
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
     }
+
+    @Test
+    void Test023_AuctionControllerWhenGetAuctionsBiddedByUserAndUserNotFoundShouldReturnNOTFOUND(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/bidder/3", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test024_AuctionControllerWhenGetAuctionsBiddedByUserAndUserFoundShouldReturnOK(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/bidder/1", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
 }

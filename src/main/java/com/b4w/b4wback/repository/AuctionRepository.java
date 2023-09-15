@@ -4,6 +4,7 @@ import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,4 +69,7 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
             "WHERE auction.createdAt < :currentDateTime " +
             "ORDER BY auction.createdAt DESC ")
     Page<AuctionDTO> findNewAuctions(@Param("currentDateTime") LocalDateTime currentDateTime,Pageable pageable);
+
+    @Query("SELECT auction FROM Auction auction WHERE auction.id IN (SELECT bid.auction.id FROM Bid bid WHERE bid.bidder.id = :bidder_id) ORDER BY auction.deadline ASC")
+    Page<Auction> findAuctionsByBidderIdOrderByDeadline(long bidder_id, Pageable pageable);
 }
