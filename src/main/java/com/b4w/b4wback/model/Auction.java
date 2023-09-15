@@ -103,16 +103,6 @@ public class Auction {
     public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, UserService userService){
         Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
 
-
-        AuctionHigestBidDTO auctionHigestBidDTO = null;
-
-        if(topBid != null)
-            auctionHigestBidDTO = AuctionHigestBidDTO.builder()
-                    .amount(topBid.getAmount())
-                    .userId(topBid.getBidder().getId())
-                    .userName(topBid.getBidder().getName())
-                    .userLastName(topBid.getBidder().getLastName()).build();
-
         return GetAuctionDTO.builder().title(this.getTitle()).description(this.getDescription()).deadline(this.getDeadline()).basePrice(this.getBasePrice()).
                 brand(this.getBrand()).model(this.getModel()).status(this.getStatus()).milage(this.getMilage()).gasType(this.getGasType())
                 .modelYear(this.getModelYear()).color(this.getColor()).doorsAmount(this.getDoorsAmount()).gearShiftType(this.getGearShiftType())
