@@ -68,4 +68,6 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
             "WHERE auction.createdAt < :currentDateTime " +
             "ORDER BY auction.createdAt DESC ")
     Page<AuctionDTO> findNewAuctions(@Param("currentDateTime") LocalDateTime currentDateTime,Pageable pageable);
+
+    Auction findAuctionByIdAndUserId(long auctionID, long userID);
 }
