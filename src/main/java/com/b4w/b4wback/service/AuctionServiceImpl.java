@@ -1,10 +1,13 @@
 package com.b4w.b4wback.service;
 
+
 import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.dto.FilterAuctionDTO;
 import com.b4w.b4wback.exception.AuctionExpiredException;
+import com.b4w.b4wback.dto.*;
+
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.exception.UrlAlreadySentException;
@@ -73,7 +76,18 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public GetAuctionDTO getAuctionById(long id) {
         Auction auction = auctionRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Auction with id "+id+" not found"));
-        return new GetAuctionDTO(auction.getAuctionToDTO(bidRepository,userService),createUrlsForDownloadingImages(id));
+        List<Bid> bids = bidRepository.getBidByAuction(auction);
+        List<AuctionHigestBidDTO> top5 = new ArrayList<>();
+        for(int i = 0; i < 5; i++){
+            if(bids.size()<=i)break;
+            top5.add(AuctionHigestBidDTO.builder()
+                    .amount(bids.get(bids.size() -1 -i).getAmount())
+                    .userId(bids.get(bids.size()-1 -i).getBidder().getId())
+                    .userName(bids.get(bids.size()-1 -i).getBidder().getUsername())
+                    .userLastName(bids.get(bids.size()-1 -i).getBidder().getLastName())
+                    .build());
+            }
+        return new GetAuctionDTO(auction.getAuctionToDTO(bidRepository,userService),createUrlsForDownloadingImages(id),top5);
     }
     @Override
     public Page<AuctionDTO> getAuctionsByUserId(Long userId, Pageable pageable) {

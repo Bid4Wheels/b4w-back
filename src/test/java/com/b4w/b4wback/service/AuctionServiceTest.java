@@ -160,10 +160,6 @@ public class AuctionServiceTest {
         assertEquals(auctionDTO.getGearShiftType(),auction.getGearShiftType());
         assertEquals(auctionDTO.getUserId(),auction.getAuctionOwnerDTO().getId());
 
-        assertEquals(bidDto.getAmount(),auction.getAuctionHigestBidDTO().getAmount());
-        assertEquals(bidDto.getUserId(),auction.getAuctionHigestBidDTO().getUserId());
-        assertEquals("Esteban",auction.getAuctionHigestBidDTO().getUserName());
-        assertEquals("Chiquito",auction.getAuctionHigestBidDTO().getUserLastName());
 
         assertEquals(1L,auction.getAuctionOwnerDTO().getId());
         assertEquals("Nico",auction.getAuctionOwnerDTO().getName());
@@ -629,8 +625,35 @@ public class AuctionServiceTest {
             createdAt = auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt();
         }
     }
+
     @Test
-    void Test033_AuctionServiceWhenDeleteAuctionWithValidIdShouldBeDoneWithoutAnyException() {
+    void Test033_AuctionServiceWhenGetAuctionByIdShouldReturnGetAuctionDTOWithTop5NewestBids() throws Exception {
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO);
+        CreateBidDTO bidDto=new CreateBidDTO(150001,2L,1L);
+        bidService.crateBid(bidDto);
+        CreateBidDTO bidDto2=new CreateBidDTO(160000,2L,1L);
+        bidService.crateBid(bidDto2);
+        CreateBidDTO bidDto3=new CreateBidDTO(170000,2L,1L);
+        bidService.crateBid(bidDto3);
+        CreateBidDTO bidDto4=new CreateBidDTO(180000,2L,1L);
+        bidService.crateBid(bidDto4);
+        CreateBidDTO bidDto5=new CreateBidDTO(190000,2L,1L);
+        bidService.crateBid(bidDto5);
+
+        GetAuctionDTO auction=auctionService.getAuctionById(1L);
+        assertEquals(5,auction.getTopBids().size());
+        assertEquals(190000,auction.getTopBids().get(0).getAmount());
+        assertEquals(180000,auction.getTopBids().get(1).getAmount());
+        assertEquals(170000,auction.getTopBids().get(2).getAmount());
+        assertEquals(160000,auction.getTopBids().get(3).getAmount());
+        assertEquals(150001,auction.getTopBids().get(4).getAmount());
+    }
+    @Test
+    void Test034_AuctionServiceWhenDeleteAuctionWithValidIdShouldBeDoneWithoutAnyException() {
         CreateUserDTO userDTO= new CreateUserDTO("Marcos", "Benji", "marcosbenji@dusyum.com",
                 "+5491112341678", "1Afjfslkjfl");
         userService.createUser(userDTO);
@@ -646,7 +669,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test034_AuctionServiceWhenDeleteAuctionAndUserNotOwnsTheAuctionShouldThrowEntityNotFoundException() {
+    void Test035_AuctionServiceWhenDeleteAuctionAndUserNotOwnsTheAuctionShouldThrowEntityNotFoundException() {
         CreateUserDTO userDTO= new CreateUserDTO("Marcos", "Benji", "marcosbenji@dusyum.com",
                 "+5491112341678", "1Afjfslkjfl");
         userService.createUser(userDTO);
@@ -657,11 +680,11 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test035_AuctionServiceWhenDeleteAuctionWithValidIdAndIsExpiredShouldThrowAuctionExpiredException(){
+    void Test036_AuctionServiceWhenDeleteAuctionWithValidIdAndIsExpiredShouldThrowAuctionExpiredException(){
         auctionDTO.setDeadline(LocalDateTime.now().minusDays(1));
         auctionService.createAuction(auctionDTO);
         SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
         String token=authenticateAndGetToken(signInRequest);
-        assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));
-    }
+        assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));}
+
 }
