@@ -618,11 +618,14 @@ public class AuctionServiceTest {
         AuctionDTO firstAuction = auctionList.get(0);
 
         LocalDateTime createdAt = auctionRepository.findById(firstAuction.getId()).get().getCreatedAt();
-
+        System.out.println("first" + createdAt);
         for (int i = 1; i < auctionList.size(); i++) {
             AuctionDTO auctionDTO = auctionList.get(i);
+            System.out.println();
             assertTrue(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt().isBefore(createdAt));
+            System.out.println(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt());
             createdAt = auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt();
+
         }
     }
 
@@ -653,7 +656,43 @@ public class AuctionServiceTest {
         assertEquals(150001,auction.getTopBids().get(4).getAmount());
     }
     @Test
-    void Test034_AuctionServiceWhenDeleteAuctionWithValidIdShouldBeDoneWithoutAnyException() {
+    void Test034_AuctionServiceWhenGetAuctionsBiddedByUserShouldReturnAllAuctionsSortedByDeadline(){
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil1", "text",
+                LocalDateTime.of(2035, 9, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO);
+
+        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil2", "text",
+                LocalDateTime.of(2031, 6, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO2);
+
+        CreateAuctionDTO auctionDTO3 = new CreateAuctionDTO(1L, "Subasta de automovil3", "text",
+                LocalDateTime.of(2032, 3, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO3);
+
+        CreateBidDTO bidDto=new CreateBidDTO(150001,2L,1L);
+        bidService.crateBid(bidDto);
+        CreateBidDTO bidDto2=new CreateBidDTO(160000,2L,2L);
+        bidService.crateBid(bidDto2);
+        CreateBidDTO bidDto3=new CreateBidDTO(170000,2L,3L);
+        bidService.crateBid(bidDto3);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsBiddedByUser(2L, pageable);
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+        assertEquals(3,auctionList.size());
+        assertEquals("Subasta de automovil2",auctionList.get(0).getTitle());
+        assertEquals("Subasta de automovil3",auctionList.get(1).getTitle());
+        assertEquals("Subasta de automovil1",auctionList.get(2).getTitle());
+
+    }
+    @Test
+    void Test035_AuctionServiceWhenDeleteAuctionWithValidIdShouldBeDoneWithoutAnyException() {
         CreateUserDTO userDTO= new CreateUserDTO("Marcos", "Benji", "marcosbenji@dusyum.com",
                 "+5491112341678", "1Afjfslkjfl");
         userService.createUser(userDTO);
@@ -669,7 +708,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test035_AuctionServiceWhenDeleteAuctionAndUserNotOwnsTheAuctionShouldThrowEntityNotFoundException() {
+    void Test036_AuctionServiceWhenDeleteAuctionAndUserNotOwnsTheAuctionShouldThrowEntityNotFoundException() {
         CreateUserDTO userDTO= new CreateUserDTO("Marcos", "Benji", "marcosbenji@dusyum.com",
                 "+5491112341678", "1Afjfslkjfl");
         userService.createUser(userDTO);
@@ -680,7 +719,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test036_AuctionServiceWhenDeleteAuctionWithValidIdAndIsExpiredShouldThrowAuctionExpiredException(){
+    void Test037_AuctionServiceWhenDeleteAuctionWithValidIdAndIsExpiredShouldThrowAuctionExpiredException(){
         auctionDTO.setDeadline(LocalDateTime.now().minusDays(1));
         auctionService.createAuction(auctionDTO);
         SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");

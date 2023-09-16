@@ -298,7 +298,7 @@ public class AuctionControllerTest {
                 new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());}
 
-
+    @Test
     void Test022_AuctionControllerWhenCreateAuctionWithTagsThenGetAuctionWithTags(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
@@ -334,9 +334,30 @@ public class AuctionControllerTest {
 
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
     }
+    @Test
+    void Test023_AuctionControllerWhenGetAuctionsBiddedByUserAndUserNotFoundShouldReturnNOTFOUND(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/bidder/3", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, getAuctionsResponse.getStatusCode());
+    }
 
     @Test
-    void Test023_AuctionControllerWhenDeleteAuctionWithAllOKShouldReturnOK(){
+    void Test024_AuctionControllerWhenGetAuctionsBiddedByUserAndUserFoundShouldReturnOK(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/bidder/1", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test025_AuctionControllerWhenDeleteAuctionWithAllOKShouldReturnOK(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
         restTemplate.exchange(baseUrl, HttpMethod.POST, new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
@@ -346,7 +367,7 @@ public class AuctionControllerTest {
     }
 
     @Test
-    void Test024_AuctionControllerWhenDeleteAuctionWithInvalidIdShouldReturnNotFound(){
+    void Test026_AuctionControllerWhenDeleteAuctionWithInvalidIdShouldReturnNotFound(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
         ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/5", HttpMethod.DELETE,
@@ -355,7 +376,7 @@ public class AuctionControllerTest {
     }
 
     @Test
-    void Test025_AuctionControllerWhenDeleteAuctionWithAuctionExpiredShouldReturnBadRequest(){
+    void Test027_AuctionControllerWhenDeleteAuctionWithAuctionExpiredShouldReturnBadRequest(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
         auctionDTO.setDeadline(LocalDateTime.now().minus(1, ChronoUnit.HOURS));
