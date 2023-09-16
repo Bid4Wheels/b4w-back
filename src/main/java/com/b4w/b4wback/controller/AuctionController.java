@@ -51,4 +51,9 @@ public class AuctionController {
     public ResponseEntity<Page<AuctionDTO>> getAuctionsNew(Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsNew(pageable));
     }
+
+    @GetMapping("/bidder/{bidderId}")
+    public ResponseEntity<Page<AuctionDTO>> getAuctionsBiddedByUser(@PathVariable long bidderId, Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsBiddedByUser(bidderId, pageable));
+    }
 }

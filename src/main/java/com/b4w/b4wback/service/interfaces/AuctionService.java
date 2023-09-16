@@ -25,4 +25,6 @@ public interface AuctionService {
     Page<AuctionDTO> getAuctionsEnding(Pageable pageable);
 
     Page<AuctionDTO> getAuctionsNew(Pageable pageable);
+
+    Page<AuctionDTO> getAuctionsBiddedByUser(long bidderId, Pageable pageable);
 }
