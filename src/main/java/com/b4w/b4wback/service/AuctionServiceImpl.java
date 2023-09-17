@@ -99,14 +99,16 @@ public class AuctionServiceImpl implements AuctionService {
     }
     @Override
     public Page<AuctionDTO> getAuctionsFiltered(FilterAuctionDTO filter, Pageable pageable) {
-        if (filter.getTags() == null)
-            filter.setTags(new ArrayList<>());
-
         Page<AuctionDTO> auctionDTOPage=auctionRepository.findWithFilter(filter.getMilageMin(), filter.getMilageMax(),
                 filter.getModelYearMin(), filter.getModelYearMax(),
                 filter.getPriceMin(), filter.getPriceMax(),
-                filter.getBrand(), filter.getColor(), filter.getGasType(), filter.getDoorsAmount(),
-                filter.getGearShiftType(), filter.getModel(), filter.getTags(), pageable);
+                filter.getBrand(), filter.getColor(),
+                filter.getGasType() != null? filter.getGasType().ordinal() : null,
+                filter.getDoorsAmount(),
+                filter.getGearShiftType() != null? filter.getGearShiftType().ordinal() : null,
+                filter.getModel(),
+                filter.getTags() != null? filter.getTags() : new ArrayList<>(),
+                pageable);
 
         List<AuctionDTO> auctions=auctionDTOPage.getContent();
         long totalElements=auctionDTOPage.getTotalElements();

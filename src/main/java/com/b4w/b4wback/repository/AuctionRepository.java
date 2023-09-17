@@ -65,9 +65,9 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                                     @Param("priceMin") Integer priceMin, @Param("priceMax") Integer priceMax,
                                     @Param("brand") String brand,
                                     @Param("color") String color,
-                                    @Param("gasType") GasType gasType,
+                                    @Param("gasType") Integer gasType,
                                     @Param("doorsAmount") Integer doorsAmount,
-                                    @Param("gearShiftType") GearShiftType gearShiftType,
+                                    @Param("gearShiftType") Integer gearShiftType,
                                     @Param("model") String model,
                                     @Param("tagsIds") List<Long> tagsIds,
                                     Pageable pageable);

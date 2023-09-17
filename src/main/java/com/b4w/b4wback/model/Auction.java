@@ -20,11 +20,12 @@ import java.util.List;
         query = "SELECT DISTINCT auction.id AS id, auction.title AS title, auction.deadline AS deadline, auction.status AS status," +
                 "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price) AS highestBidAmount " +
                 "FROM Auction auction WHERE " +
-                "(:tagsIds IS NULL OR NOT EXISTS (SELECT 1 FROM Auction_tag auct_t " +
-                    "WHERE NOT EXISTS (SELECT 1 FROM Tag tag " +
-                        "WHERE (auct_t.auction_id = auction.id) AND " +
-                            "(auct_t.tag_id = tag.id) AND " +
-                            "(tag.id IN :tagsIds)))) AND " +
+                "(:tagsIds IS NULL OR " +
+                    "(SELECT COUNT(DISTINCT tag.id) FROM Tag tag WHERE tag.id IN :tagsIds) = (" +
+                        "SELECT COUNT(DISTINCT auct_t.tag_id) FROM Auction_tag auct_t " +
+                            "WHERE auct_t.auction_id = auction.id AND " +
+                            "auct_t.tag_id IN :tagsIds) OR " +
+                    "(SELECT COUNT(DISTINCT tag.id) FROM Tag tag WHERE tag.id IN :tagsIds) = 0) AND " +
                 "(:milageMin IS NULL OR auction.milage >= :milageMin) AND " +
                 "(:milageMax IS NULL OR auction.milage <= :milageMax) AND " +
                 "(:modelYearMin IS NULL OR auction.model_year >= :modelYearMin) AND " +
@@ -41,7 +42,7 @@ import java.util.List;
                 "(:priceMax IS NULL OR COALESCE((SELECT " +
                     "MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price " +
                 ") <= :priceMax) AND " +
-                "auction.status = 0",
+                "(auction.status = 0)",
         resultSetMapping = "sqlConstructor"
 )
 @SqlResultSetMapping(
