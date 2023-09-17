@@ -1,6 +1,8 @@
 package com.b4w.b4wback.model;
 
-import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.dto.AuctionOwnerDTO;
+import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -112,8 +114,8 @@ public class Auction {
     )
     private List<Tag> tags;
 
-
-
+    @OneToMany(mappedBy = "auction",cascade = CascadeType.ALL)
+    private List<Bid> bids;
     public Auction (CreateAuctionDTO createAuctionDTO, List<Tag> tags){
         this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();
@@ -141,17 +143,6 @@ public class Auction {
         return status;
     }
     public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, UserService userService){
-        Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(this);
-
-
-        AuctionHigestBidDTO auctionHigestBidDTO = null;
-
-        if(topBid != null)
-            auctionHigestBidDTO = AuctionHigestBidDTO.builder()
-                    .amount(topBid.getAmount())
-                    .userId(topBid.getBidder().getId())
-                    .userName(topBid.getBidder().getName())
-                    .userLastName(topBid.getBidder().getLastName()).build();
 
         return GetAuctionDTO.builder().title(this.getTitle()).description(this.getDescription()).deadline(this.getDeadline()).basePrice(this.getBasePrice()).
                 brand(this.getBrand()).model(this.getModel()).status(this.getStatus()).milage(this.getMilage()).gasType(this.getGasType())
@@ -162,7 +153,6 @@ public class Auction {
                         .lastName(this.getUser().getLastName())
                         .profilePicture(userService.createUrlForDownloadingImage(user.getId()))
                         .build())
-                .auctionHigestBidDTO(auctionHigestBidDTO)
                 .tags(tags)
                 .build();
     }

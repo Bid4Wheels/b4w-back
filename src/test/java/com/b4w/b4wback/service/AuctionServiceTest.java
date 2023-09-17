@@ -1,14 +1,18 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.dto.auth.JwtResponse;
+import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
+import com.b4w.b4wback.exception.AuctionExpiredException;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.exception.UrlAlreadySentException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Tag;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
@@ -22,18 +26,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.sql.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class AuctionServiceTest {
@@ -58,11 +67,14 @@ public class AuctionServiceTest {
 
     private CreateAuctionDTO auctionDTO;
 
+    @Autowired
+    TestRestTemplate restTemplate;
 
-
+    @Autowired
+    private BidRepository bidRepository;
     @BeforeEach
     public void setup() {
-        CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
+        CreateUserDTO userDTO= new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
         CreateUserDTO userDTO2 = new CreateUserDTO("Esteban", "Chiquito", "bejero@dusyum,com","+5491112345678",
                 "1Afjfslkjfl");
@@ -75,7 +87,12 @@ public class AuctionServiceTest {
                 4, GearShiftType.AUTOMATIC, null);
     }
 
-
+    private String authenticateAndGetToken(SignInRequest signInRequest) {
+        String loginURL = "/auth/login";
+        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
+                new HttpEntity<>(signInRequest), JwtResponse.class);
+        return Objects.requireNonNull(response.getBody()).getToken();
+    }
     @Test
     void Test001_AuctionServiceWhenReceiveCreatedAuctionDTOWithValidDTOShouldReturnCreateAuctionDTO() {
         CreateAuctionDTO auctionDTOWithID = new CreateAuctionDTO(1L, new CreateAuctionDTO(1L, "Subasta de automovil", "text",
@@ -144,10 +161,6 @@ public class AuctionServiceTest {
         assertEquals(auctionDTO.getGearShiftType(),auction.getGearShiftType());
         assertEquals(auctionDTO.getUserId(),auction.getAuctionOwnerDTO().getId());
 
-        assertEquals(bidDto.getAmount(),auction.getAuctionHigestBidDTO().getAmount());
-        assertEquals(bidDto.getUserId(),auction.getAuctionHigestBidDTO().getUserId());
-        assertEquals("Esteban",auction.getAuctionHigestBidDTO().getUserName());
-        assertEquals("Chiquito",auction.getAuctionHigestBidDTO().getUserLastName());
 
         assertEquals(1L,auction.getAuctionOwnerDTO().getId());
         assertEquals("Nico",auction.getAuctionOwnerDTO().getName());
@@ -649,11 +662,112 @@ public class AuctionServiceTest {
         AuctionDTO firstAuction = auctionList.get(0);
 
         LocalDateTime createdAt = auctionRepository.findById(firstAuction.getId()).get().getCreatedAt();
-
+        System.out.println("first" + createdAt);
         for (int i = 1; i < auctionList.size(); i++) {
             AuctionDTO auctionDTO = auctionList.get(i);
+            System.out.println();
             assertTrue(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt().isBefore(createdAt));
+            System.out.println(auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt());
             createdAt = auctionRepository.findById(auctionDTO.getId()).get().getCreatedAt();
+
         }
     }
+
+    @Test
+    void Test033_AuctionServiceWhenGetAuctionByIdShouldReturnGetAuctionDTOWithTop5NewestBids() throws Exception {
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO);
+        CreateBidDTO bidDto=new CreateBidDTO(150001,2L,1L);
+        bidService.crateBid(bidDto);
+        CreateBidDTO bidDto2=new CreateBidDTO(160000,2L,1L);
+        bidService.crateBid(bidDto2);
+        CreateBidDTO bidDto3=new CreateBidDTO(170000,2L,1L);
+        bidService.crateBid(bidDto3);
+        CreateBidDTO bidDto4=new CreateBidDTO(180000,2L,1L);
+        bidService.crateBid(bidDto4);
+        CreateBidDTO bidDto5=new CreateBidDTO(190000,2L,1L);
+        bidService.crateBid(bidDto5);
+
+        GetAuctionDTO auction=auctionService.getAuctionById(1L);
+        assertEquals(5,auction.getTopBids().size());
+        assertEquals(190000,auction.getTopBids().get(0).getAmount());
+        assertEquals(180000,auction.getTopBids().get(1).getAmount());
+        assertEquals(170000,auction.getTopBids().get(2).getAmount());
+        assertEquals(160000,auction.getTopBids().get(3).getAmount());
+        assertEquals(150001,auction.getTopBids().get(4).getAmount());
+    }
+    @Test
+    void Test034_AuctionServiceWhenGetAuctionsBiddedByUserShouldReturnAllAuctionsSortedByDeadline(){
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil1", "text",
+                LocalDateTime.of(2035, 9, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO);
+
+        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil2", "text",
+                LocalDateTime.of(2031, 6, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO2);
+
+        CreateAuctionDTO auctionDTO3 = new CreateAuctionDTO(1L, "Subasta de automovil3", "text",
+                LocalDateTime.of(2032, 3, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO3);
+
+        CreateBidDTO bidDto=new CreateBidDTO(150001,2L,1L);
+        bidService.crateBid(bidDto);
+        CreateBidDTO bidDto2=new CreateBidDTO(160000,2L,2L);
+        bidService.crateBid(bidDto2);
+        CreateBidDTO bidDto3=new CreateBidDTO(170000,2L,3L);
+        bidService.crateBid(bidDto3);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<AuctionDTO> actualAuctions = auctionService.getAuctionsBiddedByUser(2L, pageable);
+        List<AuctionDTO> auctionList = actualAuctions.getContent();
+        assertEquals(3,auctionList.size());
+        assertEquals("Subasta de automovil2",auctionList.get(0).getTitle());
+        assertEquals("Subasta de automovil3",auctionList.get(1).getTitle());
+        assertEquals("Subasta de automovil1",auctionList.get(2).getTitle());
+
+    }
+    @Test
+    void Test035_AuctionServiceWhenDeleteAuctionWithValidIdShouldBeDoneWithoutAnyException() {
+        CreateUserDTO userDTO= new CreateUserDTO("Marcos", "Benji", "marcosbenji@dusyum.com",
+                "+5491112341678", "1Afjfslkjfl");
+        userService.createUser(userDTO);
+        auctionService.createAuction(auctionDTO);
+        long bidforUser = bidService.crateBid(new CreateBidDTO(150000, 2L, 1L)).getId();
+        long bidforUser2 = bidService.crateBid(new CreateBidDTO(5000000, 3L, 1L)).getId();
+        SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
+        String token=authenticateAndGetToken(signInRequest);
+        auctionService.deleteAuction(1L,"Bearer "+token);
+        assertFalse(auctionRepository.existsById(1L));
+        assertFalse(bidRepository.existsById(bidforUser));
+        assertFalse(bidRepository.existsById(bidforUser2));
+    }
+
+    @Test
+    void Test036_AuctionServiceWhenDeleteAuctionAndUserNotOwnsTheAuctionShouldThrowEntityNotFoundException() {
+        CreateUserDTO userDTO= new CreateUserDTO("Marcos", "Benji", "marcosbenji@dusyum.com",
+                "+5491112341678", "1Afjfslkjfl");
+        userService.createUser(userDTO);
+        auctionService.createAuction(auctionDTO);
+        SignInRequest signInRequest=new SignInRequest("marcosbenji@dusyum.com","1Afjfslkjfl");
+        String token=authenticateAndGetToken(signInRequest);
+        assertThrows(EntityNotFoundException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));
+    }
+
+    @Test
+    void Test037_AuctionServiceWhenDeleteAuctionWithValidIdAndIsExpiredShouldThrowAuctionExpiredException(){
+        auctionDTO.setDeadline(LocalDateTime.now().minusDays(1));
+        auctionService.createAuction(auctionDTO);
+        SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
+        String token=authenticateAndGetToken(signInRequest);
+        assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));}
+
 }

@@ -30,7 +30,7 @@ public class Bid {
     @NotNull
     private User bidder;
 
-    @ManyToOne
+    @ManyToOne()
     @NotNull
     private Auction auction;
 
