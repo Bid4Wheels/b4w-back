@@ -61,4 +61,9 @@ public class DefaultExceptionHandler {
     protected ResponseEntity<String> handleUrlAlreadySentException(UrlAlreadySentException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
+
+    @ExceptionHandler(AuctionExpiredException.class)
+    protected ResponseEntity<String> handleAuctionExpiredException(AuctionExpiredException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
 }

@@ -52,6 +52,12 @@ public class AuctionController {
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsNew(pageable));
     }
 
+
+    @DeleteMapping("/{auctionID}")
+    public ResponseEntity<?> deleteAuctionById(@RequestHeader("Authorization") String token,@PathVariable Long auctionID) {
+        auctionService.deleteAuction(auctionID, token);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
     @GetMapping("/bidder/{bidderId}")
     public ResponseEntity<Page<AuctionDTO>> getAuctionsBiddedByUser(@PathVariable long bidderId, Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsBiddedByUser(bidderId, pageable));

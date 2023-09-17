@@ -71,8 +71,8 @@ public class Auction {
     )
     private List<Tag> tags;
 
-
-
+    @OneToMany(mappedBy = "auction",cascade = CascadeType.ALL)
+    private List<Bid> bids;
     public Auction (CreateAuctionDTO createAuctionDTO, List<Tag> tags){
         this.title = createAuctionDTO.getTitle();
         this.description = createAuctionDTO.getDescription();

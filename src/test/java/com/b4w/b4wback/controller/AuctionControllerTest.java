@@ -7,6 +7,7 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.TagService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.util.AuctionGenerator;
@@ -47,7 +48,8 @@ public class AuctionControllerTest {
     private AuctionRepository auctionRepository;
     @Autowired
     private TagService tagService;
-
+    @Autowired
+    private AuctionService auctionService;
     private String token;
     private CreateAuctionDTO auctionDTO;
     @BeforeEach
@@ -332,7 +334,6 @@ public class AuctionControllerTest {
 
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
     }
-
     @Test
     void Test023_AuctionControllerWhenGetAuctionsBiddedByUserAndUserNotFoundShouldReturnNOTFOUND(){
         HttpHeaders headers= new HttpHeaders();
@@ -355,4 +356,34 @@ public class AuctionControllerTest {
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
     }
 
+    @Test
+    void Test025_AuctionControllerWhenDeleteAuctionWithAllOKShouldReturnOK(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        restTemplate.exchange(baseUrl, HttpMethod.POST, new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
+        ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.DELETE,
+                new HttpEntity<>(headers),String.class);
+        assertEquals(HttpStatus.OK, deleteAuctionDTOResponseEntity.getStatusCode());
+    }
+
+    @Test
+    void Test026_AuctionControllerWhenDeleteAuctionWithInvalidIdShouldReturnNotFound(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/5", HttpMethod.DELETE,
+                new HttpEntity<>(headers),String.class);
+        assertEquals(HttpStatus.NOT_FOUND, deleteAuctionDTOResponseEntity.getStatusCode());
+    }
+
+    @Test
+    void Test027_AuctionControllerWhenDeleteAuctionWithAuctionExpiredShouldReturnBadRequest(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        auctionDTO.setDeadline(LocalDateTime.now().minus(1, ChronoUnit.HOURS));
+        //I have to instance the auction service because i can't create an auction with invalid deadline in the auction controller.
+        auctionService.createAuction(auctionDTO);
+        ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.DELETE,
+                new HttpEntity<>(headers),String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, deleteAuctionDTOResponseEntity.getStatusCode());
+    }
 }

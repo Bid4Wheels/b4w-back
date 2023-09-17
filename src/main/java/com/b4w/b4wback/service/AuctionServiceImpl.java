@@ -1,6 +1,13 @@
 package com.b4w.b4wback.service;
 
+
+import com.b4w.b4wback.dto.AuctionDTO;
+import com.b4w.b4wback.dto.CreateAuctionDTO;
+import com.b4w.b4wback.dto.GetAuctionDTO;
+import com.b4w.b4wback.dto.FilterAuctionDTO;
+import com.b4w.b4wback.exception.AuctionExpiredException;
 import com.b4w.b4wback.dto.*;
+
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.exception.UrlAlreadySentException;
@@ -10,13 +17,10 @@ import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
-import com.b4w.b4wback.service.interfaces.AuctionService;
-import com.b4w.b4wback.service.interfaces.S3Service;
+import com.b4w.b4wback.service.interfaces.*;
 
-import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.b4w.b4wback.service.interfaces.TagService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -47,14 +51,18 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final TagService tagService;
 
+    private final JwtService jwtService;
 
-    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,UserService userService,S3Service s3Service,TagService tagService) {
+
+    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,
+                              UserService userService,S3Service s3Service,TagService tagService, JwtService jwtService) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
         this.userService=userService;
         this.s3Service=s3Service;
         this.tagService=tagService;
+        this.jwtService=jwtService;
     }
 
     @Override
@@ -199,26 +207,43 @@ public class AuctionServiceImpl implements AuctionService {
     }
 
     @Override
-    public Page<AuctionDTO> getAuctionsBiddedByUser(long bidderId, Pageable pageable) {
-        User user = userRepository.findById(bidderId).orElseThrow(() -> new EntityNotFoundException("User not found"));
-        Page<Auction> auctions = auctionRepository.findAuctionsByBidderIdOrderByDeadline(bidderId, pageable);
-        List<AuctionDTO> auctionDTOS = new ArrayList<>();
-        for (Auction auction : auctions){
-            auctionDTOS.add((new AuctionDTO(auction)));
-        }
-        long totalElements= auctions.getTotalElements();
-        List<AuctionDTO> auctionWithImages=new ArrayList<>();
-        for (AuctionDTO auctionDTO : auctionDTOS) {
-            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
-            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
-            auctionWithImages.add(auctionDTO);
-            Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()-> new BadRequestParametersException("Auction not found")));
-            if (topBid == null){
-                auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")).getBasePrice());
-                continue;
+    public void deleteAuction(Long auctionID,String token) {
+        String email = jwtService.extractUsername(token.substring(7));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Auction userAuctionFound = auctionRepository.findAuctionByIdAndUserId(auctionID, user.getId());
+        if (userAuctionFound != null) {
+            LocalDateTime momentToDelete = LocalDateTime.now();
+            if (!momentToDelete.isAfter(userAuctionFound.getDeadline())) {
+                auctionRepository.delete(userAuctionFound);
+            } else {
+                throw new AuctionExpiredException("Auction expired in " + userAuctionFound.getDeadline());
             }
-            auctionDTO.setHighestBidAmount(topBid.getAmount());
+        } else {
+            throw new EntityNotFoundException("Auction not found");
+        }}
+
+        @Override
+        public Page<AuctionDTO> getAuctionsBiddedByUser ( long bidderId, Pageable pageable){
+            User user = userRepository.findById(bidderId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+            Page<Auction> auctions = auctionRepository.findAuctionsByBidderIdOrderByDeadline(bidderId, pageable);
+            List<AuctionDTO> auctionDTOS = new ArrayList<>();
+            for (Auction auction : auctions) {
+                auctionDTOS.add((new AuctionDTO(auction)));
+            }
+            long totalElements = auctions.getTotalElements();
+            List<AuctionDTO> auctionWithImages = new ArrayList<>();
+            for (AuctionDTO auctionDTO : auctionDTOS) {
+                String url = auctionObjectKey + auctionDTO.getId() + "/img1";
+                auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url, expirationTimeImageUrl));
+                auctionWithImages.add(auctionDTO);
+                Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new BadRequestParametersException("Auction not found")));
+                if (topBid == null) {
+                    auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Auction not found")).getBasePrice());
+                    continue;
+                }
+                auctionDTO.setHighestBidAmount(topBid.getAmount());
+            }
+            return new PageImpl<>(auctionWithImages, pageable, totalElements);
         }
-        return new PageImpl<>(auctionWithImages,pageable,totalElements);
-    }
+
 }
