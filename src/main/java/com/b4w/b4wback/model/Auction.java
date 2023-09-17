@@ -1,5 +1,6 @@
 package com.b4w.b4wback.model;
 
+import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.AuctionOwnerDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
