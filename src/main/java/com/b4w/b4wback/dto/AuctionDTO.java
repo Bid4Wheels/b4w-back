@@ -1,6 +1,9 @@
 package com.b4w.b4wback.dto;
 
 import com.b4w.b4wback.enums.AuctionStatus;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.SqlResultSetMapping;
 import com.b4w.b4wback.model.Auction;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

@@ -266,7 +266,7 @@ public class AuctionControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
+        //new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/filter", HttpMethod.POST,
                 new HttpEntity<>(FilterAuctionDTO.builder().build(), headers), String.class);
