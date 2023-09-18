@@ -134,6 +134,7 @@ public class AuctionServiceImpl implements AuctionService {
             String url=auctionObjectKey+auction.getId()+"/img1";
             auction.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
             auctionsWithImage.add(auction);
+            auction.setTagNames(auctionRepository.findTagsOfAuctionID(auction.getId()));
         }
         return new PageImpl<>(auctionsWithImage,pageable,totalElements);
     }
