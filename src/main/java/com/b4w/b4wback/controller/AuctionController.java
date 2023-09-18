@@ -41,4 +41,25 @@ public class AuctionController {
     public ResponseEntity<?> generateAuctionImageUrl(@PathVariable long auctionId){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.createUrlsForUploadingImages(auctionId));
     }
+
+    @GetMapping("/ending")
+    public ResponseEntity<Page<AuctionDTO>> getAuctionsEnding(Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsEnding(pageable));
+    }
+
+    @GetMapping("/new")
+    public ResponseEntity<Page<AuctionDTO>> getAuctionsNew(Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsNew(pageable));
+    }
+
+
+    @DeleteMapping("/{auctionID}")
+    public ResponseEntity<?> deleteAuctionById(@RequestHeader("Authorization") String token,@PathVariable Long auctionID) {
+        auctionService.deleteAuction(auctionID, token);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @GetMapping("/bidder/{bidderId}")
+    public ResponseEntity<Page<AuctionDTO>> getAuctionsBiddedByUser(@PathVariable long bidderId, Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsBiddedByUser(bidderId, pageable));
+    }
 }

@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 public class GetAuctionDTO {
@@ -30,12 +29,13 @@ public class GetAuctionDTO {
     private int doorsAmount;
     private GearShiftType gearShiftType;
     private AuctionOwnerDTO auctionOwnerDTO;
-    private AuctionHigestBidDTO auctionHigestBidDTO;
     private List<Tag> tags;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> auctionImageUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<AuctionHigestBidDTO> topBids;
 
-    public GetAuctionDTO(GetAuctionDTO getAuctionDTO,List<String> auctionImageUrl){
+    public GetAuctionDTO(GetAuctionDTO getAuctionDTO,List<String> auctionImageUrl, List<AuctionHigestBidDTO> topBids){
         this.title=getAuctionDTO.getTitle();
         this.description=getAuctionDTO.getDescription();
         this.deadline=getAuctionDTO.getDeadline();
@@ -50,8 +50,8 @@ public class GetAuctionDTO {
         this.doorsAmount=getAuctionDTO.getDoorsAmount();
         this.gearShiftType=getAuctionDTO.getGearShiftType();
         this.auctionOwnerDTO=getAuctionDTO.getAuctionOwnerDTO();
-        this.auctionHigestBidDTO=getAuctionDTO.getAuctionHigestBidDTO();
         this.tags=getAuctionDTO.getTags();
         this.auctionImageUrl=auctionImageUrl;
+        this.topBids=topBids;
     }
 }

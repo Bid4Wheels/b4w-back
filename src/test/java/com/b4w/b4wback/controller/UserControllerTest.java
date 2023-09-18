@@ -258,7 +258,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test015_UserControllerWhenModifyingUserWithNullNameReturnsStatus400(){
+    void Test014_UserControllerWhenModifyingUserWithNullNameReturnsStatus400(){
         restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
         ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
                 HttpMethod.PATCH,
@@ -271,7 +271,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test016_UserControllerWhenModifyingUserWithNullLastNameReturnsStatus400(){
+    void Test015_UserControllerWhenModifyingUserWithNullLastNameReturnsStatus400(){
         restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
         ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
                 HttpMethod.PATCH,
@@ -284,7 +284,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test017_UserControllerWhenModifyingUserWithNullPhoneReturnsStatus400(){
+    void Test016_UserControllerWhenModifyingUserWithNullPhoneReturnsStatus400(){
         restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(userDTO), CreateUserDTO.class);
         ResponseEntity<String> modUserResponse = restTemplate.exchange(baseUrl+"/1",
                 HttpMethod.PATCH,
@@ -299,7 +299,7 @@ public class UserControllerTest {
 
 
     @Test
-    void Test013_UserControllerWhenGetPasswordCodeForIdWithValidIdShouldReturnOk() {
+    void Test017_UserControllerWhenGetPasswordCodeForIdWithValidIdShouldReturnOk() {
         ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
                 createHttpEntity(userDTO), CreateUserDTO.class);
 
@@ -314,7 +314,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test014_UserControllerWhenGetPasswordCodeForIdWithInvalidIdShouldRespondNotFound() {
+    void Test018_UserControllerWhenGetPasswordCodeForIdWithInvalidIdShouldRespondNotFound() {
         ResponseEntity<String> checkPasswordResponse = restTemplate.exchange(baseUrl ,
                 HttpMethod.PATCH, new HttpEntity<>(passwordChangerDTO), String.class);
         assertEquals(HttpStatus.NOT_FOUND, checkPasswordResponse.getStatusCode());
@@ -323,7 +323,7 @@ public class UserControllerTest {
 
 
     @Test
-    void Test015_UserControllerWhenChangePasswordAndValidInfoShouldReturnOK(){
+    void Test019_UserControllerWhenChangePasswordAndValidInfoShouldReturnOK(){
         ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
                 createHttpEntity(userDTO), CreateUserDTO.class);
 
@@ -339,7 +339,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void Test016_UserControllerWhenCheckingPasswordCodeAndNotEqualsShouldReturnBadRequest(){
+    void Test020_UserControllerWhenCheckingPasswordCodeAndNotEqualsShouldReturnBadRequest(){
         ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
                 createHttpEntity(userDTO), CreateUserDTO.class);
 
@@ -351,7 +351,7 @@ public class UserControllerTest {
         restTemplate.exchange(baseUrl + "/1", HttpMethod.PATCH,new HttpEntity<>(passwordChangerDTO), PasswordChangerDTO.class);
 
 
-        ResponseEntity<String> checkPasswordCodeResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.GET,
+        ResponseEntity<String> checkPasswordCodeResponse = restTemplate.exchange(baseUrl + "/password", HttpMethod.POST,
                 new HttpEntity<>(getPasswordCodeDTO), String.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, checkPasswordCodeResponse.getStatusCode());
@@ -360,7 +360,7 @@ public class UserControllerTest {
 
 
     @Test
-    void Test017_UserControllerWhenGetUserByIdWithValidIdAndExistingImageShouldRespondWithAnExistsUserImageURL() {
+    void Test021_UserControllerWhenGetUserByIdWithValidIdAndExistingImageShouldRespondWithAnExistsUserImageURL() {
         ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
                 createHttpEntity(userDTO), CreateUserDTO.class);
         CreateUserDTO createdUser = postUserResponse.getBody();

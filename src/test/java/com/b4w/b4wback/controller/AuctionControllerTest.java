@@ -6,8 +6,8 @@ import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.repository.AuctionRepository;
-import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.TagService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.util.AuctionGenerator;
@@ -48,7 +48,8 @@ public class AuctionControllerTest {
     private AuctionRepository auctionRepository;
     @Autowired
     private TagService tagService;
-
+    @Autowired
+    private AuctionService auctionService;
     private String token;
     private CreateAuctionDTO auctionDTO;
     @BeforeEach
@@ -297,7 +298,7 @@ public class AuctionControllerTest {
                 new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.BAD_REQUEST, getAuctionsResponse2.getStatusCode());}
 
-
+    @Test
     void Test022_AuctionControllerWhenCreateAuctionWithTagsThenGetAuctionWithTags(){
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
@@ -307,5 +308,82 @@ public class AuctionControllerTest {
                 new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
         assertEquals(HttpStatus.CREATED, createAuctionDTOResponseEntity.getStatusCode());
         assertTrue(createAuctionDTOResponseEntity.getBody().getTags().containsAll(tags));
+    }
+    @Test
+    void Test021_AuctionControllerWhenGetAuctionsEndingWithAllOkShouldReturnOK() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/ending", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test022_AuctionControllerWhenGetAuctionsNewWithAllOkShouldReturnOK() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        new AuctionGenerator(userRepository, tagService).generateAndSaveListOfAuctions(100, auctionRepository);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/new", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+    @Test
+    void Test023_AuctionControllerWhenGetAuctionsBiddedByUserAndUserNotFoundShouldReturnNOTFOUND(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/bidder/3", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test024_AuctionControllerWhenGetAuctionsBiddedByUserAndUserFoundShouldReturnOK(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+
+        ResponseEntity<String> getAuctionsResponse = restTemplate.exchange(baseUrl + "/bidder/1", HttpMethod.GET,
+                new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
+    }
+
+    @Test
+    void Test025_AuctionControllerWhenDeleteAuctionWithAllOKShouldReturnOK(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        restTemplate.exchange(baseUrl, HttpMethod.POST, new HttpEntity<>(auctionDTO,headers),CreateAuctionDTO.class);
+        ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.DELETE,
+                new HttpEntity<>(headers),String.class);
+        assertEquals(HttpStatus.OK, deleteAuctionDTOResponseEntity.getStatusCode());
+    }
+
+    @Test
+    void Test026_AuctionControllerWhenDeleteAuctionWithInvalidIdShouldReturnNotFound(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/5", HttpMethod.DELETE,
+                new HttpEntity<>(headers),String.class);
+        assertEquals(HttpStatus.NOT_FOUND, deleteAuctionDTOResponseEntity.getStatusCode());
+    }
+
+    @Test
+    void Test027_AuctionControllerWhenDeleteAuctionWithAuctionExpiredShouldReturnBadRequest(){
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        auctionDTO.setDeadline(LocalDateTime.now().minus(1, ChronoUnit.HOURS));
+        //I have to instance the auction service because i can't create an auction with invalid deadline in the auction controller.
+        auctionService.createAuction(auctionDTO);
+        ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.DELETE,
+                new HttpEntity<>(headers),String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, deleteAuctionDTOResponseEntity.getStatusCode());
     }
 }

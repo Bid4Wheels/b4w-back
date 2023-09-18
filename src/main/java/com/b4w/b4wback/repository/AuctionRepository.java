@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -19,7 +20,7 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
 
     List<AuctionDTO> findAllByUserId(Long id);
 
-    Page<AuctionDTO> findByUser(User user, Pageable pageable);
+    Page<Auction> findByUser(User user, Pageable pageable);
 
 
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
@@ -53,4 +54,23 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                                     @Param("gearShiftType") GearShiftType gearShiftType,
                                     @Param("model") String model,
                                     Pageable pageable);
+
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
+            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
+            "FROM Auction auction " +
+            "WHERE auction.deadline > :currentDateTime " +
+            "ORDER BY auction.deadline ASC")
+    Page<AuctionDTO> findUpcomingAuctions(@Param("currentDateTime") LocalDateTime currentDateTime, Pageable pageable);
+
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
+            "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
+            "FROM Auction auction " +
+            "WHERE auction.createdAt < :currentDateTime " +
+            "ORDER BY auction.createdAt DESC ")
+    Page<AuctionDTO> findNewAuctions(@Param("currentDateTime") LocalDateTime currentDateTime,Pageable pageable);
+
+
+    Auction findAuctionByIdAndUserId(long auctionID, long userID);
+    @Query("SELECT auction FROM Auction auction WHERE auction.id IN (SELECT bid.auction.id FROM Bid bid WHERE bid.bidder.id = :bidder_id) ORDER BY auction.deadline ASC")
+    Page<Auction> findAuctionsByBidderIdOrderByDeadline(long bidder_id, Pageable pageable);
 }
