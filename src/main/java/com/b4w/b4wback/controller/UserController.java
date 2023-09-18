@@ -33,7 +33,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/password")
+    @PostMapping("/password")
     public ResponseEntity<?> checkPasswordCode(@RequestBody GetPasswordCodeDTO passwordCodeDTO){
         userService.checkPasswordCode(passwordCodeDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
