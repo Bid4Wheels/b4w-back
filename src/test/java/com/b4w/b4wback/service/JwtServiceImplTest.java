@@ -79,7 +79,7 @@ class JwtServiceImplTest {
 
     private String generateToken() {
         Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("userId", 1L);
+        extraClaims.put("userID", 1L);
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject("user@example.com")

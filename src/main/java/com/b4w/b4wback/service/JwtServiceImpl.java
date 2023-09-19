@@ -26,7 +26,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public Long extractId(String token){return extractClaim(token, claims -> claims.get("userId", Long.class));}
+    public Long extractId(String token){return extractClaim(token, claims -> claims.get("userID", Long.class));}
 
     @Override
     public String generateToken(String email,Long userID) {
