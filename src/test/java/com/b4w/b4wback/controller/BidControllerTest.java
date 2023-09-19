@@ -169,4 +169,23 @@ public class BidControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, postBidResponse.getStatusCode());
         assertTrue(postBidResponse.getBody().contains("The auction could not be found"));
     }
+
+    @Test
+    void Test005_BidControllerWhenGetHighestBidOfUserInAuctionWithBidReturnBid(){
+        int userNumber = 1;
+        Optional<User> user = userRepository.findByEmail(userDTOS.get(userNumber).getEmail());
+        restTemplate.exchange(baseUrl, HttpMethod.POST, createHttpEntity(new CreateBidDTO(10, user.get().getId(),
+                        auctionId), userDTOS.get(userNumber)), String.class);
+
+        HttpHeaders header = createHeaderWithToken(userDTOS.get(userNumber));
+        header.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<BidDTO> getBid = restTemplate.exchange(baseUrl+"/highestBid?auctionId="+auctionId,
+                HttpMethod.GET, new HttpEntity<>(header), BidDTO.class);
+
+        assertEquals(HttpStatus.OK, getBid.getStatusCode());
+        assertEquals(user.get().getId(), getBid.getBody().getUserId());
+        assertEquals(auctionId, getBid.getBody().getAuctionId());
+        assertEquals(10, getBid.getBody().getAmount());
+    }
 }
