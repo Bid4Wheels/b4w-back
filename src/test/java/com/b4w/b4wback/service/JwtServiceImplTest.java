@@ -70,8 +70,16 @@ class JwtServiceImplTest {
         assertFalse(jwtService.isTokenValid(token, userDetails));
     }
 
+    @Test
+    void Test005_JwtServiceImplWhenExtractUserIdShouldReturnEquals(){
+        String token = generateToken();
+        Long extractedId = jwtService.extractId(token);
+        assertEquals(1L, extractedId);
+    }
+
     private String generateToken() {
         Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", 1L);
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject("user@example.com")
