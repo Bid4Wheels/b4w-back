@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @Getter
+@Setter
 public class GetAuctionDTO {
     private String title;
     private String description;
@@ -34,6 +35,7 @@ public class GetAuctionDTO {
     private List<String> auctionImageUrl;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<AuctionHigestBidDTO> topBids;
+    private Integer myHighestBid;
 
     public GetAuctionDTO(GetAuctionDTO getAuctionDTO,List<String> auctionImageUrl, List<AuctionHigestBidDTO> topBids){
         this.title=getAuctionDTO.getTitle();
