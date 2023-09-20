@@ -5,6 +5,7 @@ import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
+import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
@@ -27,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -52,6 +54,8 @@ public class AuctionControllerTest {
     private AuctionService auctionService;
     private String token;
     private CreateAuctionDTO auctionDTO;
+
+    private List<CreateUserDTO> userDTOs;
     @BeforeEach
     public void setup() {
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -67,6 +71,10 @@ public class AuctionControllerTest {
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
                 4, GearShiftType.AUTOMATIC, null);
+
+        userDTOs = new ArrayList<>();
+        userDTOs.add(userDTO);
+        userDTOs.add(userDTO2);
     }
 
     private String authenticateAndGetToken(SignInRequest signInRequest) {
@@ -74,6 +82,19 @@ public class AuctionControllerTest {
         ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
                 new HttpEntity<>(signInRequest), JwtResponse.class);
         return Objects.requireNonNull(response.getBody()).getToken();
+    }
+
+    private HttpEntity<CreateBidDTO> createHttpEntity(CreateBidDTO bidDTO, CreateUserDTO userDTO){
+        HttpHeaders headers = createHeaderWithToken(userDTO);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(bidDTO, headers);
+    }
+
+    private HttpHeaders createHeaderWithToken(CreateUserDTO userDTO){
+        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), "1Afjfslkjfl"));
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
+        return headers;
     }
 
     @Test
@@ -380,10 +401,28 @@ public class AuctionControllerTest {
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token);
         auctionDTO.setDeadline(LocalDateTime.now().minus(1, ChronoUnit.HOURS));
-        //I have to instance the auction service because i can't create an auction with invalid deadline in the auction controller.
+        //I have to instance the auction service because I can't create an auction with invalid deadline in the auction controller.
         auctionService.createAuction(auctionDTO);
         ResponseEntity<String> deleteAuctionDTOResponseEntity= restTemplate.exchange(baseUrl+"/1", HttpMethod.DELETE,
                 new HttpEntity<>(headers),String.class);
         assertEquals(HttpStatus.BAD_REQUEST, deleteAuctionDTOResponseEntity.getStatusCode());
+    }
+
+    @Test
+    void Test028_AuctionControllerWhenUserGetAuctionByIdGetHisHighestBidReturnGetAuctionSTOWithHighestBid(){
+        int userNumber = 1;
+        Long auctionId = auctionService.createAuction(auctionDTO).getAuctionId();
+        Optional<User> user = userRepository.findByEmail(userDTOs.get(userNumber).getEmail());
+        restTemplate.exchange("/bid", HttpMethod.POST, createHttpEntity(new CreateBidDTO(100000000, user.get().getId(),
+                auctionId), userDTOs.get(userNumber)), String.class);
+
+        HttpHeaders header = createHeaderWithToken(userDTOs.get(userNumber));
+        header.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<?> getAuction = restTemplate.exchange(baseUrl+"/"+auctionId,
+                HttpMethod.GET, new HttpEntity<>(header), String.class);
+
+        assertEquals(HttpStatus.OK, getAuction.getStatusCode());
+        //assertEquals(10, getAuction.getBody().getMyHighestBid());
     }
 }

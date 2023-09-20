@@ -61,4 +61,9 @@ public class BidServiceImpl implements BidService {
 
         return bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
     }
+
+    @Override
+    public Bid getHighestBidByUserInAuction(Long userId, Long auctionId) {
+        return bidRepository.findTopByBidderIdAndAuctionIdOrderByAmountDesc(userId, auctionId);
+    }
 }
