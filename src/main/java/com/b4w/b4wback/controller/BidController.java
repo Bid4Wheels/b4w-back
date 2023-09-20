@@ -29,16 +29,4 @@ public class BidController {
         Bid bid = bidService.crateBid(bidDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(new BidDTO(bid));
     }
-
-    @GetMapping("/highestBid")
-    public ResponseEntity<BidDTO> getHighestBidOfUserInAuction(
-            @RequestHeader(HttpHeaders.AUTHORIZATION)  String auth,
-            @Param("auctionId") Long auctionId){
-
-        final String jwt = auth.substring(7);
-        Long userId = jwtService.extractId(jwt);
-
-        Bid bid = bidService.getHighestBidByUserInAuction(userId, auctionId);
-        return ResponseEntity.status(HttpStatus.OK).body(bid == null? null : new BidDTO(bid));
-    }
 }
