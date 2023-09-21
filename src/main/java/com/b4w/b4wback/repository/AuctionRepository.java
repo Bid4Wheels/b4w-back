@@ -23,6 +23,7 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
     Page<Auction> findByUser(User user, Pageable pageable);
 
 
+    /**
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
             "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
             "FROM Auction auction WHERE " +
@@ -42,7 +43,8 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
             ") >= :priceMin) AND" +
             "(:priceMax IS NULL OR COALESCE((SELECT " +
                 "MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice " +
-            ") <= :priceMax)"
+            ") <= :priceMax) AND " +
+            "(:tagsIds IS NULL OR auction.tags IN (SELECT t FROM Tag t WHERE t.id IN :tagsIds))"
     )
     Page<AuctionDTO> findWithFilter(@Param("milageMin") Integer milageMin, @Param("milageMax") Integer milageMax,
                                     @Param("modelYearMin") Integer modelYearMin, @Param("modelYearMax") Integer modelYearMax,
@@ -53,7 +55,23 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                                     @Param("doorsAmount") Integer doorsAmount,
                                     @Param("gearShiftType") GearShiftType gearShiftType,
                                     @Param("model") String model,
+                                    @Param("tagsIds") List<Long> tagsIds,
                                     Pageable pageable);
+     **/
+
+    @Query(name = "getAuctionDTOWithFilter", nativeQuery = true)
+    Page<AuctionDTO> findWithFilter(@Param("milageMin") Integer milageMin, @Param("milageMax") Integer milageMax,
+                                    @Param("modelYearMin") Integer modelYearMin, @Param("modelYearMax") Integer modelYearMax,
+                                    @Param("priceMin") Integer priceMin, @Param("priceMax") Integer priceMax,
+                                    @Param("brand") String brand,
+                                    @Param("color") String color,
+                                    @Param("gasType") Integer gasType,
+                                    @Param("doorsAmount") Integer doorsAmount,
+                                    @Param("gearShiftType") Integer gearShiftType,
+                                    @Param("model") String model,
+                                    @Param("tagsIds") List<Long> tagsIds,
+                                    Pageable pageable);
+
 
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
             "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
@@ -73,4 +91,12 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
     Auction findAuctionByIdAndUserId(long auctionID, long userID);
     @Query("SELECT auction FROM Auction auction WHERE auction.id IN (SELECT bid.auction.id FROM Bid bid WHERE bid.bidder.id = :bidder_id) ORDER BY auction.deadline ASC")
     Page<Auction> findAuctionsByBidderIdOrderByDeadline(long bidder_id, Pageable pageable);
+
+    @Query(value = "SELECT t.tag_name " +
+            "FROM Auction a " +
+            "JOIN Auction_tag at ON a.id = at.auction_id " +
+            "JOIN Tag t ON at.tag_id = t.id " +
+            "WHERE a.id = :auction_id",
+    nativeQuery = true)
+    List<String> findTagsOfAuctionID(@Param("auction_id") long auction_id);
 }

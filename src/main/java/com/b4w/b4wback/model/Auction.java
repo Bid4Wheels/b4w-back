@@ -1,5 +1,6 @@
 package com.b4w.b4wback.model;
 
+import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.AuctionOwnerDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
@@ -17,6 +18,49 @@ import java.util.List;
 
 
 @Entity
+@NamedNativeQuery(
+        name = "getAuctionDTOWithFilter",
+        query = "SELECT DISTINCT auction.id AS id, auction.title AS title, auction.deadline AS deadline, auction.status AS status," +
+                "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price) AS highestBidAmount " +
+                "FROM Auction auction WHERE " +
+                "(:tagsIds IS NULL OR " +
+                    "(SELECT COUNT(DISTINCT tag.id) FROM Tag tag WHERE tag.id IN :tagsIds) = (" +
+                        "SELECT COUNT(DISTINCT auct_t.tag_id) FROM Auction_tag auct_t " +
+                            "WHERE auct_t.auction_id = auction.id AND " +
+                            "auct_t.tag_id IN :tagsIds) OR " +
+                    "(SELECT COUNT(DISTINCT tag.id) FROM Tag tag WHERE tag.id IN :tagsIds) = 0) AND " +
+                "(:milageMin IS NULL OR auction.milage >= :milageMin) AND " +
+                "(:milageMax IS NULL OR auction.milage <= :milageMax) AND " +
+                "(:modelYearMin IS NULL OR auction.model_year >= :modelYearMin) AND " +
+                "(:modelYearMax IS NULL OR auction.model_year <= :modelYearMax) AND " +
+                "(:brand IS NULL OR lower(auction.brand) = lower(:brand)) AND " +
+                "(:color IS NULL OR lower(auction.color) = lower(:color)) AND " +
+                "(:gasType IS NULL OR auction.gas_type = :gasType) AND " +
+                "(:doorsAmount IS NULL OR auction.doors_amount = :doorsAmount) AND " +
+                "(:gearShiftType IS NULL OR auction.gear_shift_type = :gearShiftType) AND " +
+                "(:model IS NULL OR lower(auction.model) = lower(:model)) AND " +
+                "(:priceMin IS NULL OR COALESCE((SELECT " +
+                    "MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price " +
+                ") >= :priceMin) AND " +
+                "(:priceMax IS NULL OR COALESCE((SELECT " +
+                    "MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price " +
+                ") <= :priceMax) AND " +
+                "(auction.status = 0)",
+        resultSetMapping = "sqlConstructor"
+)
+@SqlResultSetMapping(
+        name = "sqlConstructor",
+        classes = @ConstructorResult(
+                targetClass = AuctionDTO.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "title", type = String.class),
+                        @ColumnResult(name = "deadLine", type = LocalDateTime.class),
+                        @ColumnResult(name = "status", type = AuctionStatus.class),
+                        @ColumnResult(name = "highestBidAmount", type = Integer.class)
+                }
+        )
+)
 @Getter
 @Setter
 @NoArgsConstructor

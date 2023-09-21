@@ -114,4 +114,61 @@ public class BidServiceTest {
         assertThrows(BadRequestParametersException.class,
                 ()->bidService.crateBid(new CreateBidDTO(0, users.get(0).getId(), auction.getId())));
     }
+
+    @Test
+    void Test008_BidServiceWhenGetHighestBidOfUserInAuctionShouldReturnNull(){
+        assertNull(bidService.getHighestBidByUserInAuction(users.get(1).getId(), auction.getId()));
+    }
+
+    @Test
+    void Test009_BidServiceWhenGetHighestBidOfUserInAuctionWithOneBidShouldReturnBid(){
+        int bidAmount = 100;
+        Long userId = users.get(1).getId();
+        Long auctionId = auction.getId();
+
+        bidService.crateBid(new CreateBidDTO(bidAmount, userId, auctionId));
+        Bid bid = bidService.getHighestBidByUserInAuction(userId, auctionId);
+
+        assertNotNull(bid);
+        assertEquals(userId, bid.getBidder().getId());
+        assertEquals(auctionId, bid.getAuction().getId());
+        assertEquals(bidAmount, bid.getAmount());
+    }
+
+    @Test
+    void Test010_BidServiceWhenGetHighestBidOfUserInAuctionWith2BidsShouldReturnHighestBid(){
+        int bidAmount = 100;
+        Long userId = users.get(1).getId();
+        Long auctionId = auction.getId();
+
+        bidService.crateBid(new CreateBidDTO(bidAmount, userId, auctionId));
+        bidAmount = 200;
+        bidService.crateBid(new CreateBidDTO(bidAmount, userId, auctionId));
+        Bid bid = bidService.getHighestBidByUserInAuction(userId, auctionId);
+
+        assertNotNull(bid);
+        assertEquals(userId, bid.getBidder().getId());
+        assertEquals(auctionId, bid.getAuction().getId());
+        assertEquals(bidAmount, bid.getAmount());
+    }
+
+    @Test
+    void Test0011_BidServiceWhenGetHighestBidOfUserInAuctionWith2BidsAndOtherUserBidShouldReturnHighestBid(){
+        int bidAmount = 100;
+        Long userId = users.get(1).getId();
+        Long auctionId = auction.getId();
+
+        bidService.crateBid(new CreateBidDTO(bidAmount, userId, auctionId));
+        bidAmount = 200;
+        bidService.crateBid(new CreateBidDTO(bidAmount, userId, auctionId));
+
+        bidService.crateBid(new CreateBidDTO(300, users.get(2).getId(), auctionId));
+
+        Bid bid = bidService.getHighestBidByUserInAuction(userId, auctionId);
+
+        assertNotNull(bid);
+        assertEquals(userId, bid.getBidder().getId());
+        assertEquals(auctionId, bid.getAuction().getId());
+        assertEquals(bidAmount, bid.getAmount());
+    }
 }

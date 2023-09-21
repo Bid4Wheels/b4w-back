@@ -5,6 +5,8 @@ import com.b4w.b4wback.enums.GearShiftType;
 import lombok.*;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -23,4 +25,5 @@ public class FilterAuctionDTO {
     private Integer doorsAmount;
     private GearShiftType gearShiftType;
     private String model;
+    private List<Long> tags;
 }
