@@ -57,7 +57,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(imageUrl);
     }
 
-    @DeleteMapping("/user")
+    @DeleteMapping()
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token){
         userService.deleteUser(token);
         return ResponseEntity.status(HttpStatus.OK).build();

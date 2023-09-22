@@ -1,6 +1,7 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -73,6 +75,9 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if(Objects.equals(user.getName(), "Deleted")){
+            throw new EntityNotFoundException("User not found");
+        }
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
                 phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).build();
     }
@@ -133,15 +138,15 @@ public class UserServiceImp implements UserService {
 
     @Override
     public void deleteUser(String token) {
-        String email= jwtService.extractUsername(token.substring(7));
-        User user= userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User not found"));
+        long id= jwtService.extractId(token.substring(7));
+        User user= userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
         user.setName("Deleted");
         user.setLastName("Deleted");
         user.setPhoneNumber("Deleted");
-        user.setPassword(null);
-        user.setPasswordCode(null);
         userRepository.save(user);
         Page<Auction> auctionsList = auctionRepository.findByUser(user, PageRequest.of(0, 10));
         auctionRepository.deleteAll(auctionsList);
+        List<Bid> bidsList = bidRepository.findAllByUserAndStatusOpen(id, AuctionStatus.OPEN);
+        bidRepository.deleteAll(bidsList);
     }
 }
