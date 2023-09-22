@@ -29,7 +29,8 @@ public class S3ServiceImpl implements S3Service {
         Date expiration=new Date(System.currentTimeMillis() + expirationTime);
         GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, url)
                 .withExpiration(expiration).withMethod(HttpMethod.PUT);
-        return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+        String defaultUrl= amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+        return "https://s3.bid4wheels.com"+ defaultUrl.substring(defaultUrl.indexOf(".com")+4);
     }
 
     @Override
@@ -38,7 +39,8 @@ public class S3ServiceImpl implements S3Service {
         if (amazonS3.doesObjectExist(bucketName,url)){
             GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, url)
                     .withExpiration(expiration).withMethod(HttpMethod.GET);
-            return amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+            String defaultUrl= amazonS3.generatePresignedUrl(generatePresignedUrlRequest).toString();
+            return "https://s3.bid4wheels.com"+ defaultUrl.substring(defaultUrl.indexOf(".com")+4);
         }
         return "default";
     }
