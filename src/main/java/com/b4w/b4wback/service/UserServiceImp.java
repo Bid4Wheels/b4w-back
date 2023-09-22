@@ -3,7 +3,11 @@ package com.b4w.b4wback.service;
 import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
+import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.MailService;
@@ -11,6 +15,8 @@ import com.b4w.b4wback.service.interfaces.S3Service;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,6 +36,8 @@ public class UserServiceImp implements UserService {
     private boolean sendMail;
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final AuctionRepository auctionRepository;
+    private final BidRepository bidRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final Random Random = new Random();
 
@@ -39,11 +47,13 @@ public class UserServiceImp implements UserService {
     @Value("${expiration.time.image.url}")
     private Integer expirationTimeImageUrl;
     private final S3Service s3Service;
-    public UserServiceImp(UserRepository userRepository, MailService mailService,S3Service s3Service, JwtService jwtService) {
+    public UserServiceImp(UserRepository userRepository, MailService mailService, S3Service s3Service, JwtService jwtService, AuctionRepository auctionRepository, BidRepository bidRepository) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.s3Service=s3Service;
         this.jwtService=jwtService;
+        this.auctionRepository=auctionRepository;
+        this.bidRepository = bidRepository;
     }
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
@@ -119,5 +129,19 @@ public class UserServiceImp implements UserService {
     public String createUrlForDownloadingImage(Long userID) {
         String userUrl=usersObjectKey + userID;
         return s3Service.generatePresignedDownloadImageUrl(userUrl,expirationTimeImageUrl);
+    }
+
+    @Override
+    public void deleteUser(String token) {
+        String email= jwtService.extractUsername(token.substring(7));
+        User user= userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User not found"));
+        user.setName("Deleted");
+        user.setLastName("Deleted");
+        user.setPhoneNumber("Deleted");
+        user.setPassword(null);
+        user.setPasswordCode(null);
+        userRepository.save(user);
+        Page<Auction> auctionsList = auctionRepository.findByUser(user, PageRequest.of(0, 10));
+        auctionRepository.deleteAll(auctionsList);
     }
 }

@@ -29,4 +29,6 @@ public interface UserService {
     String createUrlForUploadingImage(String token);
 
     String createUrlForDownloadingImage(Long userID);
+
+    void deleteUser(String token);
 }
