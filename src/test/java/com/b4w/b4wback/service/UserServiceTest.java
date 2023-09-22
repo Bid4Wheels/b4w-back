@@ -43,10 +43,6 @@ class UserServiceTest {
     private TestRestTemplate restTemplate;
     @Autowired
     private AuctionService auctionService;
-    @Autowired
-    private BidService bidService;
-    @Autowired
-    private BidRepository bidRepository;
 
     CreateUserDTO userDTO;
     PasswordChangerDTO passwordChangerDto;
@@ -229,7 +225,7 @@ class UserServiceTest {
 
     @Test
     void Test023_UserServiceWhenDeleteUserShouldDeleteAllAuctions(){
-        User user = userService.createUser(userDTO);
+        userService.createUser(userDTO);
         SignInRequest signInRequest = new SignInRequest(userDTO.getEmail(), "1Afjfslkjfl");
         String token = authenticateAndGetToken(signInRequest);
         CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L,"Subasta de automovil","text",
