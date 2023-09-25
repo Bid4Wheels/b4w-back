@@ -84,7 +84,13 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+        return username -> {
+            User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            if (user.isDeleted()) {
+                throw new UsernameNotFoundException("User not found");
+            }
+            return user;
+        };
     }
 
     @Override
@@ -143,8 +149,9 @@ public class UserServiceImp implements UserService {
         user.setName("Deleted");
         user.setLastName("Deleted");
         user.setPhoneNumber("Deleted");
+        user.setDeleted(true);
         userRepository.save(user);
-        Page<Auction> auctionsList = auctionRepository.findByUser(user, PageRequest.of(0, 10));
+        List<Auction> auctionsList = auctionRepository.findByUser(user);
         auctionRepository.deleteAll(auctionsList);
         List<Bid> bidsList = bidRepository.findAllByUserAndStatusOpen(id, AuctionStatus.OPEN);
         bidRepository.deleteAll(bidsList);
