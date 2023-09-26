@@ -131,7 +131,7 @@ public class AuctionServiceImpl implements AuctionService {
         List<AuctionDTO> auctionsWithImage=new ArrayList<>();
 
         for (AuctionDTO auction: auctions) {
-            String url=auctionObjectKey+auction.getId()+"/img1";
+            String url=auctionObjectKey+auction.getId()+"/img0";
             auction.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
             auctionsWithImage.add(auction);
             auction.setTagNames(auctionRepository.findTagsOfAuctionID(auction.getId()));
@@ -176,7 +176,7 @@ public class AuctionServiceImpl implements AuctionService {
         long totalElements= auctions.getTotalElements();
         List<AuctionDTO> auctionWithImages=new ArrayList<>();
         for (AuctionDTO auctionDTO : auctionDTOS) {
-            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
+            String url=auctionObjectKey+auctionDTO.getId()+"/img0";
             auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
             auctionWithImages.add(auctionDTO);
             Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")));
@@ -201,7 +201,7 @@ public class AuctionServiceImpl implements AuctionService {
         long totalElements= auctions.getTotalElements();
         List<AuctionDTO> auctionWithImages=new ArrayList<>();
         for (AuctionDTO auctionDTO : auctionDTOS) {
-            String url=auctionObjectKey+auctionDTO.getId()+"/img1";
+            String url=auctionObjectKey+auctionDTO.getId()+"/img0";
             auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
             auctionWithImages.add(auctionDTO);
             Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(()->new EntityNotFoundException("Auction not found")));
@@ -241,7 +241,7 @@ public class AuctionServiceImpl implements AuctionService {
             long totalElements = auctions.getTotalElements();
             List<AuctionDTO> auctionWithImages = new ArrayList<>();
             for (AuctionDTO auctionDTO : auctionDTOS) {
-                String url = auctionObjectKey + auctionDTO.getId() + "/img1";
+                String url = auctionObjectKey + auctionDTO.getId() + "/img0";
                 auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url, expirationTimeImageUrl));
                 auctionWithImages.add(auctionDTO);
                 Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new BadRequestParametersException("Auction not found")));
