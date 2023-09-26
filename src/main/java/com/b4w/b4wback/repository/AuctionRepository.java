@@ -22,6 +22,8 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
 
     Page<Auction> findByUser(User user, Pageable pageable);
 
+    List<Auction> findByUser(User user);
+
 
     /**
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +

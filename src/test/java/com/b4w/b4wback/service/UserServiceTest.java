@@ -1,29 +1,35 @@
 package com.b4w.b4wback.service;
 
-import com.b4w.b4wback.dto.ChangePasswordDTO;
-import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.GetPasswordCodeDTO;
-import com.b4w.b4wback.dto.PasswordChangerDTO;
-
+import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.dto.auth.JwtResponse;
+import com.b4w.b4wback.dto.auth.SignInRequest;
+import com.b4w.b4wback.enums.GasType;
+import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
-import com.b4w.b4wback.dto.ModifyUserDTO;
-import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 class UserServiceTest {
@@ -31,6 +37,10 @@ class UserServiceTest {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TestRestTemplate restTemplate;
+    @Autowired
+    private AuctionService auctionService;
 
     CreateUserDTO userDTO;
     PasswordChangerDTO passwordChangerDto;
@@ -47,6 +57,12 @@ class UserServiceTest {
         passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
         changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com","1Afjfslkjfl");
 
+    }
+
+    private  String authenticateAndGetToken(SignInRequest signInRequest){
+        ResponseEntity<JwtResponse> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
+                new HttpEntity<>(signInRequest), JwtResponse.class);
+        return Objects.requireNonNull(response.getBody()).getToken();
     }
 
     @Test
@@ -193,4 +209,31 @@ class UserServiceTest {
 
         assertThrowsExactly(EntityNotFoundException.class,()->userService.modifyUser(432189507, modUser));
     }
+
+    @Test
+    void Test022_UserServiceWhenDeleteUserShouldChangeNameToDeleted() {
+        User user = userService.createUser(userDTO);
+        SignInRequest signInRequest = new SignInRequest(userDTO.getEmail(), "1Afjfslkjfl");
+        String token = authenticateAndGetToken(signInRequest);
+        userService.deleteUser("Bearer " + token);
+        assertEquals("Deleted", userRepository.findById(user.getId()).get().getName());
+        assertEquals("Deleted", userRepository.findById(user.getId()).get().getLastName());
+        assertEquals("Deleted", userRepository.findById(user.getId()).get().getPhoneNumber());
+    }
+
+    @Test
+    void Test023_UserServiceWhenDeleteUserShouldDeleteAllAuctions(){
+        userService.createUser(userDTO);
+        SignInRequest signInRequest = new SignInRequest(userDTO.getEmail(), "1Afjfslkjfl");
+        String token = authenticateAndGetToken(signInRequest);
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L,"Subasta de automovil","text",
+                LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
+                "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
+                4, GearShiftType.AUTOMATIC, null);
+        auctionService.createAuction(auctionDTO);
+        auctionService.getAuctionById(1L);
+        userService.deleteUser("Bearer " + token);
+        assertThrowsExactly(EntityNotFoundException.class, ()->auctionService.getAuctionById(1L));
+    }
+
 }

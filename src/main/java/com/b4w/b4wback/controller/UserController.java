@@ -56,4 +56,10 @@ public class UserController {
         String imageUrl=userService.createUrlForUploadingImage(token);
         return ResponseEntity.status(HttpStatus.OK).body(imageUrl);
     }
+
+    @DeleteMapping()
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token){
+        userService.deleteUser(token);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

@@ -374,4 +374,19 @@ public class UserControllerTest {
         assertTrue(getUserResponse.getBody().getImgURL().startsWith(userImageUrl));
     }
 
+
+    @Test
+    void Test022_UserControllerWhenDeleteUserAuthenticatedShouldReturnOk(){
+        ResponseEntity<CreateUserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+                createHttpEntity(userDTO), CreateUserDTO.class);
+        CreateUserDTO createdUser = postUserResponse.getBody();
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        assertNotNull(createdUser);
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +jwtToken);
+        ResponseEntity<String> deleteUserResponse = restTemplate.exchange(baseUrl,
+                HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+        assertEquals(HttpStatus.OK, deleteUserResponse.getStatusCode());
+    }
 }

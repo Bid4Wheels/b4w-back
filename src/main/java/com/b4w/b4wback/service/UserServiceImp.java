@@ -1,9 +1,14 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
+import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.MailService;
@@ -18,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
@@ -30,6 +36,8 @@ public class UserServiceImp implements UserService {
     private boolean sendMail;
     private final UserRepository userRepository;
     private final MailService mailService;
+    private final AuctionRepository auctionRepository;
+    private final BidRepository bidRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final Random Random = new Random();
 
@@ -39,11 +47,13 @@ public class UserServiceImp implements UserService {
     @Value("${expiration.time.image.url}")
     private Integer expirationTimeImageUrl;
     private final S3Service s3Service;
-    public UserServiceImp(UserRepository userRepository, MailService mailService,S3Service s3Service, JwtService jwtService) {
+    public UserServiceImp(UserRepository userRepository, MailService mailService, S3Service s3Service, JwtService jwtService, AuctionRepository auctionRepository, BidRepository bidRepository) {
         this.userRepository = userRepository;
         this.mailService = mailService;
         this.s3Service=s3Service;
         this.jwtService=jwtService;
+        this.auctionRepository=auctionRepository;
+        this.bidRepository = bidRepository;
     }
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
@@ -63,13 +73,22 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if(Objects.equals(user.getName(), "Deleted")){
+            throw new EntityNotFoundException("User not found");
+        }
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
                 phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).build();
     }
 
     @Override
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User not found"));
+        return username -> {
+            User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            if (user.isDeleted()) {
+                throw new UsernameNotFoundException("User not found");
+            }
+            return user;
+        };
     }
 
     @Override
@@ -119,5 +138,20 @@ public class UserServiceImp implements UserService {
     public String createUrlForDownloadingImage(Long userID) {
         String userUrl=usersObjectKey + userID;
         return s3Service.generatePresignedDownloadImageUrl(userUrl,expirationTimeImageUrl);
+    }
+
+    @Override
+    public void deleteUser(String token) {
+        long id= jwtService.extractId(token.substring(7));
+        User user= userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
+        user.setName("Deleted");
+        user.setLastName("Deleted");
+        user.setPhoneNumber("Deleted");
+        user.setDeleted(true);
+        userRepository.save(user);
+        List<Auction> auctionsList = auctionRepository.findByUser(user);
+        auctionRepository.deleteAll(auctionsList);
+        List<Bid> bidsList = bidRepository.findAllByUserAndStatusOpen(id, AuctionStatus.OPEN);
+        bidRepository.deleteAll(bidsList);
     }
 }
