@@ -39,6 +39,8 @@ public class User implements UserDetails {
 
     private Integer passwordCode;
 
+    private boolean isDeleted = false;
+
     public User(CreateUserDTO createUserDTO){
         name = createUserDTO.getName();
         lastName = createUserDTO.getLastName();
