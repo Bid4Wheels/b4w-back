@@ -16,6 +16,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -47,15 +49,8 @@ public class UserControllerTest {
         return new HttpEntity<>(createUserDTO, headers);
     }
 
-    private HttpHeaders createHeaderWithToken(){
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization","Bearer " +jwtToken);
-        return headers;
-    }
-
     private HttpEntity<ModifyUserDTO> createHttpEntity(ModifyUserDTO modifyUserDTO){
-        HttpHeaders headers = createHeaderWithToken();
+        HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(modifyUserDTO, headers);
     }

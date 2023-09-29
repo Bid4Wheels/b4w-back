@@ -1,6 +1,5 @@
 package com.b4w.b4wback.controller;
 
-import com.b4w.b4wback.dto.BidDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
@@ -10,7 +9,6 @@ import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
-import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

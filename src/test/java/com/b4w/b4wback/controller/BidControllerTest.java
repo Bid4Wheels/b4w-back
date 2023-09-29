@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -82,7 +83,7 @@ public class BidControllerTest {
 
 
     private HttpEntity<CreateBidDTO> createHttpEntity(CreateBidDTO bidDTO, CreateUserDTO userDTO){
-        HttpHeaders headers = createHeaderWithToken(userDTO);
+        HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(bidDTO, headers);
     }
@@ -91,13 +92,6 @@ public class BidControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(createUserDTO, headers);
-    }
-
-    private HttpHeaders createHeaderWithToken(CreateUserDTO userDTO){
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization","Bearer " +jwtToken);
-        return headers;
     }
 
     private String authenticateAndGetToken(SignInRequest signInRequest) {

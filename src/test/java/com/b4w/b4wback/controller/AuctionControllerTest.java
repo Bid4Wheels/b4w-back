@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,8 +64,15 @@ public class AuctionControllerTest {
         CreateUserDTO userDTO2 = new CreateUserDTO("Mico", "Vorja", "bejero@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
         SignInRequest signInRequest=new SignInRequest(userDTO.getEmail(), userDTO.getPassword());
+
+        String psw = userDTO.getPassword();
         userService.createUser(userDTO);
+        userDTO.setPassword(psw);
+
+        psw = userDTO2.getPassword();
         userService.createUser(userDTO2);
+        userDTO2.setPassword(psw);
+
         token=authenticateAndGetToken(signInRequest);
 
         auctionDTO= new CreateAuctionDTO(1L,"Subasta de automovil", "text",
@@ -85,16 +93,9 @@ public class AuctionControllerTest {
     }
 
     private HttpEntity<CreateBidDTO> createHttpEntity(CreateBidDTO bidDTO, CreateUserDTO userDTO){
-        HttpHeaders headers = createHeaderWithToken(userDTO);
+        HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(bidDTO, headers);
-    }
-
-    private HttpHeaders createHeaderWithToken(CreateUserDTO userDTO){
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), "1Afjfslkjfl"));
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization","Bearer " +jwtToken);
-        return headers;
     }
 
     @Test
@@ -416,7 +417,7 @@ public class AuctionControllerTest {
         restTemplate.exchange("/bid", HttpMethod.POST, createHttpEntity(new CreateBidDTO(100000000, user.get().getId(),
                 auctionId), userDTOs.get(userNumber)), String.class);
 
-        HttpHeaders header = createHeaderWithToken(userDTOs.get(userNumber));
+        HttpHeaders header = createHeaderWithToken(userDTOs.get(userNumber), restTemplate);
         header.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<?> getAuction = restTemplate.exchange(baseUrl+"/"+auctionId,

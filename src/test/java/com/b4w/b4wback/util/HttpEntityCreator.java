@@ -19,7 +19,7 @@ public class HttpEntityCreator {
         return headers;
     }
 
-    private static String authenticateAndGetToken(SignInRequest signInRequest, TestRestTemplate restTemplate) {
+    public static String authenticateAndGetToken(SignInRequest signInRequest, TestRestTemplate restTemplate) {
         String loginURL = "/auth/login";
         ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
                 new HttpEntity<>(signInRequest), JwtResponse.class);
