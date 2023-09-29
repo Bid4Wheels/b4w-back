@@ -15,8 +15,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
 @Table(name="app_user")
 public class User implements UserDetails {
     @Id

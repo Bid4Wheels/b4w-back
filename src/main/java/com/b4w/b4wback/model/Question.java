@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
 @Getter
 public class Question {
     @Id
