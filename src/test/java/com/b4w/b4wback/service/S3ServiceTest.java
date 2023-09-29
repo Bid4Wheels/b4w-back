@@ -1,7 +1,6 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
-import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.service.interfaces.S3Service;
 import com.b4w.b4wback.service.interfaces.UserService;
@@ -12,13 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.Objects;
-
+import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -44,14 +39,7 @@ public class S3ServiceTest {
                 "+5491154964341", "1Afjfslkjfl");
         SignInRequest signInRequest=new SignInRequest(userDTO.getEmail(), userDTO.getPassword());
         userService.createUser(userDTO);
-        token=authenticateAndGetToken(signInRequest);
-    }
-
-    private  String authenticateAndGetToken(SignInRequest signInRequest){
-        String loginURL ="/auth/login";
-        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
-                new HttpEntity<>(signInRequest), JwtResponse.class);
-        return Objects.requireNonNull(response.getBody()).getToken();
+        token = authenticateAndGetToken(signInRequest, restTemplate);
     }
 
 

@@ -1,7 +1,6 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.*;
-import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +12,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.util.Objects;
 
+import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
 
@@ -55,12 +54,6 @@ public class UserControllerTest {
         return new HttpEntity<>(modifyUserDTO, headers);
     }
 
-    private  String authenticateAndGetToken(SignInRequest signInRequest){
-        String loginURL ="/auth/login";
-        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
-                new HttpEntity<>(signInRequest), JwtResponse.class);
-        return Objects.requireNonNull(response.getBody()).getToken();
-    }
     @Test
     void Test001_UserControllerWhenPostNewUserWithValidDTOShouldCreateUserCorrectly() {
         ResponseEntity<UserDTO> postUserResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
@@ -210,7 +203,7 @@ public class UserControllerTest {
         CreateUserDTO createdUser = postUserResponse.getBody();
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
-        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +jwtToken);
         ResponseEntity<UserDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
@@ -233,7 +226,7 @@ public class UserControllerTest {
         CreateUserDTO createdUser = postUserResponse.getBody();
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
-        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +jwtToken);
         ResponseEntity<String> getUserResponse = restTemplate.exchange(baseUrl + "/2",
@@ -361,7 +354,7 @@ public class UserControllerTest {
         CreateUserDTO createdUser = postUserResponse.getBody();
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
-        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +jwtToken);
         ResponseEntity<UserDTO> getUserResponse = restTemplate.exchange(baseUrl + "/1",
@@ -377,7 +370,7 @@ public class UserControllerTest {
         CreateUserDTO createdUser = postUserResponse.getBody();
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
         assertNotNull(createdUser);
-        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
+        String jwtToken= authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +jwtToken);
         ResponseEntity<String> deleteUserResponse = restTemplate.exchange(baseUrl,

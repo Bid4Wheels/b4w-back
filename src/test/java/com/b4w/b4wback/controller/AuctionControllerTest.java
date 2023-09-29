@@ -1,7 +1,6 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.*;
-import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -27,9 +26,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
+import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -73,7 +72,7 @@ public class AuctionControllerTest {
         userService.createUser(userDTO2);
         userDTO2.setPassword(psw);
 
-        token=authenticateAndGetToken(signInRequest);
+        token = authenticateAndGetToken(signInRequest, restTemplate);
 
         auctionDTO= new CreateAuctionDTO(1L,"Subasta de automovil", "text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
@@ -83,13 +82,6 @@ public class AuctionControllerTest {
         userDTOs = new ArrayList<>();
         userDTOs.add(userDTO);
         userDTOs.add(userDTO2);
-    }
-
-    private String authenticateAndGetToken(SignInRequest signInRequest) {
-        String loginURL = "/auth/login";
-        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
-                new HttpEntity<>(signInRequest), JwtResponse.class);
-        return Objects.requireNonNull(response.getBody()).getToken();
     }
 
     private HttpEntity<CreateBidDTO> createHttpEntity(CreateBidDTO bidDTO, CreateUserDTO userDTO){

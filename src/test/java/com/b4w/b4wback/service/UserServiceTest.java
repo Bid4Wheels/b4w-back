@@ -1,7 +1,6 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
-import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -18,14 +17,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
+import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -57,12 +53,6 @@ class UserServiceTest {
         passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
         changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com","1Afjfslkjfl");
 
-    }
-
-    private  String authenticateAndGetToken(SignInRequest signInRequest){
-        ResponseEntity<JwtResponse> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
-                new HttpEntity<>(signInRequest), JwtResponse.class);
-        return Objects.requireNonNull(response.getBody()).getToken();
     }
 
     @Test
@@ -214,7 +204,7 @@ class UserServiceTest {
     void Test022_UserServiceWhenDeleteUserShouldChangeNameToDeleted() {
         User user = userService.createUser(userDTO);
         SignInRequest signInRequest = new SignInRequest(userDTO.getEmail(), "1Afjfslkjfl");
-        String token = authenticateAndGetToken(signInRequest);
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
         userService.deleteUser("Bearer " + token);
         assertEquals("Deleted", userRepository.findById(user.getId()).get().getName());
         assertEquals("Deleted", userRepository.findById(user.getId()).get().getLastName());
@@ -225,7 +215,7 @@ class UserServiceTest {
     void Test023_UserServiceWhenDeleteUserShouldDeleteAllAuctions(){
         userService.createUser(userDTO);
         SignInRequest signInRequest = new SignInRequest(userDTO.getEmail(), "1Afjfslkjfl");
-        String token = authenticateAndGetToken(signInRequest);
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
         CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L,"Subasta de automovil","text",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0),"Toyota",
                 "Corolla",150000,30000, GasType.GASOLINE,2022,"Silver",
