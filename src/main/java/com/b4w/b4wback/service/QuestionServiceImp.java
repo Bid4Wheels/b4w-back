@@ -36,8 +36,10 @@ public class QuestionServiceImp implements QuestionService {
         Optional<Auction> auctionOptional = auctionRepository.findById(questionDTO.getAuctionId());
         if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction with the given id was not found");
         Auction auction = auctionOptional.get();
-        if (auction.getStatus() != AuctionStatus.OPEN) throw new BadRequestParametersException("The auction is already closed");
-        if (auction.getUser().getId() == authorId) throw new BadRequestParametersException("The author of the auction can't be the same of the question");
+        if (auction.getStatus() != AuctionStatus.OPEN)
+            throw new BadRequestParametersException("The auction is already closed");
+        if (auction.getUser().getId() == authorId)
+            throw new BadRequestParametersException("The author of the auction can't be the same of the question");
 
         Optional<User> user = userRepository.findById(authorId);
         if (user.isEmpty()) throw new EntityNotFoundException("User with given id");
