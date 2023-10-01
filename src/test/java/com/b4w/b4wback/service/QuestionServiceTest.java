@@ -4,6 +4,7 @@ import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
@@ -64,28 +65,26 @@ public class QuestionServiceTest {
 
     @Test
     void Test001_QuestionServiceCreateQuestionWithAllCorrectThenCreateQuestion() {
-        Question question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         assertEquals(createQuestionDTO.getQuestion(), question.getQuestion());
-        assertEquals(createQuestionDTO.getAuctionId(), question.getAuction().getId());
-        assertEquals(users.get(1).getId(), question.getAuthor().getId());
+        assertEquals(users.get(1).getEmail(), question.getUser().getEmail());
     }
 
     @Test
     void Test002_QuestionServiceCreateQuestionMultipleTimesForSameAuctionThenAllCorrect(){
-        Question question1 = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+        GetQuestionDTO question1 = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         CreateQuestionDTO questionDTO2 = new CreateQuestionDTO("Hello", auction.getId());
-        Question question2 = questionService.createQuestion(questionDTO2, users.get(2).getId());
+        GetQuestionDTO question2 = questionService.createQuestion(questionDTO2, users.get(2).getId());
 
 
         assertEquals(createQuestionDTO.getQuestion(), question1.getQuestion());
-        assertEquals(createQuestionDTO.getAuctionId(), question1.getAuction().getId());
-        assertEquals(users.get(1).getId(), question1.getAuthor().getId());
+        assertEquals(users.get(1).getEmail(), question1.getUser().getEmail());
+
 
         assertEquals(questionDTO2.getQuestion(), question2.getQuestion());
-        assertEquals(questionDTO2.getAuctionId(), question2.getAuction().getId());
-        assertEquals(users.get(2).getId(), question2.getAuthor().getId());
+        assertEquals(users.get(2).getEmail(), question2.getUser().getEmail());
     }
 
     @Test

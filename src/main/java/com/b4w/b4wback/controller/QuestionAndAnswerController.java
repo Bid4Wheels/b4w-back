@@ -16,13 +16,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/QandA")
 public class QuestionAndAnswerController {
     private final QuestionService questionService;
-    private final UserService userService;
     private final JwtService jwtService;
 
 
-    public QuestionAndAnswerController(QuestionService questionService, UserService userService, JwtService jwtService) {
+    public QuestionAndAnswerController(QuestionService questionService, JwtService jwtService) {
         this.questionService = questionService;
-        this.userService = userService;
         this.jwtService = jwtService;
     }
 
@@ -31,15 +29,6 @@ public class QuestionAndAnswerController {
         final String jwt = auth.substring(7);
         Long userId = jwtService.extractId(jwt);
 
-        Question question = questionService.createQuestion(questionDTO, userId);
-        UserDTO userDTO = UserDTO.builder().name(question.getAuthor().getName())
-                .lastName(question.getAuthor().getLastName())
-                .email(question.getAuthor().getEmail())
-                .phoneNumber(question.getAuthor().getPhoneNumber())
-                .imgURL(userService.createUrlForDownloadingImage(userId))
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(new GetQuestionDTO(question.getId(),
-                question.getTimeOfQuestion(), question.getQuestion(), userDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(questionService.createQuestion(questionDTO, userId));
     }
 }
