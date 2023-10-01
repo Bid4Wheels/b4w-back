@@ -84,7 +84,7 @@ public class QuestionAndAnswerControllerTest {
     void Test001_QuestionAndAnswerControllerWhenPostNewQuestionInAuctionThenGetQuestionDTO() {
         int userNumber = 1;
 
-        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
                 createHttpEntity(createQuestionDTO, userDTOS.get(userNumber)),
                 GetQuestionDTO.class);
 
@@ -101,7 +101,7 @@ public class QuestionAndAnswerControllerTest {
     void Test002_QuestionAndAnswerControllerWhenPostNewQuestionInAuctionWithSameUserThenGetBadRequest() {
         int userNumber = 0;
 
-        ResponseEntity<String> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+        ResponseEntity<String> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
                 createHttpEntity(createQuestionDTO, userDTOS.get(userNumber)),
                 String.class);
 
@@ -122,7 +122,7 @@ public class QuestionAndAnswerControllerTest {
         auction = auctionRepository.save(auction);
 
         createQuestionDTO.setAuctionId(auction.getId());
-        ResponseEntity<String> postBidResponse = restTemplate.exchange(baseUrl, HttpMethod.POST,
+        ResponseEntity<String> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
                 createHttpEntity(createQuestionDTO, userDTOS.get(userNumber)),
                 String.class);
 

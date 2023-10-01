@@ -26,7 +26,7 @@ public class QuestionAndAnswerController {
         this.jwtService = jwtService;
     }
 
-    @PostMapping()
+    @PostMapping("/question")
     public ResponseEntity<GetQuestionDTO> createUserAuction(@RequestHeader("Authorization") String auth,  @RequestBody @Valid CreateQuestionDTO questionDTO){
         final String jwt = auth.substring(7);
         Long userId = jwtService.extractId(jwt);
