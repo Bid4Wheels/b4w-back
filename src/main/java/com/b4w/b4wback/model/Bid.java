@@ -13,8 +13,6 @@ import java.util.Date;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
 @Getter
 public class Bid {
     @Id

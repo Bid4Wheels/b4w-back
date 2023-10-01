@@ -1,7 +1,6 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.model.Tag;
 import com.b4w.b4wback.repository.TagRepository;
@@ -17,7 +16,9 @@ import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
-import java.util.Objects;
+
+
+import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -41,14 +42,9 @@ public class TagControllerTest {
                 "+5491112345678", "1Afjfslkjfl");
         SignInRequest signInRequest=new SignInRequest(userDTO.getEmail(), userDTO.getPassword());
         userService.createUser(userDTO);
-        token=authenticateAndGetToken(signInRequest);}
-
-    private String authenticateAndGetToken(SignInRequest signInRequest) {
-        String loginURL = "/auth/login";
-        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
-                new HttpEntity<>(signInRequest), JwtResponse.class);
-        return Objects.requireNonNull(response.getBody()).getToken();
+        token = authenticateAndGetToken(signInRequest, restTemplate);
     }
+
     @Test
     void Test001_TagControllerGetAllTagsShouldReturnStatusOK(){
         List<String> tags = List.of("Tag1", "Tag2", "Tag3", "Tag4", "Tag5");
