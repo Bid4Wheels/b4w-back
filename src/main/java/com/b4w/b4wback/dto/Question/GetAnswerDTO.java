@@ -1,7 +1,6 @@
 package com.b4w.b4wback.dto.Question;
 
 import lombok.AllArgsConstructor;
-import lombok.Generated;
 import lombok.Getter;
 
 import java.time.LocalDateTime;

@@ -1,7 +1,6 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
-import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
@@ -12,8 +11,6 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.model.Bid;
-import com.b4w.b4wback.model.Question;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
