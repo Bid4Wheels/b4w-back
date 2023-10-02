@@ -96,4 +96,18 @@ public class QuestionServiceImp implements QuestionService {
         questionRepository.save(questionOptional.get());
         return new GetAnswerDTO(questionOptional.get().getTimeOfAnswer(), questionOptional.get().getAnswer());
     }
+
+    @Override
+    public void deleteAnswer(Long answerId, Long userId) {
+        Question question = questionRepository.findById(answerId).orElseThrow(
+                () -> new EntityNotFoundException("Question with given id was not found"));
+        Auction auction = question.getAuction();
+        if (auction.getUser().getId() != userId)
+            throw new BadRequestParametersException("The user is not the owner of the auction");
+        if (auction.getStatus() != AuctionStatus.OPEN)
+            throw new BadRequestParametersException("The auction is already closed");
+        question.setAnswer(null);
+        question.setTimeOfAnswer(null);
+        questionRepository.save(question);
+    }
 }

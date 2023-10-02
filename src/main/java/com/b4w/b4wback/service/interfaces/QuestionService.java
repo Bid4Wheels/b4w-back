@@ -13,4 +13,6 @@ public interface QuestionService {
 
     void deleteQuestion(Long questionId, Long userId);
     GetAnswerDTO answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion);
+
+    void deleteAnswer(Long answerId, Long userId);
 }
