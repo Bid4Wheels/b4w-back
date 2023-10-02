@@ -1,6 +1,8 @@
 package com.b4w.b4wback.service;
 
+import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
@@ -64,14 +66,27 @@ public class QuestionServiceImp implements QuestionService {
 
     @Override
     public void deleteQuestion(Long questionId, Long userId) {
-        Question question=questionRepository.findById(questionId).orElseThrow(
+        Question question = questionRepository.findById(questionId).orElseThrow(
                 () -> new EntityNotFoundException("Question with given id was not found"));
         //TODO: check if the question is not answered.
-        if (question.getAuction().getStatus()==AuctionStatus.OPEN){
+        if (question.getAuction().getStatus() == AuctionStatus.OPEN) {
             questionRepository.deleteById(questionId);
-        }
-        else{
+        } else {
             throw new BadRequestParametersException("The auction is already closed");
         }
+    }
+    public GetAnswerDTO answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion) {
+        Optional<Question> questionOptional = questionRepository.findById(idQuestion);
+        if (questionOptional.isEmpty()) throw new EntityNotFoundException("Question with given id was not found");
+        Auction auction = questionOptional.get().getAuction();
+        if (auction.getUser().getId() != userId)
+            throw new BadRequestParametersException("The user is not the owner of the auction");
+        if (auction.getStatus() != AuctionStatus.OPEN)
+            throw new BadRequestParametersException("The auction is already closed");
+        Question question = questionOptional.get();
+        question.setAnswer(answer.getAnswer());
+        question.setTimeOfAnswer(LocalDateTime.now());
+        questionRepository.save(questionOptional.get());
+        return new GetAnswerDTO(questionOptional.get().getTimeOfAnswer(), questionOptional.get().getAnswer());
     }
 }

@@ -1,9 +1,10 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
-import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
@@ -11,8 +12,6 @@ import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.model.Bid;
-import com.b4w.b4wback.model.Question;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
@@ -109,16 +108,83 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test005_QuestionServiceDeleteQuestionWhenNotExists(){
+    void Test006_QuestionServiceAnswerQuestionWithAllCorrectThenAnswerQuestion() {
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        GetAnswerDTO answerDTO = questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
+
+        assertEquals(answer, answerDTO.getAnswer());
+    }
+
+    @Test
+    void Test007_QuestionServiceAnswerQuestionWhenAlreadyAnswerShouldOverwriteAnswer(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        GetAnswerDTO answerDTO = questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
+
+        assertEquals(answer, answerDTO.getAnswer());
+
+        String answer2 ="sale 603784, un saludo";
+
+        AnswerQuestionDTO answerCheck2 = new AnswerQuestionDTO(answer2);
+
+        GetAnswerDTO answerDTO2 = questionService.answerQuestion(users.get(0).getId(), answerCheck2, question.getId());
+
+        assertEquals(answer2, answerDTO2.getAnswer());
+    }
+
+    @Test
+    void Test008_QuestionServiceAnswerQuestionWhenUserIsNotOwnerOfAuctionReturnBadRequest(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        assertThrows(BadRequestParametersException.class,()->questionService.answerQuestion(users.get(1).getId(), answerCheck, question.getId()));
+    }
+
+    @Test
+    void Test009_QuestionServiceAnswerQuestionWhenAuctionIsNotOpenReturnBadRequest(){
+        auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
+                LocalDateTime.of(2025, 10, 10, 10, 10), "Toyota",
+                "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
+                GearShiftType.AUTOMATIC, null), null);
+        auction.setUser(users.get(0));
+        auction = auctionRepository.save(auction);
+
+        createQuestionDTO.setAuctionId(auction.getId());
+
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        auction.setStatus(AuctionStatus.FINISHED);
+        auctionRepository.save(auction);
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        assertThrows(BadRequestParametersException.class,()->questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId()));
+    }
+
+    @Test
+    void Test010_QuestionServiceDeleteQuestionWhenNotExists(){
         assertThrows(EntityNotFoundException.class,()-> questionService.deleteQuestion(1L,1L));
     }
 
     @Test
-    void Test006_QuestionServiceDeleteQuestionWhenAuctionIsClosed(){
+    void Test011_QuestionServiceDeleteQuestionWhenAuctionIsClosed(){
         questionService.createQuestion(createQuestionDTO, users.get(1).getId());
         auction.setStatus(AuctionStatus.FINISHED);
         auctionRepository.save(auction);
         assertThrows(BadRequestParametersException.class,()-> questionService.deleteQuestion(1L,1L));
     }
-
 }
