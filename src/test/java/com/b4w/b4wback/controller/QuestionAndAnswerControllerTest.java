@@ -164,6 +164,8 @@ public class QuestionAndAnswerControllerTest {
                 String.class);
 
         assertEquals(HttpStatus.CREATED, answerResponse.getStatusCode());
+        assertTrue(answerResponse.hasBody());
+        assertTrue(answerResponse.getBody().contains("150000 pesos, un saludo"));
     }
 
 }
