@@ -1,12 +1,11 @@
 package com.b4w.b4wback.controller;
 
+import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
-import com.b4w.b4wback.dto.UserDTO;
-import com.b4w.b4wback.model.Question;
 import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.QuestionService;
-import com.b4w.b4wback.service.interfaces.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,5 +29,13 @@ public class QuestionAndAnswerController {
         Long userId = jwtService.extractId(jwt);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.createQuestion(questionDTO, userId));
+    }
+
+    @PatchMapping("/answer/{id}")
+    public ResponseEntity<GetAnswerDTO> answerQuestion(@RequestHeader("Authorization") String token, @RequestBody @Valid AnswerQuestionDTO answer, @PathVariable Long id){
+        final String jwt = token.substring(7);
+        Long userId = jwtService.extractId(jwt);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(questionService.answerQuestion(userId, answer, id));
     }
 }
