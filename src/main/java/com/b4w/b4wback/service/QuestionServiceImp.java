@@ -61,4 +61,18 @@ public class QuestionServiceImp implements QuestionService {
 
         return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(), userDTO);
     }
+
+    @Override
+    public void deleteQuestion(Long questionId, Long userId) {
+        Question question=questionRepository.findById(questionId).orElseThrow(
+                () -> new EntityNotFoundException("Question with given id was not found"));
+        //TODO: check if the question is not answered.
+        if (question.getAuction().getStatus()==AuctionStatus.OPEN){
+            questionRepository.deleteById(questionId);
+        }
+        else{
+            throw new BadRequestParametersException("The auction is already closed");
+        }
+
+    }
 }

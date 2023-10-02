@@ -8,4 +8,6 @@ import com.b4w.b4wback.model.Question;
 
 public interface QuestionService {
     GetQuestionDTO createQuestion(CreateQuestionDTO questionDTO, Long authorId);
+
+    void deleteQuestion(Long questionId, Long userId);
 }
