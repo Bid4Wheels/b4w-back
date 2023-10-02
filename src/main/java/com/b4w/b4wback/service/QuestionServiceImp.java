@@ -73,13 +73,10 @@ public class QuestionServiceImp implements QuestionService {
             throw new BadRequestParametersException("The user is not the owner of the auction");
         if (auction.getStatus() != AuctionStatus.OPEN)
             throw new BadRequestParametersException("The auction is already closed");
-        if (questionOptional.get().getAnswer() == null) {
-            questionOptional.get().setAnswer(answer.getAnswer());
-            questionOptional.get().setTimeOfAnswer(LocalDateTime.now());
-            questionRepository.save(questionOptional.get());
-        } else {
-            throw new BadRequestParametersException("The question is already answered");
-        }
+        Question question = questionOptional.get();
+        question.setAnswer(answer.getAnswer());
+        question.setTimeOfAnswer(LocalDateTime.now());
+        questionRepository.save(questionOptional.get());
         return new GetAnswerDTO(questionOptional.get().getTimeOfAnswer(), questionOptional.get().getAnswer());
     }
 }
