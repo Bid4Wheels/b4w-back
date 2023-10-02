@@ -187,4 +187,13 @@ public class QuestionServiceTest {
         auctionRepository.save(auction);
         assertThrows(BadRequestParametersException.class,()-> questionService.deleteQuestion(1L,1L));
     }
+
+    @Test
+    void Test012_QuestionServiceDeleteQuestionWhenQuestionHasAnswer(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+        String answer ="sale 150000, un saludo";
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+        questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
+        assertThrows(BadRequestParametersException.class,()-> questionService.deleteQuestion(1L,1L));
+    }
 }

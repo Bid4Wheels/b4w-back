@@ -179,4 +179,20 @@ public class QuestionAndAnswerControllerTest {
         assertNotNull(deleteQuestionResponse.getBody());
         assertTrue(deleteQuestionResponse.getBody().contains("Question with given id was not found"));
     }
+
+    @Test
+    void Test006_QuestionAndAnswerControllerWhenDeleteQuestionWithAllOkShouldReturnOk(){
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+
+        GetQuestionDTO questionDTO = postBidResponse.getBody();
+
+        ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/"+questionDTO.getId(), HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(0)),
+                String.class);
+
+        assertEquals(HttpStatus.OK, deleteQuestionResponse.getStatusCode());
+    }
 }
