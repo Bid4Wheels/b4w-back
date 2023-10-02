@@ -5,7 +5,6 @@ import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
-import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -194,5 +193,39 @@ public class QuestionAndAnswerControllerTest {
                 String.class);
 
         assertEquals(HttpStatus.OK, deleteQuestionResponse.getStatusCode());
+    }
+
+    @Test
+    void Test007_QuestionAndAnswerControllerWhenDeleteAnswerWithAllOkShouldReturnOk(){
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+        GetQuestionDTO questionDTO = postBidResponse.getBody();
+
+        restTemplate.exchange(baseUrl+"/answer/"+questionDTO.getId(), HttpMethod.PATCH,
+                createHttpEntity(new AnswerQuestionDTO("150000 pesos, un saludo"), userDTOS.get(0)),
+                String.class);
+        //The endpoint will ignore body.
+        ResponseEntity<String> deleteAnswerResponse = restTemplate.exchange(baseUrl+"/answer/"+questionDTO.getId(), HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(0)),
+                String.class);
+
+        assertEquals(HttpStatus.OK, deleteAnswerResponse.getStatusCode());
+    }
+    @Test
+    void Test008_QuestionAndAnswerControllerWhenDeleteAnswerWithIncorrectAuthorReturnBadRequest(){
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+        GetQuestionDTO questionDTO = postBidResponse.getBody();
+        ResponseEntity<String> deleteAnswerResponse = restTemplate.exchange(baseUrl+"/answer/"+questionDTO.getId(), HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, deleteAnswerResponse.getStatusCode());
+        assertNotNull(deleteAnswerResponse.getBody());
+        assertTrue(deleteAnswerResponse.getBody().contains("The user is not the owner of the auction"));
     }
 }
