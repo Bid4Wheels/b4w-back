@@ -1,6 +1,7 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetQandADTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
@@ -17,6 +18,7 @@ import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
 
@@ -61,4 +63,26 @@ public class QuestionServiceImp implements QuestionService {
 
         return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(), userDTO);
     }
+
+    @Override
+    public GetQandADTO getQandA(long auctionId) {
+        Optional<Auction> auctionOptional = auctionRepository.findById(auctionId);
+        if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction with the given id was not found");
+        Auction auction = auctionOptional.get();
+
+        UserDTO userDTOA = UserDTO.builder().name(auction.getUser().getName())
+                .lastName(auction.getUser().getLastName())
+                .imgURL(userService.createUrlForDownloadingImage(auction.getUser().getId()))
+                .build();
+
+        List<Question> questions = questionRepository.getQuestionByAuctionId(auctionId);
+        for (Question question : questions) {
+            UserDTO userDTOQ = UserDTO.builder().name(question.getAuthor().getName())
+                    .lastName(question.getAuthor().getLastName())
+                    .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
+                    .build();
+            }
+
+    }
+
 }

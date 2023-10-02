@@ -1,6 +1,7 @@
 package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetQandADTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.model.Question;
@@ -30,5 +31,20 @@ public class QuestionAndAnswerController {
         Long userId = jwtService.extractId(jwt);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.createQuestion(questionDTO, userId));
+    }
+
+
+
+
+
+
+
+
+
+
+
+    @GetMapping("/{auctionId}")
+    public ResponseEntity<GetQandADTO> getQandA(@PathVariable long auctionId){
+        return ResponseEntity.status(HttpStatus.OK).body(questionService.getQandA(auctionId));
     }
 }
