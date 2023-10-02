@@ -1,5 +1,6 @@
 package com.b4w.b4wback.controller;
 
+import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.dto.UserDTO;
@@ -30,5 +31,13 @@ public class QuestionAndAnswerController {
         Long userId = jwtService.extractId(jwt);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.createQuestion(questionDTO, userId));
+    }
+
+    @PatchMapping("/answer/{id}")
+    public ResponseEntity<?> answerQuestion(@RequestHeader("Authorization") String token, @RequestBody AnswerQuestionDTO answer, @PathVariable Long id){
+        final String jwt = token.substring(7);
+        Long userId = jwtService.extractId(jwt);
+        questionService.answerQuestion(userId, answer, id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
