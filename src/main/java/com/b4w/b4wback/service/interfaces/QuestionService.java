@@ -10,9 +10,7 @@ import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 public interface QuestionService {
     GetQuestionDTO createQuestion(CreateQuestionDTO questionDTO, Long authorId);
 
-<<<<<<< HEAD
+
     void deleteQuestion(Long questionId, Long userId);
-=======
     GetAnswerDTO answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion);
->>>>>>> develop
 }
