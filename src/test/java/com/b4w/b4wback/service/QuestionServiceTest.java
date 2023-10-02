@@ -3,8 +3,11 @@ package com.b4w.b4wback.service;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
@@ -104,5 +107,65 @@ public class QuestionServiceTest {
     @Test
     void Test004_QuestionServiceCreateQuestionOverAuctionWithSameUser(){
         assertThrows(BadRequestParametersException.class,()->questionService.createQuestion(createQuestionDTO, users.get(0).getId()));
+    }
+
+    @Test
+    void Test005_QuestionServiceAnswerQuestionWithAllCorrectThenAnswerQuestion() {
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        GetAnswerDTO answerDTO = questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
+
+        assertEquals(answer, answerDTO.getAnswer());
+    }
+
+    @Test
+    void Test006_QuestionServiceAnswerQuestionWhenAlreadyAnswerReturnBadRequest(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
+
+        assertThrows(BadRequestParametersException.class,()->questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId()));
+    }
+
+    @Test
+    void Test007_QuestionServiceAnswerQuestionWhenUserIsNotOwnerOfAuctionReturnBadRequest(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        assertThrows(BadRequestParametersException.class,()->questionService.answerQuestion(users.get(1).getId(), answerCheck, question.getId()));
+    }
+
+    @Test
+    void Test008_QuestionServiceAnswerQuestionWhenAuctionIsNotOpenReturnBadRequest(){
+        auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
+                LocalDateTime.of(2025, 10, 10, 10, 10), "Toyota",
+                "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
+                GearShiftType.AUTOMATIC, null), null);
+        auction.setUser(users.get(0));
+        auction = auctionRepository.save(auction);
+
+        createQuestionDTO.setAuctionId(auction.getId());
+
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        auction.setStatus(AuctionStatus.FINISHED);
+        auctionRepository.save(auction);
+
+        String answer ="sale 150000, un saludo";
+
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+
+        assertThrows(BadRequestParametersException.class,()->questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId()));
     }
 }

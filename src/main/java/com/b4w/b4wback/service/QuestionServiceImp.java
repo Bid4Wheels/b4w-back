@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
@@ -64,7 +65,7 @@ public class QuestionServiceImp implements QuestionService {
     }
 
     @Override
-    public void answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion) {
+    public GetAnswerDTO answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion) {
         Optional<Question> questionOptional = questionRepository.findById(idQuestion);
         if (questionOptional.isEmpty()) throw new EntityNotFoundException("Question with given id was not found");
         Auction auction = questionOptional.get().getAuction();
@@ -72,12 +73,13 @@ public class QuestionServiceImp implements QuestionService {
             throw new BadRequestParametersException("The user is not the owner of the auction");
         if (auction.getStatus() != AuctionStatus.OPEN)
             throw new BadRequestParametersException("The auction is already closed");
-        if (questionOptional.get().getAnswer() != null) {
+        if (questionOptional.get().getAnswer() == null) {
             questionOptional.get().setAnswer(answer.getAnswer());
             questionOptional.get().setTimeOfAnswer(LocalDateTime.now());
             questionRepository.save(questionOptional.get());
         } else {
             throw new BadRequestParametersException("The question is already answered");
         }
+        return new GetAnswerDTO(questionOptional.get().getTimeOfAnswer(), questionOptional.get().getAnswer());
     }
 }

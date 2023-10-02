@@ -2,6 +2,7 @@ package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
+import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.enums.GasType;
@@ -49,6 +50,12 @@ public class QuestionAndAnswerControllerTest {
         HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(questionDTO, headers);
+    }
+
+    private HttpEntity<AnswerQuestionDTO> createHttpEntity(AnswerQuestionDTO answerDTO, CreateUserDTO userDTO){
+        HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(answerDTO, headers);
     }
 
 
@@ -131,6 +138,32 @@ public class QuestionAndAnswerControllerTest {
         assertTrue(postBidResponse.getBody().contains("The auction is already closed"));
     }
 
+    @Test
+    void Test004_QuestionAndAnswerControllerWhenPatchNewAnswerShouldReturnOk(){
+        auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
+                LocalDateTime.of(2020, 10, 10, 10, 10), "Toyota",
+                "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
+                GearShiftType.AUTOMATIC, null), null);
+        auction.setUser(users.get(0));
+        auction = auctionRepository.save(auction);
 
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+        assertEquals(HttpStatus.CREATED, postBidResponse.getStatusCode());
+        assertTrue(postBidResponse.hasBody());
+
+        GetQuestionDTO questionDTO = postBidResponse.getBody();
+        assertNotNull(questionDTO);
+        assertEquals(createQuestionDTO.getQuestion(), questionDTO.getQuestion());
+        assertEquals(userDTOS.get(1).getEmail(), questionDTO.getUser().getEmail());
+
+        ResponseEntity<String> answerResponse = restTemplate.exchange(baseUrl+"/answer/"+questionDTO.getId(), HttpMethod.PATCH,
+                createHttpEntity(new AnswerQuestionDTO("150000 pesos, un saludo"), userDTOS.get(0)),
+                String.class);
+
+        assertEquals(HttpStatus.CREATED, answerResponse.getStatusCode());
+    }
 
 }
