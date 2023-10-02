@@ -120,16 +120,24 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test006_QuestionServiceAnswerQuestionWhenAlreadyAnswerReturnBadRequest(){
+    void Test006_QuestionServiceAnswerQuestionWhenAlreadyAnswerShouldOverwriteAnswer(){
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         String answer ="sale 150000, un saludo";
 
         AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
 
-        questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
+        GetAnswerDTO answerDTO = questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
 
-        assertThrows(BadRequestParametersException.class,()->questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId()));
+        assertEquals(answer, answerDTO.getAnswer());
+
+        String answer2 ="sale 603784, un saludo";
+
+        AnswerQuestionDTO answerCheck2 = new AnswerQuestionDTO(answer2);
+
+        GetAnswerDTO answerDTO2 = questionService.answerQuestion(users.get(0).getId(), answerCheck2, question.getId());
+
+        assertEquals(answer2, answerDTO2.getAnswer());
     }
 
     @Test
