@@ -68,6 +68,9 @@ public class QuestionServiceImp implements QuestionService {
     public void deleteQuestion(Long questionId, Long userId) {
         Question question = questionRepository.findById(questionId).orElseThrow(
                 () -> new EntityNotFoundException("Question with given id was not found"));
+
+        if (question.getAuthor().getId() != userId)
+            throw new BadRequestParametersException("The user is not the author of the question");
         if (question.getAuction().getStatus() == AuctionStatus.OPEN) {
             if (question.getAnswer()==null){
                 questionRepository.deleteById(questionId);

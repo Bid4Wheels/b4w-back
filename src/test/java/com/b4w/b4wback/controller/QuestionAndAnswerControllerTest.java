@@ -190,7 +190,7 @@ public class QuestionAndAnswerControllerTest {
         GetQuestionDTO questionDTO = postBidResponse.getBody();
 
         ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/"+questionDTO.getId(), HttpMethod.DELETE,
-                createHttpEntity(createQuestionDTO, userDTOS.get(0)),
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
                 String.class);
 
         assertEquals(HttpStatus.OK, deleteQuestionResponse.getStatusCode());
