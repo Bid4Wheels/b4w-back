@@ -5,9 +5,11 @@ import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
+import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.Question;
@@ -105,4 +107,18 @@ public class QuestionServiceTest {
     void Test004_QuestionServiceCreateQuestionOverAuctionWithSameUser(){
         assertThrows(BadRequestParametersException.class,()->questionService.createQuestion(createQuestionDTO, users.get(0).getId()));
     }
+
+    @Test
+    void Test005_QuestionServiceDeleteQuestionWhenNotExists(){
+        assertThrows(EntityNotFoundException.class,()-> questionService.deleteQuestion(1L,1L));
+    }
+
+    @Test
+    void Test006_QuestionServiceDeleteQuestionWhenAuctionIsClosed(){
+        questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+        auction.setStatus(AuctionStatus.FINISHED);
+        auctionRepository.save(auction);
+        assertThrows(BadRequestParametersException.class,()-> questionService.deleteQuestion(1L,1L));
+    }
+
 }

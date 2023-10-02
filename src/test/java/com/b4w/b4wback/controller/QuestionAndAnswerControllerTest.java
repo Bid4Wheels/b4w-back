@@ -4,6 +4,7 @@ import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -131,6 +132,14 @@ public class QuestionAndAnswerControllerTest {
         assertTrue(postBidResponse.getBody().contains("The auction is already closed"));
     }
 
+    @Test
+    void Test004_QuestionAndAnswerControllerWhenDeleteQuestionNotExists(){
+        ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/1", HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(0)),
+                String.class);
 
-
+        assertEquals(HttpStatus.NOT_FOUND, deleteQuestionResponse.getStatusCode());
+        assertNotNull(deleteQuestionResponse.getBody());
+        assertTrue(deleteQuestionResponse.getBody().contains("Question with given id was not found"));
+    }
 }

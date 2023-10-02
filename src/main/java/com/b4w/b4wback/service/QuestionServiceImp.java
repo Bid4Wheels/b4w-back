@@ -73,6 +73,5 @@ public class QuestionServiceImp implements QuestionService {
         else{
             throw new BadRequestParametersException("The auction is already closed");
         }
-
     }
 }
