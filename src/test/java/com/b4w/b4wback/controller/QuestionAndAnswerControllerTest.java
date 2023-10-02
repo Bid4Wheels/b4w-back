@@ -5,6 +5,7 @@ import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -168,4 +169,30 @@ public class QuestionAndAnswerControllerTest {
         assertTrue(answerResponse.getBody().contains("150000 pesos, un saludo"));
     }
 
+    @Test
+    void Test005_QuestionAndAnswerControllerWhenDeleteQuestionNotExists(){
+        ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/1", HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(0)),
+                String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, deleteQuestionResponse.getStatusCode());
+        assertNotNull(deleteQuestionResponse.getBody());
+        assertTrue(deleteQuestionResponse.getBody().contains("Question with given id was not found"));
+    }
+
+    @Test
+    void Test006_QuestionAndAnswerControllerWhenDeleteQuestionWithAllOkShouldReturnOk(){
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+
+        GetQuestionDTO questionDTO = postBidResponse.getBody();
+
+        ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/"+questionDTO.getId(), HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                String.class);
+
+        assertEquals(HttpStatus.OK, deleteQuestionResponse.getStatusCode());
+    }
 }
