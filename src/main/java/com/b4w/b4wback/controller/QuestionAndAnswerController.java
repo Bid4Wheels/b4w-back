@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/QandA")
 public class QuestionAndAnswerController {
@@ -34,7 +36,7 @@ public class QuestionAndAnswerController {
 
 
     @GetMapping("/{auctionId}")
-    public ResponseEntity<GetQandADTO> getQandA(@PathVariable long auctionId){
+    public ResponseEntity<List<GetQandADTO>> getQandA(@PathVariable long auctionId){
         return ResponseEntity.status(HttpStatus.OK).body(questionService.getQandA(auctionId));
     }
 

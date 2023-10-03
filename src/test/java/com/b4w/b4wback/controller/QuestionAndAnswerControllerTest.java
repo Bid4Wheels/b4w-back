@@ -2,9 +2,7 @@ package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
-import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
-import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.dto.Question.*;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -56,6 +54,12 @@ public class QuestionAndAnswerControllerTest {
         HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(answerDTO, headers);
+    }
+
+    private HttpEntity<GetQandADTO> createHttpEntity(GetQandADTO qandADTO, CreateUserDTO userDTO){
+        HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(qandADTO, headers);
     }
 
 
@@ -168,4 +172,22 @@ public class QuestionAndAnswerControllerTest {
         assertTrue(answerResponse.getBody().contains("150000 pesos, un saludo"));
     }
 
+    @Test
+    void Test005_QuestionAndAnswerControllerWhenGetQandAInAuctionShouldReturnOk(){
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+        ResponseEntity<GetAnswerDTO> answerResponse = restTemplate.exchange(baseUrl+"/answer/"+postBidResponse.getBody().getId(), HttpMethod.PATCH,
+                createHttpEntity(new AnswerQuestionDTO("150000 pesos, un saludo"), userDTOS.get(0)),
+                GetAnswerDTO.class);
+
+        ResponseEntity<List> getQandAResponse = restTemplate.exchange(baseUrl+"/"+auction.getId(), HttpMethod.GET,
+                createHttpEntity(new GetQandADTO(),userDTOS.get(0)), List.class);
+
+        assertEquals(HttpStatus.OK, getQandAResponse.getStatusCode());
+        assertTrue(getQandAResponse.hasBody());
+        System.out.println(getQandAResponse.getBody());
+        assertEquals(1, getQandAResponse.getBody().size());
+    }
 }

@@ -2,10 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
-import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
-import com.b4w.b4wback.dto.Question.GetAnswerDTO;
-import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.dto.Question.*;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -173,4 +170,27 @@ public class QuestionServiceTest {
 
         assertThrows(BadRequestParametersException.class,()->questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId()));
     }
+
+    @Test
+    void Test009_QuestionServiceGetQandAWhenAuctionHasNoQuestionsReturnEmptyList(){
+        List<GetQandADTO> list = questionService.getQandA(auction.getId());
+
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    void Test010_QuestionServiceGetQandAWhenAuctionHasQuestionsReturnList(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        List<GetQandADTO> list = questionService.getQandA(auction.getId());
+
+        assertFalse(list.isEmpty());
+        assertEquals(1, list.size());
+        assertEquals(question.getQuestion(), list.get(0).getQuestion());
+        assertEquals(question.getUser().getName(), list.get(0).getUser().getName());
+        assertEquals(question.getUser().getLastName(), list.get(0).getUser().getLastName());
+        assertEquals(question.getUser().getImgURL(), list.get(0).getUser().getImgURL());
+
+    }
+
 }
