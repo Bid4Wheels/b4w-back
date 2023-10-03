@@ -27,13 +27,12 @@ public class QuestionAndAnswerController {
     }
 
     @PostMapping("/question")
-    public ResponseEntity<GetQuestionDTO> createUserAuction(@RequestHeader("Authorization") String auth,  @RequestBody @Valid CreateQuestionDTO questionDTO){
+    public ResponseEntity<GetQuestionDTO> createUserQuestion(@RequestHeader("Authorization") String auth,  @RequestBody @Valid CreateQuestionDTO questionDTO){
         final String jwt = auth.substring(7);
         Long userId = jwtService.extractId(jwt);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.createQuestion(questionDTO, userId));
     }
-
 
     @GetMapping("/{auctionId}")
     public ResponseEntity<List<GetQandADTO>> getQandA(@PathVariable long auctionId){
@@ -47,4 +46,11 @@ public class QuestionAndAnswerController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.answerQuestion(userId, answer, id));
     }
+
+    @DeleteMapping("/question/{questionId}")
+    public ResponseEntity<?> deleteUserQuestion(@RequestHeader("Authorization") String auth, @PathVariable Long questionId){
+        final String jwt = auth.substring(7);
+        Long userId = jwtService.extractId(jwt);
+        questionService.deleteQuestion(questionId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);}
 }

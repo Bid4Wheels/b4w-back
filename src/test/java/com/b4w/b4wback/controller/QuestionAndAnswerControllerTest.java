@@ -3,6 +3,7 @@ package com.b4w.b4wback.controller;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.Question.*;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -190,5 +191,31 @@ public class QuestionAndAnswerControllerTest {
         assertTrue(getQandAResponse.hasBody());
         System.out.println(getQandAResponse.getBody());
         assertEquals(1, Objects.requireNonNull(getQandAResponse.getBody()).size());
+    }
+    @Test
+    void Test006_QuestionAndAnswerControllerWhenDeleteQuestionNotExists(){
+        ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/1", HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(0)),
+                String.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, deleteQuestionResponse.getStatusCode());
+        assertNotNull(deleteQuestionResponse.getBody());
+        assertTrue(deleteQuestionResponse.getBody().contains("Question with given id was not found"));
+    }
+
+    @Test
+    void Test007_QuestionAndAnswerControllerWhenDeleteQuestionWithAllOkShouldReturnOk(){
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+
+        GetQuestionDTO questionDTO = postBidResponse.getBody();
+
+        ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/"+questionDTO.getId(), HttpMethod.DELETE,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                String.class);
+
+        assertEquals(HttpStatus.OK, deleteQuestionResponse.getStatusCode());
     }
 }

@@ -86,6 +86,23 @@ public class QuestionServiceImp implements QuestionService {
 
 
     @Override
+    public void deleteQuestion(Long questionId, Long userId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(
+                () -> new EntityNotFoundException("Question with given id was not found"));
+
+        if (question.getAuthor().getId() != userId)
+            throw new BadRequestParametersException("The user is not the author of the question");
+        if (question.getAuction().getStatus() == AuctionStatus.OPEN) {
+            if (question.getAnswer()==null){
+                questionRepository.deleteById(questionId);
+            }
+            else{
+                throw new BadRequestParametersException("The question has already been answered");
+            }
+        } else {
+            throw new BadRequestParametersException("The auction is not opened");
+        }
+    }
     public GetAnswerDTO answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion) {
         Optional<Question> questionOptional = questionRepository.findById(idQuestion);
         if (questionOptional.isEmpty()) throw new EntityNotFoundException("Question with given id was not found");

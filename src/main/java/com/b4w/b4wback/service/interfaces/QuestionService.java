@@ -13,6 +13,8 @@ import java.util.List;
 public interface QuestionService {
     GetQuestionDTO createQuestion(CreateQuestionDTO questionDTO, Long authorId);
 
+    void deleteQuestion(Long questionId, Long userId);
+
     List<GetQandADTO> getQandA(long auctionId);
 
     GetAnswerDTO answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion);
