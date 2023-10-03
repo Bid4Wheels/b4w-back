@@ -21,6 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
 import static org.junit.jupiter.api.Assertions.*;
@@ -178,7 +179,7 @@ public class QuestionAndAnswerControllerTest {
                 createHttpEntity(createQuestionDTO, userDTOS.get(1)),
                 GetQuestionDTO.class);
 
-        ResponseEntity<GetAnswerDTO> answerResponse = restTemplate.exchange(baseUrl+"/answer/"+postBidResponse.getBody().getId(), HttpMethod.PATCH,
+        restTemplate.exchange(baseUrl+"/answer/"+ Objects.requireNonNull(postBidResponse.getBody()).getId(), HttpMethod.PATCH,
                 createHttpEntity(new AnswerQuestionDTO("150000 pesos, un saludo"), userDTOS.get(0)),
                 GetAnswerDTO.class);
 
@@ -188,6 +189,6 @@ public class QuestionAndAnswerControllerTest {
         assertEquals(HttpStatus.OK, getQandAResponse.getStatusCode());
         assertTrue(getQandAResponse.hasBody());
         System.out.println(getQandAResponse.getBody());
-        assertEquals(1, getQandAResponse.getBody().size());
+        assertEquals(1, Objects.requireNonNull(getQandAResponse.getBody()).size());
     }
 }

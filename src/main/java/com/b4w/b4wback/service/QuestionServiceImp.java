@@ -70,10 +70,6 @@ public class QuestionServiceImp implements QuestionService {
     @Override
     public List<GetQandADTO> getQandA(long auctionId) {
         List<GetQandADTO> list = new ArrayList<>();
-        Optional<Auction> auctionOptional = auctionRepository.findById(auctionId);
-        if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction with the given id was not found");
-        Auction auction = auctionOptional.get();
-
         List<Question> questions = questionRepository.getQuestionByAuctionId(auctionId);
         for (Question question : questions) {
             UserDTO userDTOQ = UserDTO.builder()
