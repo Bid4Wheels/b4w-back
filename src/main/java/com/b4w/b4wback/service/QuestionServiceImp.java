@@ -98,8 +98,8 @@ public class QuestionServiceImp implements QuestionService {
     }
 
     @Override
-    public void deleteAnswer(Long answerId, Long userId) {
-        Question question = questionRepository.findById(answerId).orElseThrow(
+    public void deleteAnswer(Long questionId, Long userId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(
                 () -> new EntityNotFoundException("Question with given id was not found"));
         Auction auction = question.getAuction();
         if (auction.getUser().getId() != userId)
