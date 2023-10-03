@@ -78,7 +78,7 @@ public class QuestionServiceImp implements QuestionService {
                     .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
                     .build();
 
-            GetQandADTO getQandADTO = new GetQandADTO(question.getQuestion(), question.getAnswer(), userDTOQ);
+            GetQandADTO getQandADTO = new GetQandADTO(question.getQuestion(),question.getTimeOfQuestion(), question.getAnswer(),question.getTimeOfAnswer(), userDTOQ);
             list.add(getQandADTO);
             }
         return list;
