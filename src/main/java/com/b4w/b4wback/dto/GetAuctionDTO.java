@@ -18,6 +18,7 @@ import java.util.List;
 public class GetAuctionDTO {
     private String title;
     private String description;
+    private LocalDateTime createdAt;
     private LocalDateTime deadline;
     private int basePrice;
     private String brand;
@@ -40,6 +41,7 @@ public class GetAuctionDTO {
     public GetAuctionDTO(GetAuctionDTO getAuctionDTO,List<String> auctionImageUrl, List<AuctionHigestBidDTO> topBids){
         this.title=getAuctionDTO.getTitle();
         this.description=getAuctionDTO.getDescription();
+        this.createdAt=getAuctionDTO.getCreatedAt();
         this.deadline=getAuctionDTO.getDeadline();
         this.basePrice=getAuctionDTO.getBasePrice();
         this.brand=getAuctionDTO.getBrand();

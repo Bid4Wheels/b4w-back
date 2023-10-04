@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetQandADTO;
 import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.dto.UserDTO;
@@ -19,6 +20,8 @@ import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
 
@@ -63,6 +66,24 @@ public class QuestionServiceImp implements QuestionService {
 
         return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(), userDTO);
     }
+
+    @Override
+    public List<GetQandADTO> getQandA(long auctionId) {
+        List<GetQandADTO> list = new ArrayList<>();
+        List<Question> questions = questionRepository.getQuestionByAuctionId(auctionId);
+        for (Question question : questions) {
+            UserDTO userDTOQ = UserDTO.builder()
+                    .name(question.getAuthor().getName())
+                    .lastName(question.getAuthor().getLastName())
+                    .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
+                    .build();
+
+            GetQandADTO getQandADTO = new GetQandADTO(question.getQuestion(),question.getTimeOfQuestion(), question.getAnswer(),question.getTimeOfAnswer(), userDTOQ);
+            list.add(getQandADTO);
+            }
+        return list;
+    }
+
 
     @Override
     public void deleteQuestion(Long questionId, Long userId) {

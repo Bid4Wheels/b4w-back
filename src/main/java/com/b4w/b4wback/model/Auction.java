@@ -20,7 +20,7 @@ import java.util.List;
 @Entity
 @NamedNativeQuery(
         name = "getAuctionDTOWithFilter",
-        query = "SELECT DISTINCT auction.id AS id, auction.title AS title, auction.deadline AS deadline, auction.status AS status," +
+        query = "SELECT DISTINCT auction.id AS id, auction.title AS title, auction.deadline AS deadline, auction.created_at AS created_at, auction.status AS status," +
                 "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price) AS highestBidAmount " +
                 "FROM Auction auction WHERE " +
                 "(:tagsIds IS NULL OR " +
@@ -55,6 +55,7 @@ import java.util.List;
                 columns = {
                         @ColumnResult(name = "id", type = Long.class),
                         @ColumnResult(name = "title", type = String.class),
+                        @ColumnResult(name = "created_at", type = LocalDateTime.class),
                         @ColumnResult(name = "deadLine", type = LocalDateTime.class),
                         @ColumnResult(name = "status", type = AuctionStatus.class),
                         @ColumnResult(name = "highestBidAmount", type = Integer.class)
@@ -145,7 +146,7 @@ public class Auction {
     }
     public GetAuctionDTO getAuctionToDTO(BidRepository bidRepository, UserService userService){
 
-        return GetAuctionDTO.builder().title(this.getTitle()).description(this.getDescription()).deadline(this.getDeadline()).basePrice(this.getBasePrice()).
+        return GetAuctionDTO.builder().title(this.getTitle()).description(this.getDescription()).createdAt(this.getCreatedAt()).deadline(this.getDeadline()).basePrice(this.getBasePrice()).
                 brand(this.getBrand()).model(this.getModel()).status(this.getStatus()).milage(this.getMilage()).gasType(this.getGasType())
                 .modelYear(this.getModelYear()).color(this.getColor()).doorsAmount(this.getDoorsAmount()).gearShiftType(this.getGearShiftType())
                 .auctionOwnerDTO(AuctionOwnerDTO.builder()

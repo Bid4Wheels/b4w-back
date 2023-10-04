@@ -1,8 +1,6 @@
 package com.b4w.b4wback.repository;
 
 import com.b4w.b4wback.dto.AuctionDTO;
-import com.b4w.b4wback.enums.GasType;
-import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import org.springframework.data.domain.Page;
@@ -75,14 +73,14 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
                                     Pageable pageable);
 
 
-    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.createdAt, auction.status , " +
             "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
             "FROM Auction auction " +
             "WHERE auction.deadline > :currentDateTime " +
             "ORDER BY auction.deadline ASC")
     Page<AuctionDTO> findUpcomingAuctions(@Param("currentDateTime") LocalDateTime currentDateTime, Pageable pageable);
 
-    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.status , " +
+    @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline,auction.createdAt, auction.status , " +
             "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
             "FROM Auction auction " +
             "WHERE auction.createdAt < :currentDateTime " +

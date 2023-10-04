@@ -2,10 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
-import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
-import com.b4w.b4wback.dto.Question.GetAnswerDTO;
-import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.dto.Question.*;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -110,7 +107,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test006_QuestionServiceAnswerQuestionWithAllCorrectThenAnswerQuestion() {
+    void Test005_QuestionServiceAnswerQuestionWithAllCorrectThenAnswerQuestion() {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         String answer ="sale 150000, un saludo";
@@ -123,7 +120,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test007_QuestionServiceAnswerQuestionWhenAlreadyAnswerShouldOverwriteAnswer(){
+    void Test006_QuestionServiceAnswerQuestionWhenAlreadyAnswerShouldOverwriteAnswer(){
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         String answer ="sale 150000, un saludo";
@@ -144,7 +141,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test008_QuestionServiceAnswerQuestionWhenUserIsNotOwnerOfAuctionReturnBadRequest(){
+    void Test007_QuestionServiceAnswerQuestionWhenUserIsNotOwnerOfAuctionReturnBadRequest(){
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         String answer ="sale 150000, un saludo";
@@ -155,7 +152,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test009_QuestionServiceAnswerQuestionWhenAuctionIsNotOpenReturnBadRequest(){
+    void Test008_QuestionServiceAnswerQuestionWhenAuctionIsNotOpenReturnBadRequest(){
         auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
                 LocalDateTime.of(2025, 10, 10, 10, 10), "Toyota",
                 "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
@@ -178,12 +175,35 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test010_QuestionServiceDeleteQuestionWhenNotExists(){
+    void Test009_QuestionServiceGetQandAWhenAuctionHasNoQuestionsReturnEmptyList(){
+        List<GetQandADTO> list = questionService.getQandA(auction.getId());
+
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    void Test010_QuestionServiceGetQandAWhenAuctionHasQuestionsReturnList(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+
+        List<GetQandADTO> list = questionService.getQandA(auction.getId());
+
+        assertFalse(list.isEmpty());
+        assertEquals(1, list.size());
+        assertEquals(question.getQuestion(), list.get(0).getQuestion());
+        assertEquals(question.getUser().getName(), list.get(0).getUser().getName());
+        assertEquals(question.getUser().getLastName(), list.get(0).getUser().getLastName());
+        assertEquals(question.getUser().getImgURL(), list.get(0).getUser().getImgURL());
+
+    }
+
+
+    @Test
+    void Test011_QuestionServiceDeleteQuestionWhenNotExists(){
         assertThrows(EntityNotFoundException.class,()-> questionService.deleteQuestion(1L,1L));
     }
 
     @Test
-    void Test011_QuestionServiceDeleteQuestionWhenAuctionIsClosed(){
+    void Test012_QuestionServiceDeleteQuestionWhenAuctionIsClosed(){
         questionService.createQuestion(createQuestionDTO, users.get(1).getId());
         auction.setStatus(AuctionStatus.FINISHED);
         auctionRepository.save(auction);
@@ -191,7 +211,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test012_QuestionServiceDeleteQuestionWhenQuestionHasAnswer(){
+    void Test013_QuestionServiceDeleteQuestionWhenQuestionHasAnswer(){
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
         String answer ="sale 150000, un saludo";
         AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
