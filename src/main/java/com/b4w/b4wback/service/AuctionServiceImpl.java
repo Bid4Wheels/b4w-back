@@ -109,6 +109,7 @@ public class AuctionServiceImpl implements AuctionService {
                 continue;
             }
             auctionDTO.setHighestBidAmount(topBid.getAmount());
+            auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
         }
 
         return new PageImpl<>(auctionWithImages,pageable,totalElements);
@@ -135,6 +136,7 @@ public class AuctionServiceImpl implements AuctionService {
             auction.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url,expirationTimeImageUrl));
             auctionsWithImage.add(auction);
             auction.setTagNames(auctionRepository.findTagsOfAuctionID(auction.getId()));
+            auction.setCreatedAt(auction.getCreatedAt());
         }
         return new PageImpl<>(auctionsWithImage,pageable,totalElements);
     }
@@ -185,6 +187,7 @@ public class AuctionServiceImpl implements AuctionService {
                 continue;
             }
             auctionDTO.setHighestBidAmount(topBid.getAmount());
+            auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
         }
         return new PageImpl<>(auctionDTOS,pageable,totalElements);
     }
@@ -210,6 +213,7 @@ public class AuctionServiceImpl implements AuctionService {
                 continue;
             }
             auctionDTO.setHighestBidAmount(topBid.getAmount());
+            auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
         }
         return new PageImpl<>(auctionDTOS,pageable,totalElements);
     }
@@ -250,6 +254,7 @@ public class AuctionServiceImpl implements AuctionService {
                     continue;
                 }
                 auctionDTO.setHighestBidAmount(topBid.getAmount());
+                auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
             }
             return new PageImpl<>(auctionWithImages, pageable, totalElements);
         }
