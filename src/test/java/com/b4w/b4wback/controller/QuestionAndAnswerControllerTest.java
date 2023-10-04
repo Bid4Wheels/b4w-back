@@ -2,9 +2,7 @@ package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
-import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
-import com.b4w.b4wback.dto.Question.GetQuestionDTO;
+import com.b4w.b4wback.dto.Question.*;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -24,6 +22,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,6 +56,12 @@ public class QuestionAndAnswerControllerTest {
         HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(answerDTO, headers);
+    }
+
+    private HttpEntity<GetQandADTO> createHttpEntity(GetQandADTO qandADTO, CreateUserDTO userDTO){
+        HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(qandADTO, headers);
     }
 
 
@@ -170,7 +175,25 @@ public class QuestionAndAnswerControllerTest {
     }
 
     @Test
-    void Test005_QuestionAndAnswerControllerWhenDeleteQuestionNotExists(){
+    void Test005_QuestionAndAnswerControllerWhenGetQandAInAuctionShouldReturnOk(){
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
+                createHttpEntity(createQuestionDTO, userDTOS.get(1)),
+                GetQuestionDTO.class);
+
+        restTemplate.exchange(baseUrl+"/answer/"+ Objects.requireNonNull(postBidResponse.getBody()).getId(), HttpMethod.PATCH,
+                createHttpEntity(new AnswerQuestionDTO("150000 pesos, un saludo"), userDTOS.get(0)),
+                GetAnswerDTO.class);
+
+        ResponseEntity<List> getQandAResponse = restTemplate.exchange(baseUrl+"/"+auction.getId(), HttpMethod.GET,
+                createHttpEntity(new GetQandADTO(),userDTOS.get(0)), List.class);
+
+        assertEquals(HttpStatus.OK, getQandAResponse.getStatusCode());
+        assertTrue(getQandAResponse.hasBody());
+        System.out.println(getQandAResponse.getBody());
+        assertEquals(1, Objects.requireNonNull(getQandAResponse.getBody()).size());
+    }
+    @Test
+    void Test006_QuestionAndAnswerControllerWhenDeleteQuestionNotExists(){
         ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/1", HttpMethod.DELETE,
                 createHttpEntity(createQuestionDTO, userDTOS.get(0)),
                 String.class);
@@ -181,7 +204,7 @@ public class QuestionAndAnswerControllerTest {
     }
 
     @Test
-    void Test006_QuestionAndAnswerControllerWhenDeleteQuestionWithAllOkShouldReturnOk(){
+    void Test007_QuestionAndAnswerControllerWhenDeleteQuestionWithAllOkShouldReturnOk(){
         ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange(baseUrl+"/question", HttpMethod.POST,
                 createHttpEntity(createQuestionDTO, userDTOS.get(1)),
                 GetQuestionDTO.class);

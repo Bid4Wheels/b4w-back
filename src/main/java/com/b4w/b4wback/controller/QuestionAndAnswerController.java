@@ -2,6 +2,7 @@ package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
+import com.b4w.b4wback.dto.Question.GetQandADTO;
 import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.service.interfaces.JwtService;
@@ -10,6 +11,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/QandA")
@@ -31,6 +34,10 @@ public class QuestionAndAnswerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(questionService.createQuestion(questionDTO, userId));
     }
 
+    @GetMapping("/{auctionId}")
+    public ResponseEntity<List<GetQandADTO>> getQandA(@PathVariable long auctionId){
+        return ResponseEntity.status(HttpStatus.OK).body(questionService.getQandA(auctionId));
+    }
 
     @PatchMapping("/answer/{id}")
     public ResponseEntity<GetAnswerDTO> answerQuestion(@RequestHeader("Authorization") String token, @RequestBody @Valid AnswerQuestionDTO answer, @PathVariable Long id){
