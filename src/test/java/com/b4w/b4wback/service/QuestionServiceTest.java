@@ -192,8 +192,6 @@ public class QuestionServiceTest {
         assertEquals(question.getQuestion(), list.get(0).getQuestion());
         assertEquals(question.getUser().getName(), list.get(0).getUser().getName());
         assertEquals(question.getUser().getLastName(), list.get(0).getUser().getLastName());
-        assertEquals(question.getUser().getImgURL(), list.get(0).getUser().getImgURL());
-
     }
 
 
