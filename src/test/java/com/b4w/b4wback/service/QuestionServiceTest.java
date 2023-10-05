@@ -11,6 +11,7 @@ import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.QuestionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +42,8 @@ public class QuestionServiceTest {
     private List<User> users;
     private Auction auction;
 
-
+    @Autowired
+    private QuestionRepository questionRepository;
     @BeforeEach
     public void setup(){
         users = new ArrayList<>();
@@ -216,4 +218,15 @@ public class QuestionServiceTest {
         questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
         assertThrows(BadRequestParametersException.class,()-> questionService.deleteQuestion(1L,1L));
     }
+
+    @Test
+    void Test013_QuestionServiceDeleteAnswerWithAllOk(){
+        GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
+        String answer ="sale 150000, un saludo";
+        AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
+        questionService.answerQuestion(users.get(0).getId(), answerCheck, question.getId());
+        questionService.deleteAnswer(1L,1L);
+        assertNull(questionRepository.findById(1L).get().getAnswer());
+    }
+
 }

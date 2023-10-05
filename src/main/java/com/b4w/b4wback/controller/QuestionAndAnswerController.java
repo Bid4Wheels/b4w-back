@@ -53,4 +53,11 @@ public class QuestionAndAnswerController {
         Long userId = jwtService.extractId(jwt);
         questionService.deleteQuestion(questionId, userId);
         return new ResponseEntity<>(HttpStatus.OK);}
+
+    @DeleteMapping("/answer/{questionId}")
+    public ResponseEntity<?> deleteUserAnswer(@RequestHeader("Authorization") String auth, @PathVariable Long questionId){
+        final String jwt = auth.substring(7);
+        Long userId = jwtService.extractId(jwt);
+        questionService.deleteAnswer(questionId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);}
 }
