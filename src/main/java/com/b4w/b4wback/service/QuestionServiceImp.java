@@ -15,6 +15,7 @@ import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.MailService;
 import com.b4w.b4wback.service.interfaces.QuestionService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.springframework.stereotype.Service;
@@ -33,12 +34,14 @@ public class QuestionServiceImp implements QuestionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final MailService mailService;
 
-    public QuestionServiceImp(QuestionRepository questionRepository, AuctionRepository auctionRepository, UserRepository userRepository, UserService userService) {
+    public QuestionServiceImp(QuestionRepository questionRepository, AuctionRepository auctionRepository, UserRepository userRepository, UserService userService, MailService mailService) {
         this.questionRepository = questionRepository;
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -64,6 +67,7 @@ public class QuestionServiceImp implements QuestionService {
                 .imgURL(userService.createUrlForDownloadingImage(authorId))
                 .build();
 
+        mailService.sendMail(auction.getUser().getEmail(), "New question from: " + userDTO.getName(), question.getQuestion());
         return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(), userDTO);
     }
 
@@ -115,6 +119,7 @@ public class QuestionServiceImp implements QuestionService {
         question.setAnswer(answer.getAnswer());
         question.setTimeOfAnswer(LocalDateTime.now());
         questionRepository.save(questionOptional.get());
+        mailService.sendMail(question.getAuthor().getEmail(), question.getAuction().getUser().getName() + " replied to your question of auction: " + question.getAuction().getTitle(), "your question: " + question.getQuestion() + "\n" + "answer: " + question.getAnswer());
         return new GetAnswerDTO(questionOptional.get().getTimeOfAnswer(), questionOptional.get().getAnswer());
     }
 

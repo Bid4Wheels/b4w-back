@@ -15,6 +15,5 @@ public class GetQuestionDTO {
     private Long id;
     private LocalDateTime timeOfQuestion;
     private String question;
-
     private UserDTO user;
 }
