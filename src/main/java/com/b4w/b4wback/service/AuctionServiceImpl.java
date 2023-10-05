@@ -13,9 +13,11 @@ import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.exception.UrlAlreadySentException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
+import com.b4w.b4wback.model.Question;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
+import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.*;
 
@@ -53,9 +55,11 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final JwtService jwtService;
 
+    private final QuestionRepository questionRepository;
+
 
     public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,
-                              UserService userService,S3Service s3Service,TagService tagService, JwtService jwtService) {
+                              UserService userService, S3Service s3Service, TagService tagService, JwtService jwtService, QuestionRepository questionRepository) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
@@ -63,6 +67,7 @@ public class AuctionServiceImpl implements AuctionService {
         this.s3Service=s3Service;
         this.tagService=tagService;
         this.jwtService=jwtService;
+        this.questionRepository = questionRepository;
     }
 
     @Override
@@ -226,6 +231,8 @@ public class AuctionServiceImpl implements AuctionService {
         if (userAuctionFound != null) {
             LocalDateTime momentToDelete = LocalDateTime.now();
             if (!momentToDelete.isAfter(userAuctionFound.getDeadline())) {
+                List<Question> questions = questionRepository.getQuestionByAuctionId(auctionID);
+                questionRepository.deleteAll(questions);
                 auctionRepository.delete(userAuctionFound);
             } else {
                 throw new AuctionExpiredException("Auction expired in " + userAuctionFound.getDeadline());
