@@ -1,9 +1,6 @@
 package com.b4w.b4wback.dto.Question;
 
 import com.b4w.b4wback.dto.UserDTO;
-import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.model.User;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
