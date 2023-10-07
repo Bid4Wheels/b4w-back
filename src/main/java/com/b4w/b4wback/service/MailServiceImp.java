@@ -4,6 +4,7 @@ import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.service.interfaces.MailService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class MailServiceImp implements MailService {
 
+    @Value("${sendMail.Boolean.Value}")
+    private boolean sendMail;
     private final JavaMailSender mailSender;
 
     public MailServiceImp(JavaMailSender mailSender) {
@@ -21,6 +24,7 @@ public class MailServiceImp implements MailService {
 
     @Override
     public void sendMail(String to, String subject, String text) {
+        if (!sendMail) return;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
@@ -29,6 +33,7 @@ public class MailServiceImp implements MailService {
     }
 
     public void endOfAuctionMails(Auction auction, Bid highestBid, String[] losers){
+        if (!sendMail) return;
         Thread mailThread = new Thread(()-> {
             String subject = "End of auction: " + auction.getTitle();
             endOfAuctionMailOwner(subject, auction, highestBid);
