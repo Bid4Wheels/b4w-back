@@ -10,6 +10,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Service
 @Validated
 public class MailServiceImp implements MailService {
@@ -17,6 +20,7 @@ public class MailServiceImp implements MailService {
     @Value("${sendMail.Boolean.Value}")
     private boolean sendMail;
     private final JavaMailSender mailSender;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public MailServiceImp(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -25,23 +29,21 @@ public class MailServiceImp implements MailService {
     @Override
     public void sendMail(String to, String subject, String text) {
         if (!sendMail) return;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
+        executorService.execute(()->{
+            sendMailNotThread(to, subject, text);
+        });
+
     }
 
     public void endOfAuctionMails(Auction auction, Bid highestBid, String[] losers){
         if (!sendMail) return;
-        Thread mailThread = new Thread(()-> {
+        executorService.execute(()-> {
             String subject = "End of auction: " + auction.getTitle();
             endOfAuctionMailOwner(subject, auction, highestBid);
             if (highestBid == null) return;
             endOfAuctionSendMailWinner(subject, auction, highestBid);
             endOfAuctionSendMailLosers(subject, auction, losers);
         });
-        mailThread.start();
     }
 
 
@@ -62,12 +64,12 @@ public class MailServiceImp implements MailService {
                     """,
                     highestBid.getAmount(), bidder.getName() + " " + bidder.getLastName() ,bidder.getEmail());
         }
-        sendMail(auction.getUser().getEmail(), subject, message);
+        sendMailNotThread(auction.getUser().getEmail(), subject, message);
     }
 
     private void endOfAuctionSendMailWinner(String subject, Auction auction, Bid highestBid){
         User owner = auction.getUser();
-        sendMail(highestBid.getBidder().getEmail(),
+        sendMailNotThread(highestBid.getBidder().getEmail(),
                 subject,
                 String.format("""
                         Hello from b4w,
@@ -89,6 +91,14 @@ public class MailServiceImp implements MailService {
                 We wish you better luck next time.
                 Have a nice day.""", auction.getTitle()));
 
+        mailSender.send(message);
+    }
+
+    private void sendMailNotThread(String to, String subject, String text){
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
         mailSender.send(message);
     }
 }
