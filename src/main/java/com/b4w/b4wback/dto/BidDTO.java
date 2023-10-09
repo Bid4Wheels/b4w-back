@@ -6,9 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class BidDTO {
     private long id;
     private LocalDateTime time;

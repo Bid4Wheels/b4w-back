@@ -4,8 +4,6 @@ import com.b4w.b4wback.dto.BidDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.auth.JwtResponse;
-import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -25,10 +23,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static com.b4w.b4wback.util.HttpEntityCreator.createHeaderWithToken;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -82,7 +80,7 @@ public class BidControllerTest {
 
 
     private HttpEntity<CreateBidDTO> createHttpEntity(CreateBidDTO bidDTO, CreateUserDTO userDTO){
-        HttpHeaders headers = createHeaderWithToken(userDTO);
+        HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(bidDTO, headers);
     }
@@ -91,20 +89,6 @@ public class BidControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(createUserDTO, headers);
-    }
-
-    private HttpHeaders createHeaderWithToken(CreateUserDTO userDTO){
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()));
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization","Bearer " +jwtToken);
-        return headers;
-    }
-
-    private String authenticateAndGetToken(SignInRequest signInRequest) {
-        String loginURL = "/auth/login";
-        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
-                new HttpEntity<>(signInRequest), JwtResponse.class);
-        return Objects.requireNonNull(response.getBody()).getToken();
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
-import com.b4w.b4wback.dto.auth.JwtResponse;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -30,17 +29,13 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
-import java.sql.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
+import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -87,12 +82,6 @@ public class AuctionServiceTest {
                 4, GearShiftType.AUTOMATIC, null);
     }
 
-    private String authenticateAndGetToken(SignInRequest signInRequest) {
-        String loginURL = "/auth/login";
-        ResponseEntity<JwtResponse> response = restTemplate.exchange(loginURL, HttpMethod.POST,
-                new HttpEntity<>(signInRequest), JwtResponse.class);
-        return Objects.requireNonNull(response.getBody()).getToken();
-    }
     @Test
     void Test001_AuctionServiceWhenReceiveCreatedAuctionDTOWithValidDTOShouldReturnCreateAuctionDTO() {
         CreateAuctionDTO auctionDTOWithID = new CreateAuctionDTO(1L, new CreateAuctionDTO(1L, "Subasta de automovil", "text",
@@ -744,7 +733,7 @@ public class AuctionServiceTest {
         long bidforUser = bidService.crateBid(new CreateBidDTO(150000, 2L, 1L)).getId();
         long bidforUser2 = bidService.crateBid(new CreateBidDTO(5000000, 3L, 1L)).getId();
         SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
-        String token=authenticateAndGetToken(signInRequest);
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
         auctionService.deleteAuction(1L,"Bearer "+token);
         assertFalse(auctionRepository.existsById(1L));
         assertFalse(bidRepository.existsById(bidforUser));
@@ -758,7 +747,7 @@ public class AuctionServiceTest {
         userService.createUser(userDTO);
         auctionService.createAuction(auctionDTO);
         SignInRequest signInRequest=new SignInRequest("marcosbenji@dusyum.com","1Afjfslkjfl");
-        String token=authenticateAndGetToken(signInRequest);
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
         assertThrows(EntityNotFoundException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));
     }
 
@@ -767,7 +756,7 @@ public class AuctionServiceTest {
         auctionDTO.setDeadline(LocalDateTime.now().minusDays(1));
         auctionService.createAuction(auctionDTO);
         SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
-        String token=authenticateAndGetToken(signInRequest);
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
         assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));}
 
 }
