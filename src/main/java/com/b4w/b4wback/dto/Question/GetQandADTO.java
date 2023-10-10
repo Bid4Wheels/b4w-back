@@ -11,9 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 public class GetQandADTO {
-    private String question;
-    private LocalDateTime questionDate;
-    private String answer;
-    private LocalDateTime answerDate;
+    private GetQuestionDTO question;
+    private GetAnswerDTO answer;
     private UserDTO user;
 }
