@@ -278,8 +278,11 @@ public class AuctionServiceImpl implements AuctionService {
         auctionRepository.saveAll(auctions);
     }
 
-    private String[] getLosersMails(Auction auction, Bid winner){
-        String[] losers = new String[auction.getBids().size()];
+    public String[] getLosersMails(Auction auction, Bid winner){
+        List<Bid> bids = auction.getBids();
+        if (bids.isEmpty() || bids.size() == 1) return new String[0];
+
+        String[] losers = new String[auction.getBids().size()-1];
         int i = 0;
         for (Bid bid : auction.getBids()) {
             if (bid != winner) losers[i] = bid.getBidder().getEmail();
