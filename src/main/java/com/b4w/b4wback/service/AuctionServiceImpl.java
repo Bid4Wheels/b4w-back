@@ -5,6 +5,7 @@ import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.dto.FilterAuctionDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.AuctionExpiredException;
 import com.b4w.b4wback.dto.*;
 
@@ -24,12 +25,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -232,31 +235,47 @@ public class AuctionServiceImpl implements AuctionService {
             }
         } else {
             throw new EntityNotFoundException("Auction not found");
-        }}
-
-        @Override
-        public Page<AuctionDTO> getAuctionsBiddedByUser ( long bidderId, Pageable pageable){
-            User user = userRepository.findById(bidderId).orElseThrow(() -> new EntityNotFoundException("User not found"));
-            Page<Auction> auctions = auctionRepository.findAuctionsByBidderIdOrderByDeadline(bidderId, pageable);
-            List<AuctionDTO> auctionDTOS = new ArrayList<>();
-            for (Auction auction : auctions) {
-                auctionDTOS.add((new AuctionDTO(auction)));
-            }
-            long totalElements = auctions.getTotalElements();
-            List<AuctionDTO> auctionWithImages = new ArrayList<>();
-            for (AuctionDTO auctionDTO : auctionDTOS) {
-                String url = auctionObjectKey + auctionDTO.getId() + "/img0";
-                auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url, expirationTimeImageUrl));
-                auctionWithImages.add(auctionDTO);
-                Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new BadRequestParametersException("Auction not found")));
-                if (topBid == null) {
-                    auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Auction not found")).getBasePrice());
-                    continue;
-                }
-                auctionDTO.setHighestBidAmount(topBid.getAmount());
-                auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
-            }
-            return new PageImpl<>(auctionWithImages, pageable, totalElements);
         }
+    }
+
+    @Override
+    public Page<AuctionDTO> getAuctionsBiddedByUser ( long bidderId, Pageable pageable){
+        User user = userRepository.findById(bidderId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Page<Auction> auctions = auctionRepository.findAuctionsByBidderIdOrderByDeadline(bidderId, pageable);
+        List<AuctionDTO> auctionDTOS = new ArrayList<>();
+        for (Auction auction : auctions) {
+            auctionDTOS.add((new AuctionDTO(auction)));
+        }
+        long totalElements = auctions.getTotalElements();
+        List<AuctionDTO> auctionWithImages = new ArrayList<>();
+        for (AuctionDTO auctionDTO : auctionDTOS) {
+            String url = auctionObjectKey + auctionDTO.getId() + "/img0";
+            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url, expirationTimeImageUrl));
+            auctionWithImages.add(auctionDTO);
+            Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new BadRequestParametersException("Auction not found")));
+            if (topBid == null) {
+                auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Auction not found")).getBasePrice());
+                continue;
+            }
+            auctionDTO.setHighestBidAmount(topBid.getAmount());
+            auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
+        }
+        return new PageImpl<>(auctionWithImages, pageable, totalElements);
+    }
+
+    public void finishAuction(Long auctionID, Long userId){
+        Optional<Auction> auctionO = auctionRepository.findById(auctionID);
+        if (auctionO.isEmpty()) throw new EntityNotFoundException("The auction with the given ID was not found");
+        if (auctionO.get().getStatus() != AuctionStatus.AWATINGDELIVERY)
+            throw  new BadCredentialsException("Not valid operation");
+
+        Bid bid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionO.get());
+        if (bid.getBidder().getId() != userId) throw new BadCredentialsException("Not valid operation");
+
+        Auction auction = auctionO.get();
+        auction.setStatus(AuctionStatus.FINISHED);
+
+        auctionRepository.save(auction);
+    }
 
 }
