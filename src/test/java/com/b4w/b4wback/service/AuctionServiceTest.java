@@ -760,11 +760,29 @@ public class AuctionServiceTest {
         auctionService.createAuction(auctionDTO);
         SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
         String token = authenticateAndGetToken(signInRequest, restTemplate);
-        assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));
+        assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));}
+
+    @Test
+    void Test038_AuctionServiceWhenUpdateAuctionStatusThenAllAuctionsUpdatedCorrectly(){
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionDTO.setDeadline(LocalDateTime.of(2010, 10, 10, 10, 10));
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+
+        auctionService.updateAuctionStatus();
+
+        List<Auction> auctions = auctionRepository.findAuctionByStatusAndDeadlineLessThan(AuctionStatus.OPEN,
+                LocalDateTime.of(3000, 12, 30, 23, 59));
+        assertEquals(4, auctions.size());
     }
 
     @Test
-    void Test038_AuctionServiceWhenFinishAuctionByTheWinnerThenAllCorrect(){
+    void Test039_AuctionServiceWhenFinishAuctionByTheWinnerThenAllCorrect(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
 
@@ -783,7 +801,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test039_AuctionServiceWhenFinishAuctionByUserBeforeFinishingThenBadCredentialsException(){
+    void Test040_AuctionServiceWhenFinishAuctionByUserBeforeFinishingThenBadCredentialsException(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
 
@@ -791,7 +809,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test040_AuctionServiceWhenFinishAuctionNotByTheWinnerThenBadCredentialsException(){
+    void Test041_AuctionServiceWhenFinishAuctionNotByTheWinnerThenBadCredentialsException(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
 
@@ -802,5 +820,4 @@ public class AuctionServiceTest {
 
         assertThrows(BadCredentialsException.class, ()->auctionService.finishAuction(auction.getAuctionId(), 3L));
     }
-
 }

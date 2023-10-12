@@ -31,4 +31,6 @@ public interface AuctionService {
     Page<AuctionDTO> getAuctionsBiddedByUser(long bidderId, Pageable pageable);
 
     void finishAuction(Long auctionID, Long userId);
+
+    void updateAuctionStatus();
 }
