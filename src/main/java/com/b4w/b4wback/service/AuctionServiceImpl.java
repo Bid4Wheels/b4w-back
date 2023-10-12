@@ -285,7 +285,7 @@ public class AuctionServiceImpl implements AuctionService {
         String[] losers = new String[auction.getBids().size()-1];
         int i = 0;
         for (Bid bid : auction.getBids()) {
-            if (bid != winner) losers[i] = bid.getBidder().getEmail();
+            if (bid.getId() != winner.getId()) losers[i] = bid.getBidder().getEmail();
             i++;
         }
         return losers;
