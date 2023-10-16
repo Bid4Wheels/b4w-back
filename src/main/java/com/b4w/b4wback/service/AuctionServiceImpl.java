@@ -299,7 +299,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     private void removeTagsThatAreNotInUse(List<Tag> tags){
         for (Tag tag : tags) {
-            if (tagRepository.findAuctionsByTagId(tag.getTagName()).isEmpty()){
+            if (tagRepository.findAuctionsByTagName(tag.getTagName()).isEmpty()){
                 tagRepository.delete(tag);
             }
         }
