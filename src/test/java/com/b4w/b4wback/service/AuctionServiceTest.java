@@ -779,4 +779,23 @@ public class AuctionServiceTest {
                 LocalDateTime.of(3000, 12, 30, 23, 59));
         assertEquals(4, auctions.size());
     }
+
+    @Test
+    void Test039_AuctionServiceWhenRemoveAuctionItShouldRemoveTagsThatAreNotInUsed(){
+        List<String> tags = List.of("tag1", "tag2", "tag3", "tag4", "tag5");
+        tagRepository.saveAll(tags.stream().map(Tag::new).toList());
+        auctionDTO.setTags(tags);
+        auctionService.createAuction(auctionDTO);
+        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil2", "text",
+                LocalDateTime.of(2031, 6, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, List.of("tag4"));
+        auctionService.createAuction(auctionDTO2);
+        SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
+        auctionService.deleteAuction(1L,"Bearer "+token);
+        assertEquals(1,tagRepository.findAll().size());
+        assertEquals("tag4",tagRepository.findAll().get(0).getTagName());
+    }
+
 }
