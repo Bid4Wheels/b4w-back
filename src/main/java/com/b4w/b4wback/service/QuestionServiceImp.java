@@ -44,15 +44,15 @@ public class QuestionServiceImp implements QuestionService {
     @Override
     public GetQuestionDTO createQuestion(CreateQuestionDTO questionDTO, Long authorId) {
         Optional<Auction> auctionOptional = auctionRepository.findById(questionDTO.getAuctionId());
-        if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction with the given id was not found");
+        if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction with "+ questionDTO.getAuctionId()+ " id was not found");
         Auction auction = auctionOptional.get();
         if (auction.getStatus() != AuctionStatus.OPEN)
-            throw new BadRequestParametersException("The auction is already closed");
+            throw new BadRequestParametersException("Auction with "+ questionDTO.getAuctionId()+" is already closed");
         if (auction.getUser().getId() == authorId)
             throw new BadRequestParametersException("The author of the auction can't be the same of the question");
 
         Optional<User> user = userRepository.findById(authorId);
-        if (user.isEmpty()) throw new EntityNotFoundException("User with given id");
+        if (user.isEmpty()) throw new EntityNotFoundException("User with Id "+ authorId +" not found");
 
         Question question = questionRepository.save(
                 new Question(LocalDateTime.now(), questionDTO.getQuestion(), auction, user.get()));
@@ -91,16 +91,16 @@ public class QuestionServiceImp implements QuestionService {
     @Override
     public void deleteQuestion(Long questionId, Long userId) {
         Question question = questionRepository.findById(questionId).orElseThrow(
-                () -> new EntityNotFoundException("Question with given id was not found"));
+                () -> new EntityNotFoundException("Question with "+questionId +" id was not found"));
 
         if (question.getAuthor().getId() != userId)
-            throw new BadRequestParametersException("The user is not the author of the question");
+            throw new BadRequestParametersException("User with "+userId+" is not the author of the question");
         if (question.getAuction().getStatus() == AuctionStatus.OPEN) {
             if (question.getAnswer()==null){
                 questionRepository.deleteById(questionId);
             }
             else{
-                throw new BadRequestParametersException("The question has already been answered");
+                throw new BadRequestParametersException("Question with Id "+ questionId+" has already been answered");
             }
         } else {
             throw new BadRequestParametersException("The auction is not opened");
@@ -108,7 +108,7 @@ public class QuestionServiceImp implements QuestionService {
     }
     public GetAnswerDTO answerQuestion(Long userId, AnswerQuestionDTO answer, Long idQuestion) {
         Optional<Question> questionOptional = questionRepository.findById(idQuestion);
-        if (questionOptional.isEmpty()) throw new EntityNotFoundException("Question with given id was not found");
+        if (questionOptional.isEmpty()) throw new EntityNotFoundException("Question with "+idQuestion +" id was not found");
         Auction auction = questionOptional.get().getAuction();
         if (auction.getUser().getId() != userId)
             throw new BadRequestParametersException("The user is not the owner of the auction");
@@ -124,12 +124,12 @@ public class QuestionServiceImp implements QuestionService {
     @Override
     public void deleteAnswer(Long questionId, Long userId) {
         Question question = questionRepository.findById(questionId).orElseThrow(
-                () -> new EntityNotFoundException("Question with given id was not found"));
+                () -> new EntityNotFoundException("Question with "+questionId +" id was not found"));
         Auction auction = question.getAuction();
         if (auction.getUser().getId() != userId)
-            throw new BadRequestParametersException("The user is not the owner of the auction");
+            throw new BadRequestParametersException("User with "+userId+" is not the owner of the auction");
         if (auction.getStatus() != AuctionStatus.OPEN)
-            throw new BadRequestParametersException("The auction is already closed");
+            throw new BadRequestParametersException("Auction of user with id "+userId+" is already closed");
         question.setAnswer(null);
         question.setTimeOfAnswer(null);
         questionRepository.save(question);

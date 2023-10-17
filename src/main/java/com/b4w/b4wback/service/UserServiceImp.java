@@ -72,9 +72,9 @@ public class UserServiceImp implements UserService {
     }
     @Override
     public UserDTO getUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User with Id "+id+" not found"));
         if(Objects.equals(user.getName(), "Deleted")){
-            throw new EntityNotFoundException("User not found");
+            throw new EntityNotFoundException("User with "+id+" not found");
         }
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
                 phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).build();
@@ -94,14 +94,14 @@ public class UserServiceImp implements UserService {
     @Override
     public void modifyUser(long id, ModifyUserDTO modifyUserDTO){
         User user = userRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("User not found"));
+                () -> new EntityNotFoundException("User with Id "+id+" not found"));
         user.modifyUser(modifyUserDTO);
         userRepository.save(user);
     }
 
     @Override
     public Integer createPasswordCodeForId(PasswordChangerDTO userDTO) {
-        User user = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(userDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User with email "+userDTO.getEmail()+" not found"));
         Integer passwordCode = Random.nextInt(100000, 999999);
         user.setPasswordCode(passwordCode);
         userRepository.save(user);
@@ -111,7 +111,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public void checkPasswordCode(GetPasswordCodeDTO passwordCodeDTO) {
-        User user = userRepository.findByEmail(passwordCodeDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(passwordCodeDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User with email "+passwordCodeDTO.getEmail()+" not found"));
         boolean check = Objects.equals(user.getPasswordCode(), passwordCodeDTO.getPasswordCode());
         if (!check) {
             throw new BadRequestParametersException("Password code does not match");
@@ -123,7 +123,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public void changePassword(ChangePasswordDTO changePasswordDTO) {
-        User user = userRepository.findByEmail(changePasswordDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findByEmail(changePasswordDTO.getEmail()).orElseThrow(() -> new EntityNotFoundException("User with email "+changePasswordDTO.getEmail() +" not found"));
         user.setPassword(passwordEncoder.encode(changePasswordDTO.getPassword()));
         userRepository.save(user);
     }
@@ -131,7 +131,7 @@ public class UserServiceImp implements UserService {
     @Override
     public String createUrlForUploadingImage(String token){
         String email= jwtService.extractUsername(token.substring(7));
-        long userId= userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User not found")).getId();
+        long userId= userRepository.findByEmail(email).orElseThrow(()->new EntityNotFoundException("User with email "+ email +" not found")).getId();
         return s3Service.generatePresignedUploadImageUrl(usersObjectKey+userId,expirationTimeImageUrl);
     }
     @Override
@@ -143,7 +143,7 @@ public class UserServiceImp implements UserService {
     @Override
     public void deleteUser(String token) {
         long id= jwtService.extractId(token.substring(7));
-        User user= userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User not found"));
+        User user= userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User with Id "+ id +" not found"));
         user.setName("Deleted");
         user.setLastName("Deleted");
         user.setPhoneNumber("Deleted");
