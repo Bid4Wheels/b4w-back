@@ -63,7 +63,7 @@ public class QuestionServiceImp implements QuestionService {
         Question question = questionRepository.save(
                 new Question(LocalDateTime.now(), questionDTO.getQuestion(), auction, user.get()));
 
-        UserDTO userDTO = UserDTO.builder().name(question.getAuthor().getName())
+        UserDTO userDTO = UserDTO.builder().id(user.get().getId()).name(question.getAuthor().getName())
                 .lastName(question.getAuthor().getLastName())
                 .email(question.getAuthor().getEmail())
                 .phoneNumber(question.getAuthor().getPhoneNumber())
@@ -79,13 +79,16 @@ public class QuestionServiceImp implements QuestionService {
         List<GetQandADTO> list = new ArrayList<>();
         List<Question> questions = questionRepository.getQuestionByAuctionId(auctionId);
         for (Question question : questions) {
-            UserDTO userDTOQ = UserDTO.builder()
+            UserDTO userDTOQ = UserDTO.builder().id(question.getAuthor().getId())
                     .name(question.getAuthor().getName())
                     .lastName(question.getAuthor().getLastName())
                     .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
                     .build();
 
-            GetQandADTO getQandADTO = new GetQandADTO(question.getQuestion(),question.getTimeOfQuestion(), question.getAnswer(),question.getTimeOfAnswer(), userDTOQ);
+            GetQandADTO getQandADTO = new GetQandADTO(
+                    new GetQuestionDTO(question),
+                    new GetAnswerDTO(question.getTimeOfAnswer(), question.getAnswer()),
+                    userDTOQ);
             list.add(getQandADTO);
             }
         return list;

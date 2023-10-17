@@ -5,6 +5,7 @@ import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.GetAuctionDTO;
 import com.b4w.b4wback.dto.FilterAuctionDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.AuctionExpiredException;
 import com.b4w.b4wback.dto.*;
 
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final UserRepository userRepository;
     private final BidRepository bidRepository;
 
+    private final MailService mailService;
     private final UserService userService;
 
     private final S3Service s3Service;
@@ -55,10 +58,11 @@ public class AuctionServiceImpl implements AuctionService {
 
 
     public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,
-                              UserService userService,S3Service s3Service,TagService tagService, JwtService jwtService) {
+                              MailService mailService, UserService userService, S3Service s3Service, TagService tagService, JwtService jwtService) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
+        this.mailService = mailService;
         this.userService=userService;
         this.s3Service=s3Service;
         this.tagService=tagService;
@@ -232,31 +236,58 @@ public class AuctionServiceImpl implements AuctionService {
             }
         } else {
             throw new EntityNotFoundException("Auction not found");
-        }}
-
-        @Override
-        public Page<AuctionDTO> getAuctionsBiddedByUser ( long bidderId, Pageable pageable){
-            User user = userRepository.findById(bidderId).orElseThrow(() -> new EntityNotFoundException("User not found"));
-            Page<Auction> auctions = auctionRepository.findAuctionsByBidderIdOrderByDeadline(bidderId, pageable);
-            List<AuctionDTO> auctionDTOS = new ArrayList<>();
-            for (Auction auction : auctions) {
-                auctionDTOS.add((new AuctionDTO(auction)));
-            }
-            long totalElements = auctions.getTotalElements();
-            List<AuctionDTO> auctionWithImages = new ArrayList<>();
-            for (AuctionDTO auctionDTO : auctionDTOS) {
-                String url = auctionObjectKey + auctionDTO.getId() + "/img0";
-                auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url, expirationTimeImageUrl));
-                auctionWithImages.add(auctionDTO);
-                Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new BadRequestParametersException("Auction not found")));
-                if (topBid == null) {
-                    auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Auction not found")).getBasePrice());
-                    continue;
-                }
-                auctionDTO.setHighestBidAmount(topBid.getAmount());
-                auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
-            }
-            return new PageImpl<>(auctionWithImages, pageable, totalElements);
         }
+    }
+
+    @Override
+    public Page<AuctionDTO> getAuctionsBiddedByUser ( long bidderId, Pageable pageable){
+        User user = userRepository.findById(bidderId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Page<Auction> auctions = auctionRepository.findAuctionsByBidderIdOrderByDeadline(bidderId, pageable);
+        List<AuctionDTO> auctionDTOS = new ArrayList<>();
+        for (Auction auction : auctions)
+            auctionDTOS.add((new AuctionDTO(auction)));
+
+        long totalElements = auctions.getTotalElements();
+        List<AuctionDTO> auctionWithImages = new ArrayList<>();
+        for (AuctionDTO auctionDTO : auctionDTOS) {
+            String url = auctionObjectKey + auctionDTO.getId() + "/img0";
+            auctionDTO.setFirstImageUrl(s3Service.generatePresignedDownloadImageUrl(url, expirationTimeImageUrl));
+            auctionWithImages.add(auctionDTO);
+            Bid topBid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new BadRequestParametersException("Auction not found")));
+            if (topBid == null) {
+                auctionDTO.setHighestBidAmount(auctionRepository.findById(auctionDTO.getId()).orElseThrow(() -> new EntityNotFoundException("Auction not found")).getBasePrice());
+                continue;
+            }
+            auctionDTO.setHighestBidAmount(topBid.getAmount());
+            auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
+        }
+        return new PageImpl<>(auctionWithImages, pageable, totalElements);
+    }
+
+    @Transactional
+    public void updateAuctionStatus(){
+        List<Auction> auctions = auctionRepository.findAuctionByStatusAndDeadlineLessThan(AuctionStatus.OPEN, LocalDateTime.now());
+
+        for (Auction auction : auctions) {
+            if (auction.getBids().isEmpty()) auction.setStatus(AuctionStatus.FINISHED);
+            else auction.setStatus(AuctionStatus.AWATINGDELIVERY);
+            Bid winnerBid = bidRepository.findTopByAuctionOrderByAmountDesc(auction);
+            mailService.endOfAuctionMails(auction, winnerBid, getLosersMails(auction, winnerBid));
+        }
+
+        auctionRepository.saveAll(auctions);
+    }
+
+    public String[] getLosersMails(Auction auction, Bid winner){
+        List<Bid> bids = auction.getBids();
+        if (bids.isEmpty() || bids.size() == 1) return new String[0];
+
+        List<String> losers = new ArrayList<>();
+        for (Bid bid : auction.getBids()) {
+            if (bid.getBidder().getId() != winner.getBidder().getId() && !losers.contains(bid.getBidder().getEmail()))
+                losers.add(bid.getBidder().getEmail());
+        }
+        return losers.toArray(new String[0]);
+    }
 
 }

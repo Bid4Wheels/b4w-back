@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.dto.auth.SignInRequest;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.AuctionExpiredException;
@@ -757,6 +758,25 @@ public class AuctionServiceTest {
         auctionService.createAuction(auctionDTO);
         SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
         String token = authenticateAndGetToken(signInRequest, restTemplate);
-        assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));}
+        assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));
+    }
 
+    @Test
+    void Test038_AuctionServiceWhenUpdateAuctionStatusThenAllAuctionsUpdatedCorrectly(){
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionDTO.setDeadline(LocalDateTime.of(2010, 10, 10, 10, 10));
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+
+        auctionService.updateAuctionStatus();
+
+        List<Auction> auctions = auctionRepository.findAuctionByStatusAndDeadlineLessThan(AuctionStatus.OPEN,
+                LocalDateTime.of(3000, 12, 30, 23, 59));
+        assertEquals(4, auctions.size());
+    }
 }
