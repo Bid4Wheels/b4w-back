@@ -70,7 +70,7 @@ public class QuestionServiceImp implements QuestionService {
                 .imgURL(userService.createUrlForDownloadingImage(authorId))
                 .build();
         if(sendMail)
-            mailService.sendMail(auction.getUser().getEmail(), "New question from: " + userDTO.getName(), question.getQuestion());
+            mailService.sendQuestionMail(auction.getUser().getEmail(), userDTO.getName(), auction.getTitle(), question.getQuestion());
         return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(), userDTO);
     }
 
