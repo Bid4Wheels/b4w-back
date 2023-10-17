@@ -106,7 +106,7 @@ public class MailServiceImp implements MailService {
     public void sendQuestionMail(String to, String subject, String title, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject(subject);
+        message.setSubject("Question about your auction" + title);
         message.setText("The user " + subject + " has made a question about your auction: " + title + "\n" + text);
         mailSender.send(message);
     }
