@@ -1,6 +1,7 @@
 package com.b4w.b4wback.repository;
 
 import com.b4w.b4wback.dto.AuctionDTO;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import org.springframework.data.domain.Page;
@@ -99,4 +100,6 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
             "WHERE a.id = :auction_id",
     nativeQuery = true)
     List<String> findTagsOfAuctionID(@Param("auction_id") long auction_id);
+
+    List<Auction> findAuctionByStatusAndDeadlineLessThan(AuctionStatus status, LocalDateTime deadLineLimit);
 }

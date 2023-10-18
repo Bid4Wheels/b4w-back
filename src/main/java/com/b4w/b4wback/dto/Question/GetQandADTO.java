@@ -13,5 +13,4 @@ import java.time.LocalDateTime;
 public class GetQandADTO {
     private GetQuestionDTO question;
     private GetAnswerDTO answer;
-    private UserDTO user;
 }

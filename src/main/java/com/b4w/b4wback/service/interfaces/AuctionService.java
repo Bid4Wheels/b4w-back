@@ -29,4 +29,6 @@ public interface AuctionService {
 
     void deleteAuction(Long auctionID,String token);
     Page<AuctionDTO> getAuctionsBiddedByUser(long bidderId, Pageable pageable);
+
+    void updateAuctionStatus();
 }
