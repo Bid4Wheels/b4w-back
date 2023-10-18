@@ -190,8 +190,6 @@ public class QuestionServiceTest {
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
         assertEquals(question.getQuestion(), list.get(0).getQuestion().getQuestion());
-        assertEquals(question.getUser().getName(), list.get(0).getUser().getName());
-        assertEquals(question.getUser().getLastName(), list.get(0).getUser().getLastName());
         //mutable URL because it contains time
         //assertEquals(question.getUser().getImgURL(), list.get(0).getUser().getImgURL());
     }

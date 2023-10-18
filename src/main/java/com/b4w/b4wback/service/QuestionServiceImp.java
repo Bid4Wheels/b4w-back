@@ -71,7 +71,7 @@ public class QuestionServiceImp implements QuestionService {
                 .build();
         if(sendMail)
             mailService.sendQuestionMail(auction.getUser().getEmail(), userDTO.getName(), auction.getTitle(), question.getQuestion());
-        return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(), userDTO);
+        return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(),userDTO);
     }
 
     @Override
@@ -79,16 +79,15 @@ public class QuestionServiceImp implements QuestionService {
         List<GetQandADTO> list = new ArrayList<>();
         List<Question> questions = questionRepository.getQuestionByAuctionId(auctionId);
         for (Question question : questions) {
-            UserDTO userDTOQ = UserDTO.builder().id(question.getAuthor().getId())
-                    .name(question.getAuthor().getName())
-                    .lastName(question.getAuthor().getLastName())
-                    .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
-                    .build();
-
+//            UserDTO userDTOQ = UserDTO.builder().id(question.getAuthor().getId())
+//                    .name(question.getAuthor().getName())
+//                    .lastName(question.getAuthor().getLastName())
+//                    .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
+//                    .build();
+            String url=userService.createUrlForDownloadingImage(question.getAuthor().getId());
             GetQandADTO getQandADTO = new GetQandADTO(
-                    new GetQuestionDTO(question),
-                    new GetAnswerDTO(question.getTimeOfAnswer(), question.getAnswer()),
-                    userDTOQ);
+                    new GetQuestionDTO(question,url),
+                    new GetAnswerDTO(question.getTimeOfAnswer(), question.getAnswer()));
             list.add(getQandADTO);
             }
         return list;

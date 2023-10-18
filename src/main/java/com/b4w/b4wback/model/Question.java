@@ -31,4 +31,5 @@ public class Question {
         this.answer = null;
         this.timeOfAnswer = null;
     }
+
 }
