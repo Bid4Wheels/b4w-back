@@ -24,4 +24,12 @@ public class GetQuestionDTO {
         this.question = question.getQuestion();
         user = new UserDTO(question.getAuthor());
     }
+
+    public GetQuestionDTO(){}
+    public GetQuestionDTO(Question question,String imgUrl){
+        id = question.getId();
+        timeOfQuestion = question.getTimeOfQuestion();
+        this.question = question.getQuestion();
+        user = new UserDTO(question.getAuthor(),imgUrl);
+    }
 }
