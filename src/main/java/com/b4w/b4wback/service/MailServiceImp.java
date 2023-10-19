@@ -81,6 +81,7 @@ public class MailServiceImp implements MailService {
     }
 
     private void endOfAuctionSendMailLosers(String subject, Auction auction, String[] losers){
+        if (losers.length < 1) return;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(losers);
         message.setSubject(subject);
@@ -99,6 +100,15 @@ public class MailServiceImp implements MailService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendQuestionMail(String to, String subject, String title, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Question about your auction" + title);
+        message.setText("The user " + subject + " has made a question about your auction: " + title + "\n" + text);
         mailSender.send(message);
     }
 }

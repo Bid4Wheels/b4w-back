@@ -32,4 +32,12 @@ public class UserDTO {
         email = user.getEmail();
         phoneNumber = user.getPhoneNumber();
     }
+    public UserDTO(User user, String img){
+        id=user.getId();
+        name = user.getName();
+        lastName = user.getLastName();
+        email = user.getEmail();
+        phoneNumber = user.getPhoneNumber();
+        imgURL=img;
+    }
 }
