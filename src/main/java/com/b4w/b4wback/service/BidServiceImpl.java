@@ -41,18 +41,18 @@ public class BidServiceImpl implements BidService {
     @Override
     public Bid crateBid(CreateBidDTO bidDTO) {
         Optional<User> userOptional = userRepository.findById(bidDTO.getUserId());
-        if (userOptional.isEmpty()) throw new EntityNotFoundException("The user could not be found");
+        if (userOptional.isEmpty()) throw new EntityNotFoundException("User with Id "+ bidDTO.getUserId() +" not found");
         Optional<Auction> auctionOptional = auctionRepository.findById(bidDTO.getAuctionId());
-        if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction could not be found");
+        if (auctionOptional.isEmpty()) throw new EntityNotFoundException("Auction with Id "+ bidDTO.getAuctionId() +" not found");
 
         User user = userOptional.get();
         Auction auction = auctionOptional.get();
 
         if (auction.getStatus() != AuctionStatus.OPEN)
-            throw new BadRequestParametersException("The auction is not open");
+            throw new BadRequestParametersException("Auction with "+ bidDTO.getAuctionId()+" is already closed");
 
         if (auction.getUser().getId() == user.getId())
-            throw new BadRequestParametersException("User can't bid in own auctions");
+            throw new BadRequestParametersException("The author of the auction can't be the same of the bid");
 
         List<Bid> bids = bidRepository.getBidByAuction(auction);
         if (bids.size() > 0) {
