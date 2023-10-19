@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +33,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -263,6 +265,21 @@ public class AuctionServiceImpl implements AuctionService {
             auctionDTO.setCreatedAt(auctionDTO.getCreatedAt());
         }
         return new PageImpl<>(auctionWithImages, pageable, totalElements);
+    }
+
+    public void finishAuction(Long auctionID, Long userId){
+        Optional<Auction> auctionO = auctionRepository.findById(auctionID);
+        if (auctionO.isEmpty()) throw new EntityNotFoundException("The auction with the given ID was not found");
+        if (auctionO.get().getStatus() != AuctionStatus.AWATINGDELIVERY)
+            throw  new BadCredentialsException("Not valid operation");
+
+        Bid bid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionO.get());
+        if (bid.getBidder().getId() != userId) throw new BadCredentialsException("Not valid operation");
+
+        Auction auction = auctionO.get();
+        auction.setStatus(AuctionStatus.FINISHED);
+
+        auctionRepository.save(auction);
     }
 
     @Transactional

@@ -15,8 +15,10 @@ import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.service.interfaces.MailService;
 import com.b4w.b4wback.service.interfaces.QuestionService;
 import com.b4w.b4wback.service.interfaces.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -33,12 +35,16 @@ public class QuestionServiceImp implements QuestionService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final MailService mailService;
+    @Value("${sendMail.Boolean.Value}")
+    private boolean sendMail;
 
-    public QuestionServiceImp(QuestionRepository questionRepository, AuctionRepository auctionRepository, UserRepository userRepository, UserService userService) {
+    public QuestionServiceImp(QuestionRepository questionRepository, AuctionRepository auctionRepository, UserRepository userRepository, UserService userService, MailService mailService) {
         this.questionRepository = questionRepository;
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -63,8 +69,9 @@ public class QuestionServiceImp implements QuestionService {
                 .phoneNumber(question.getAuthor().getPhoneNumber())
                 .imgURL(userService.createUrlForDownloadingImage(authorId))
                 .build();
-
-        return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(), userDTO);
+        if(sendMail)
+            mailService.sendQuestionMail(auction.getUser().getEmail(), userDTO.getName(), auction.getTitle(), question.getQuestion());
+        return new GetQuestionDTO(question.getId(), question.getTimeOfQuestion(), question.getQuestion(),userDTO);
     }
 
     @Override
@@ -72,16 +79,15 @@ public class QuestionServiceImp implements QuestionService {
         List<GetQandADTO> list = new ArrayList<>();
         List<Question> questions = questionRepository.getQuestionByAuctionId(auctionId);
         for (Question question : questions) {
-            UserDTO userDTOQ = UserDTO.builder().id(question.getAuthor().getId())
-                    .name(question.getAuthor().getName())
-                    .lastName(question.getAuthor().getLastName())
-                    .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
-                    .build();
-
+//            UserDTO userDTOQ = UserDTO.builder().id(question.getAuthor().getId())
+//                    .name(question.getAuthor().getName())
+//                    .lastName(question.getAuthor().getLastName())
+//                    .imgURL(userService.createUrlForDownloadingImage(question.getAuthor().getId()))
+//                    .build();
+            String url=userService.createUrlForDownloadingImage(question.getAuthor().getId());
             GetQandADTO getQandADTO = new GetQandADTO(
-                    new GetQuestionDTO(question),
-                    new GetAnswerDTO(question.getTimeOfAnswer(), question.getAnswer()),
-                    userDTOQ);
+                    new GetQuestionDTO(question,url),
+                    new GetAnswerDTO(question.getTimeOfAnswer(), question.getAnswer()));
             list.add(getQandADTO);
             }
         return list;
@@ -118,6 +124,8 @@ public class QuestionServiceImp implements QuestionService {
         question.setAnswer(answer.getAnswer());
         question.setTimeOfAnswer(LocalDateTime.now());
         questionRepository.save(questionOptional.get());
+        if(sendMail)
+            mailService.sendMail(question.getAuthor().getEmail(), question.getAuction().getUser().getName() + " replied to your question of auction: " + question.getAuction().getTitle(), "your question: " + question.getQuestion() + "\n" + "answer: " + question.getAnswer());
         return new GetAnswerDTO(questionOptional.get().getTimeOfAnswer(), questionOptional.get().getAnswer());
     }
 

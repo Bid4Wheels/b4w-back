@@ -1,5 +1,6 @@
 package com.b4w.b4wback.service;
 
+import com.b4w.b4wback.dto.BidNotificationDTO;
 import com.b4w.b4wback.dto.CreateBidDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.BadRequestParametersException;
@@ -11,9 +12,12 @@ import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.BidService;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,11 +28,14 @@ public class BidServiceImpl implements BidService {
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
 
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
     public BidServiceImpl(BidRepository bidRepository, UserRepository userRepository,
-                          AuctionRepository auctionRepository) {
+                          AuctionRepository auctionRepository, SimpMessagingTemplate simpMessagingTemplate) {
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -57,7 +64,9 @@ public class BidServiceImpl implements BidService {
             if (auction.getBasePrice() > bidDTO.getAmount())
                 throw new BadRequestParametersException("Base bid amount not reached");
         }
-
+        simpMessagingTemplate.convertAndSend("/auction/" + auction.getId(),
+                new BidNotificationDTO(bidDTO.getAmount(),user.getName(),user.getLastName()),new MessageHeaders(Collections.singletonMap(
+                        MessageHeaders.CONTENT_TYPE,"application/json")));
 
         return bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
     }
