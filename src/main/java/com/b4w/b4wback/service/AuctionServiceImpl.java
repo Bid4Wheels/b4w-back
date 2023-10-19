@@ -14,9 +14,11 @@ import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.exception.UrlAlreadySentException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
+import com.b4w.b4wback.model.Tag;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
+import com.b4w.b4wback.repository.TagRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.*;
 
@@ -58,17 +60,19 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final JwtService jwtService;
 
+    private final TagRepository tagRepository;
 
-    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository,
-                              MailService mailService, UserService userService, S3Service s3Service, TagService tagService, JwtService jwtService) {
+    public AuctionServiceImpl(AuctionRepository auctionRepository, UserRepository userRepository, BidRepository bidRepository, MailService mailService, UserService userService
+            , S3Service s3Service, TagService tagService, JwtService jwtService, TagRepository tagRepository) {
         this.auctionRepository = auctionRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
         this.mailService = mailService;
-        this.userService=userService;
-        this.s3Service=s3Service;
-        this.tagService=tagService;
-        this.jwtService=jwtService;
+        this.userService = userService;
+        this.s3Service = s3Service;
+        this.tagService = tagService;
+        this.jwtService = jwtService;
+        this.tagRepository = tagRepository;
     }
 
     @Override
@@ -234,6 +238,8 @@ public class AuctionServiceImpl implements AuctionService {
             LocalDateTime momentToDelete = LocalDateTime.now();
             if (!momentToDelete.isAfter(userAuctionFound.getDeadline())) {
                 auctionRepository.delete(userAuctionFound);
+                List<Tag> tags=userAuctionFound.getTags();
+                removeTagsThatAreNotInUse(tags);
             } else {
                 throw new AuctionExpiredException("Auction expired in " + userAuctionFound.getDeadline());
             }
@@ -306,6 +312,15 @@ public class AuctionServiceImpl implements AuctionService {
                 losers.add(bid.getBidder().getEmail());
         }
         return losers.toArray(new String[0]);
+    }
+
+
+    private void removeTagsThatAreNotInUse(List<Tag> tags){
+        for (Tag tag : tags) {
+            if (tagRepository.findAuctionsByTagName(tag.getTagName()).isEmpty()){
+                tagRepository.delete(tag);
+            }
+        }
     }
 
 }
