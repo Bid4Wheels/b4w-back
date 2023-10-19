@@ -81,6 +81,7 @@ public class MailServiceImp implements MailService {
     }
 
     private void endOfAuctionSendMailLosers(String subject, Auction auction, String[] losers){
+        if (losers.length < 1) return;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(losers);
         message.setSubject(subject);

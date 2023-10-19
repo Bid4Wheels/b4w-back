@@ -2,8 +2,10 @@ package com.b4w.b4wback.controller;
 
 import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.dto.auth.SignInRequest;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
+import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
@@ -417,5 +419,27 @@ public class AuctionControllerTest {
 
         assertEquals(HttpStatus.OK, getAuction.getStatusCode());
         //assertEquals(10, getAuction.getBody().getMyHighestBid());
+    }
+
+    @Test
+    void Test029_AuctionServiceWhenFinishAuctionByTheWinnerThenHTTPOK(){
+        int userNumber = 1;
+        Long auctionId = auctionService.createAuction(auctionDTO).getAuctionId();
+        Optional<User> user = userRepository.findByEmail(userDTOs.get(userNumber).getEmail());
+        restTemplate.exchange("/bid", HttpMethod.POST, createHttpEntity(new CreateBidDTO(100000000, user.get().getId(),
+                auctionId), userDTOs.get(userNumber)), String.class);
+
+        Optional<Auction> auctionHelper = auctionRepository.findById(auctionId);
+        if (auctionHelper.isEmpty()) throw new RuntimeException("Expected to found auction");
+        auctionHelper.get().setStatus(AuctionStatus.AWATINGDELIVERY);
+        auctionRepository.save(auctionHelper.get());
+
+        HttpHeaders header = createHeaderWithToken(userDTOs.get(userNumber), restTemplate);
+        header.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<?> modStatus = restTemplate.exchange(baseUrl+"/finish/"+auctionId,
+                HttpMethod.PATCH, new HttpEntity<>(header), String.class);
+
+        assertEquals(HttpStatus.OK, modStatus.getStatusCode());
     }
 }
