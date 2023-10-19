@@ -1,6 +1,7 @@
 package com.b4w.b4wback.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class Tag {
 
     @Column(unique = true)
     private String tagName;
-
+    @JsonIgnore
     @ManyToMany(mappedBy = "tags")
     private List<Auction> auctions;
     public Tag(String tagName){
