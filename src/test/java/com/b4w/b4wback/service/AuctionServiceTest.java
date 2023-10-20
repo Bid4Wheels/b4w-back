@@ -2,6 +2,7 @@ package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
 import com.b4w.b4wback.dto.auth.SignInRequest;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.AuctionExpiredException;
@@ -29,11 +30,13 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
@@ -759,4 +762,80 @@ public class AuctionServiceTest {
         String token = authenticateAndGetToken(signInRequest, restTemplate);
         assertThrows(AuctionExpiredException.class,()->auctionService.deleteAuction(1L,"Bearer "+token));}
 
+    @Test
+    void Test038_AuctionServiceWhenUpdateAuctionStatusThenAllAuctionsUpdatedCorrectly(){
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionDTO.setDeadline(LocalDateTime.of(2010, 10, 10, 10, 10));
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+        auctionService.createAuction(auctionDTO);
+
+        auctionService.updateAuctionStatus();
+
+        List<Auction> auctions = auctionRepository.findAuctionByStatusAndDeadlineLessThan(AuctionStatus.OPEN,
+                LocalDateTime.of(3000, 12, 30, 23, 59));
+        assertEquals(4, auctions.size());
+    }
+
+    @Test
+    void Test040_AuctionServiceWhenRemoveAuctionItShouldRemoveTagsThatAreNotInUsed(){
+        List<String> tags = List.of("tag1", "tag2", "tag3", "tag4", "tag5");
+        tagRepository.saveAll(tags.stream().map(Tag::new).toList());
+        auctionDTO.setTags(tags);
+        auctionService.createAuction(auctionDTO);
+        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil2", "text",
+                LocalDateTime.of(2031, 6, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, List.of("tag4"));
+        auctionService.createAuction(auctionDTO2);
+        SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
+        auctionService.deleteAuction(1L,"Bearer "+token);
+        assertEquals(1,tagRepository.findAll().size());
+        assertEquals("tag4",tagRepository.findAll().get(0).getTagName());
+    }
+
+
+    void Test041_AuctionServiceWhenFinishAuctionByTheWinnerThenAllCorrect(){
+        CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
+        bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
+
+        Optional<Auction> auctionHelper = auctionRepository.findById(auction.getAuctionId());
+        if (auctionHelper.isEmpty()) throw new RuntimeException("Expected to found auction");
+        auctionHelper.get().setStatus(AuctionStatus.AWATINGDELIVERY);
+        auctionRepository.save(auctionHelper.get());
+
+        auctionService.finishAuction(auction.getAuctionId(), 2L);
+
+        Optional<Auction> auctionR = auctionRepository.findById(auction.getAuctionId());
+
+        assertTrue(auctionR.isPresent());
+        assertEquals(auction.getAuctionId(), auctionR.get().getId());
+        assertEquals(AuctionStatus.FINISHED, auctionR.get().getStatus());
+    }
+
+    @Test
+    void Test042_AuctionServiceWhenFinishAuctionByUserBeforeFinishingThenBadCredentialsException(){
+        CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
+        bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
+
+        assertThrows(BadCredentialsException.class, ()->auctionService.finishAuction(auction.getAuctionId(), 2L));
+    }
+
+    @Test
+    void Test043_AuctionServiceWhenFinishAuctionNotByTheWinnerThenBadCredentialsException(){
+        CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
+        bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
+
+        Optional<Auction> auctionHelper = auctionRepository.findById(auction.getAuctionId());
+        if (auctionHelper.isEmpty()) throw new RuntimeException("Expected to found auction");
+        auctionHelper.get().setStatus(AuctionStatus.AWATINGDELIVERY);
+        auctionRepository.save(auctionHelper.get());
+
+        assertThrows(BadCredentialsException.class, ()->auctionService.finishAuction(auction.getAuctionId(), 3L));
+    }
 }

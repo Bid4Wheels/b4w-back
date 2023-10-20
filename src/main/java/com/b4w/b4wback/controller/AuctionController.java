@@ -78,4 +78,13 @@ public class AuctionController {
     public ResponseEntity<Page<AuctionDTO>> getAuctionsBiddedByUser(@PathVariable long bidderId, Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(auctionService.getAuctionsBiddedByUser(bidderId, pageable));
     }
+
+    @PatchMapping("/finish/{auctionId}")
+    public ResponseEntity<?> finishAuction(@RequestHeader(HttpHeaders.AUTHORIZATION)  String auth,
+                                           @PathVariable long auctionId){
+        final String jwt = auth.substring(7);
+        Long userId = jwtService.extractId(jwt);
+        auctionService.finishAuction(auctionId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
