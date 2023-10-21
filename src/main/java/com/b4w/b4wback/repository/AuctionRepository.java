@@ -93,12 +93,11 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
     @Query("SELECT auction FROM Auction auction WHERE auction.id IN (SELECT bid.auction.id FROM Bid bid WHERE bid.bidder.id = :bidder_id) ORDER BY auction.deadline ASC")
     Page<Auction> findAuctionsByBidderIdOrderByDeadline(long bidder_id, Pageable pageable);
 
-    @Query(value = "SELECT t.tag_name " +
-            "FROM Auction a " +
-            "JOIN Auction_tag at ON a.id = at.auction_id " +
-            "JOIN Tag t ON at.tag_id = t.id " +
-            "WHERE a.id = :auction_id",
-    nativeQuery = true)
+    @Query(value = "SELECT t.tag_name" +
+                    " FROM auction a" +
+                    " JOIN auction_tag at ON a.id = at.auction_id" +
+                    " JOIN tag t ON at.tag_id = t.id" +
+                    " WHERE a.id = :auction_id", nativeQuery = true)
     List<String> findTagsOfAuctionID(@Param("auction_id") long auction_id);
 
     List<Auction> findAuctionByStatusAndDeadlineLessThan(AuctionStatus status, LocalDateTime deadLineLimit);
