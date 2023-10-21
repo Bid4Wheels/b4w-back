@@ -16,36 +16,41 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Table(name = "auction")
 @Entity
 @NamedNativeQuery(
         name = "getAuctionDTOWithFilter",
-        query = "SELECT DISTINCT auction.id AS id, auction.title AS title, auction.deadline AS deadline, auction.created_at AS created_at, auction.status AS status," +
-                "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price) AS highestBidAmount " +
-                "FROM Auction auction WHERE " +
-                "(:tagsIds IS NULL OR " +
-                    "(SELECT COUNT(DISTINCT tag.id) FROM Tag tag WHERE tag.id IN :tagsIds) = (" +
-                        "SELECT COUNT(DISTINCT auct_t.tag_id) FROM Auction_tag auct_t " +
-                            "WHERE auct_t.auction_id = auction.id AND " +
-                            "auct_t.tag_id IN :tagsIds) OR " +
-                    "(SELECT COUNT(DISTINCT tag.id) FROM Tag tag WHERE tag.id IN :tagsIds) = 0) AND " +
-                "(:milageMin IS NULL OR auction.milage >= :milageMin) AND " +
-                "(:milageMax IS NULL OR auction.milage <= :milageMax) AND " +
-                "(:modelYearMin IS NULL OR auction.model_year >= :modelYearMin) AND " +
-                "(:modelYearMax IS NULL OR auction.model_year <= :modelYearMax) AND " +
-                "(:brand IS NULL OR lower(auction.brand) = lower(:brand)) AND " +
-                "(:color IS NULL OR lower(auction.color) = lower(:color)) AND " +
-                "(:gasType IS NULL OR auction.gas_type = :gasType) AND " +
-                "(:doorsAmount IS NULL OR auction.doors_amount = :doorsAmount) AND " +
-                "(:gearShiftType IS NULL OR auction.gear_shift_type = :gearShiftType) AND " +
-                "(:model IS NULL OR lower(auction.model) = lower(:model)) AND " +
-                "(:priceMin IS NULL OR COALESCE((SELECT " +
-                    "MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price " +
-                ") >= :priceMin) AND " +
-                "(:priceMax IS NULL OR COALESCE((SELECT " +
-                    "MAX(bid.amount) FROM Bid bid WHERE bid.auction_id = auction.id), auction.base_price " +
-                ") <= :priceMax) AND " +
-                "(auction.status = 0)",
+        query = "SELECT DISTINCT" +
+                " a.id AS id," +
+                " a.title AS title," +
+                " a.deadline AS deadline," +
+                " a.created_at AS created_at," +
+                " a.status AS status," +
+                " COALESCE(( SELECT MAX(b.amount) FROM bid b WHERE b.auction_id = a.id), a.base_price) AS highestBidAmount" +
+                " FROM" +
+                " auction a" +
+                " LEFT JOIN" +
+                " auction_tag at ON a.id = at.auction_id" +
+                " LEFT JOIN" +
+                " tag t ON at.tag_id = t.id" +
+                " WHERE" +
+                " (:tagsIds IS NULL OR" +
+                " (SELECT COUNT( DISTINCT t.id) FROM tag t WHERE t.id IN :tagsIds) = " +
+                " (SELECT COUNT( DISTINCT at.tag_id) FROM auction_tag at WHERE at.auction_id = a.id AND at.tag_id IN :tagsIds) OR " +
+                " (SELECT COUNT( DISTINCT t.id) FROM tag t WHERE t.id IN :tagsIds) = 0) " +
+                " AND (:milageMin IS NULL OR a.milage >= :milageMin) " +
+                " AND (:milageMax IS NULL OR a.milage <= :milageMax) " +
+                " AND (:modelYearMin IS NULL OR a.model_year >= :modelYearMin) " +
+                " AND (:modelYearMax IS NULL OR a.model_year <= :modelYearMax) " +
+                " AND (:brand IS NULL OR LOWER(a.brand) = LOWER(:brand)) " +
+                " AND (:color IS NULL OR LOWER(a.color) = LOWER(:color)) " +
+                " AND (:gasType IS NULL OR a.gas_type = :gasType) " +
+                " AND (:doorsAmount IS NULL OR a.doors_amount = :doorsAmount) " +
+                " AND (:gearShiftType IS NULL OR a.gear_shift_type = :gearShiftType) " +
+                " AND (:model IS NULL OR LOWER(a.model) = LOWER(:model)) " +
+                " AND (:priceMin IS NULL OR COALESCE (( SELECT MAX(b.amount) FROM bid b WHERE b.auction_id = a.id), a.base_price) >= :priceMin) " +
+                " AND (:priceMax IS NULL OR COALESCE (( SELECT MAX(b.amount) FROM bid b WHERE b.auction_id = a.id), a.base_price) <= :priceMax) " +
+                " AND a.status = 0",
         resultSetMapping = "sqlConstructor"
 )
 @SqlResultSetMapping(
@@ -56,7 +61,7 @@ import java.util.List;
                         @ColumnResult(name = "id", type = Long.class),
                         @ColumnResult(name = "title", type = String.class),
                         @ColumnResult(name = "created_at", type = LocalDateTime.class),
-                        @ColumnResult(name = "deadLine", type = LocalDateTime.class),
+                        @ColumnResult(name = "deadline", type = LocalDateTime.class),
                         @ColumnResult(name = "status", type = AuctionStatus.class),
                         @ColumnResult(name = "highestBidAmount", type = Integer.class)
                 }

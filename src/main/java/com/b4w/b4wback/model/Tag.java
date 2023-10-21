@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
+@Table(name = "tag")
 @Entity
 @Getter
 @NoArgsConstructor
