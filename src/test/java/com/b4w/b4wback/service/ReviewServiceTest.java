@@ -9,10 +9,13 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.enums.UserReviewType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
+import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
+import com.b4w.b4wback.model.Review;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
+import com.b4w.b4wback.repository.ReviewRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.ReviewService;
@@ -44,6 +47,8 @@ public class ReviewServiceTest {
     private ReviewService reviewService;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @BeforeEach
     public void setup(){
@@ -79,6 +84,13 @@ public class ReviewServiceTest {
         assertEquals(UserReviewType.OWNER, reviewDTO.getType());
         assertEquals(users.get(0).getId(), reviewDTO.getOwner().getId());
         assertEquals(users.get(1).getId(), reviewDTO.getWinner().getId());
+        Review review = reviewRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("Review not found"));
+            assertEquals(createReviewDTO.getReview(), review.getReview());
+            assertEquals(createReviewDTO.getRating(), review.getRating());
+            assertEquals(UserReviewType.OWNER, review.getType());
+            assertEquals(users.get(0).getId(), review.getOwner().getId());
+            assertEquals(users.get(1).getId(), review.getWinner().getId());
+
     }
 
     @Test
