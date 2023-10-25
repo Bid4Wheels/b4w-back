@@ -4,6 +4,7 @@ import com.b4w.b4wback.enums.UserReviewType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class UserReview {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,7 +23,7 @@ public class UserReview {
     @ManyToOne
     private User reviewed;
     private UserReviewType type;
-    private byte punctuation;
+    private float punctuation;
     private String review;
     private LocalDateTime date;
 }

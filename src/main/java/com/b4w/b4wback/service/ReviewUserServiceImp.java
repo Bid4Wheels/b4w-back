@@ -40,7 +40,7 @@ public class ReviewUserServiceImp implements ReviewUserService {
 
     @Override
     //TODO: make an accurate exception fot this
-    public UserReview createUserReview(CreateUserReview userReviewDTO, long auctionId) {
+    public UserReview createUserReviewOwner(CreateUserReview userReviewDTO, long auctionId) {
         User reviewer = getEntity(userRepository, userReviewDTO.getReviewer(), "The reviewer id was not found");
         User reviewed = getEntity(userRepository, userReviewDTO.getReviewed(), "The reviewed id was not found");
 
@@ -71,8 +71,8 @@ public class ReviewUserServiceImp implements ReviewUserService {
     }
 
     private UserReviewType getReviewType(Auction auction, User reviewer, User reviewed){
-        if (auction.getUser().getId() == reviewer.getId()) return UserReviewType.OWNER;
-        else if (auction.getUser().getId() == reviewed.getId()) return UserReviewType.WINNER;
+        if (auction.getUser().getId() == reviewer.getId()) return UserReviewType.WINNER;
+        else if (auction.getUser().getId() == reviewed.getId()) return UserReviewType.OWNER;
         else throw new BadCredentialsException("Reviewer nor reviewed are the owner of the auction");
     }
     private static <T> T getEntity(JpaRepository<T, Long> repository, long id, String errorMsg){
