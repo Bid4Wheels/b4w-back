@@ -78,11 +78,10 @@ public class UserServiceImp implements UserService {
         }
         return newUser;
     }
-
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User with Id "+id+" not found"));
-        if(Objects.equals(user.getName(), "Deleted")){
+        if(user.isDeleted()){
             throw new EntityNotFoundException("User with "+id+" not found");
         }
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
