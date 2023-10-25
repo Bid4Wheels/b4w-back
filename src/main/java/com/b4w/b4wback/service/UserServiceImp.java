@@ -6,9 +6,11 @@ import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
 import com.b4w.b4wback.model.Auction;
 import com.b4w.b4wback.model.Bid;
+import com.b4w.b4wback.model.Question;
 import com.b4w.b4wback.model.User;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
+import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.MailService;
@@ -47,14 +49,20 @@ public class UserServiceImp implements UserService {
     @Value("${expiration.time.image.url}")
     private Integer expirationTimeImageUrl;
     private final S3Service s3Service;
-    public UserServiceImp(UserRepository userRepository, MailService mailService, S3Service s3Service, JwtService jwtService, AuctionRepository auctionRepository, BidRepository bidRepository) {
+
+    private final QuestionRepository questionRepository;
+
+    public UserServiceImp(JwtService jwtService, UserRepository userRepository, MailService mailService, AuctionRepository auctionRepository,
+                          BidRepository bidRepository, S3Service s3Service, QuestionRepository questionRepository) {
+        this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.mailService = mailService;
-        this.s3Service=s3Service;
-        this.jwtService=jwtService;
-        this.auctionRepository=auctionRepository;
+        this.auctionRepository = auctionRepository;
         this.bidRepository = bidRepository;
+        this.s3Service = s3Service;
+        this.questionRepository = questionRepository;
     }
+
     @Override
     public User createUser(CreateUserDTO createUserDTO) {
         //Added encode method for the password.
@@ -73,7 +81,7 @@ public class UserServiceImp implements UserService {
     @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User with Id "+id+" not found"));
-        if(Objects.equals(user.getName(), "Deleted")){
+        if(user.isDeleted()){
             throw new EntityNotFoundException("User with "+id+" not found");
         }
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
@@ -140,7 +148,7 @@ public class UserServiceImp implements UserService {
         return s3Service.generatePresignedDownloadImageUrl(userUrl,expirationTimeImageUrl);
     }
 
-    @Override
+   @Override
     public void deleteUser(String token) {
         long id= jwtService.extractId(token.substring(7));
         User user= userRepository.findById(id).orElseThrow(()->new EntityNotFoundException("User with Id "+ id +" not found"));
@@ -149,9 +157,11 @@ public class UserServiceImp implements UserService {
         user.setPhoneNumber("Deleted");
         user.setDeleted(true);
         userRepository.save(user);
-        List<Auction> auctionsList = auctionRepository.findByUser(user);
+        List<Auction> auctionsList = auctionRepository.findByUserAndStatus(user, AuctionStatus.OPEN);
         auctionRepository.deleteAll(auctionsList);
         List<Bid> bidsList = bidRepository.findAllByUserAndStatusOpen(id, AuctionStatus.OPEN);
         bidRepository.deleteAll(bidsList);
+        List<Question> questionsList = questionRepository.findAllByAuthor(user);
+        questionRepository.deleteAll(questionsList);
     }
 }
