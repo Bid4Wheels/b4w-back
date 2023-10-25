@@ -9,7 +9,6 @@ import org.hibernate.validator.constraints.Range;
 @Getter
 @AllArgsConstructor
 public class CreateUserReview {
-    private Long reviewer;
     private Long reviewed;
     @Range(min = 1, max = 5)
     private float punctuation;

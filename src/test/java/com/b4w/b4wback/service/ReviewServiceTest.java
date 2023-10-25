@@ -68,9 +68,9 @@ public class ReviewServiceTest {
     void Test003_ReviewServiceCreateReviewForOwnerShouldReturnReviewDTO(){
         auction.setStatus(AuctionStatus.FINISHED);
         auction = auctionRepository.save(auction);
-        CreateUserReview createReviewDTO = new CreateUserReview(users.get(1).getId(), users.get(0).getId(),4, "Very bad service");
+        CreateUserReview createReviewDTO = new CreateUserReview(users.get(0).getId(),4, "Very bad service");
 
-        UserReview review = reviewService.createUserReviewOwner(createReviewDTO, auction.getId());
+        UserReview review = reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
         assertEquals(createReviewDTO.getReview(), review.getReview());
         assertEquals(createReviewDTO.getPunctuation(), review.getPunctuation());
         assertEquals(UserReviewType.OWNER, review.getType());
@@ -81,9 +81,9 @@ public class ReviewServiceTest {
     @Test
     void Test004_ReviewServiceCreateReviewForOwnerWhenIsNotFinishedShouldThrowException(){
         auction = auctionRepository.save(auction);
-        CreateUserReview createReviewDTO = new CreateUserReview(users.get(1).getId(), users.get(0).getId(), 4.6f, "Muy malo");
+        CreateUserReview createReviewDTO = new CreateUserReview(users.get(0).getId(), 4.6f, "Muy malo");
         assertThrows(BadCredentialsException.class, ()->
-                reviewService.createUserReviewOwner(createReviewDTO, auction.getId()));
+                reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId()));
     }
 
 

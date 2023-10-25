@@ -40,8 +40,8 @@ public class ReviewUserServiceImp implements ReviewUserService {
 
     @Override
     //TODO: make an accurate exception fot this
-    public UserReview createUserReviewOwner(CreateUserReview userReviewDTO, long auctionId) {
-        User reviewer = getEntity(userRepository, userReviewDTO.getReviewer(), "The reviewer id was not found");
+    public UserReview createUserReviewOwner(CreateUserReview userReviewDTO, long auctionId, long reviewerId) {
+        User reviewer = getEntity(userRepository, reviewerId, "The reviewer id was not found");
         User reviewed = getEntity(userRepository, userReviewDTO.getReviewed(), "The reviewed id was not found");
 
         if (reviewer.getId() == reviewed.getId())
