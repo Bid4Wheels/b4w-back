@@ -1,18 +1,21 @@
 package com.b4w.b4wback.service;
 
+import com.b4w.b4wback.dto.CreateReviewDTO;
+import com.b4w.b4wback.dto.ReviewDTO;
+import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.dto.UserReview.CreateUserReview;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.UserReviewType;
+import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
-import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.model.Bid;
-import com.b4w.b4wback.model.User;
-import com.b4w.b4wback.model.UserReview;
+import com.b4w.b4wback.model.*;
 import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.repository.UserReviewRepository;
+import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.ReviewUserService;
+import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
@@ -23,19 +26,39 @@ import java.util.Optional;
 
 @Service
 @Validated
+@AllArgsConstructor
 public class ReviewUserServiceImp implements ReviewUserService {
     private final UserReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
+    private final JwtService jwtService;
 
-    public ReviewUserServiceImp(UserReviewRepository reviewRepository,
-                                UserRepository userRepository,
-                                AuctionRepository auctionRepository, BidRepository bidRepository) {
-        this.reviewRepository = reviewRepository;
-        this.userRepository = userRepository;
-        this.auctionRepository = auctionRepository;
-        this.bidRepository = bidRepository;
+
+    @Override
+    public ReviewDTO createReviewForWinner(CreateReviewDTO createReviewDTO, long auctionId, String token) {
+        Auction auction = auctionRepository.findById(auctionId).orElseThrow(() -> new RuntimeException("Auction not found"));
+        if(auction.getStatus() == AuctionStatus.FINISHED && auction.getUser().getUsername().equals(jwtService.extractUsername(token.substring(7)))){
+            Bid winnerBid = bidRepository.findTopByAuctionOrderByAmountDesc(auction);
+            User winner = winnerBid.getBidder();
+            User owner = auction.getUser();
+
+
+            UserReview savedReview = reviewRepository.save(UserReview.builder()
+                    .reviewer(owner)
+                    .reviewed(winner)
+                    .review(createReviewDTO.getReview())
+                    .punctuation(createReviewDTO.getRating())
+                    .date(LocalDateTime.now())
+                    .type(UserReviewType.WINNER)
+                    .build());
+            //Review savedreview = reviewRepository.save(new Review(createReviewDTO.getReview(), createReviewDTO.getRating(), UserReviewType.OWNER, owner, winner, LocalDateTime.now()));
+            return new ReviewDTO(savedReview.getReview(), savedReview.getPunctuation(), savedReview.getType(),
+                    new UserDTO(savedReview.getReviewer()),
+                    new UserDTO(savedReview.getReviewed()),
+                    savedReview.getDate());
+        }
+        throw new BadRequestParametersException("Auction is not finished or you are not the owner");
     }
 
     @Override

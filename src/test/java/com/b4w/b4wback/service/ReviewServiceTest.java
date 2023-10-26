@@ -4,32 +4,32 @@ import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateReviewDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.ReviewDTO;
+import com.b4w.b4wback.dto.UserReview.CreateUserReview;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.enums.UserReviewType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
-import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.model.Bid;
-import com.b4w.b4wback.model.Review;
-import com.b4w.b4wback.model.User;
+import com.b4w.b4wback.model.*;
 import com.b4w.b4wback.repository.AuctionRepository;
-import com.b4w.b4wback.repository.ReviewRepository;
 import com.b4w.b4wback.repository.UserRepository;
+import com.b4w.b4wback.repository.UserReviewRepository;
 import com.b4w.b4wback.service.interfaces.JwtService;
-import com.b4w.b4wback.service.interfaces.ReviewService;
+import com.b4w.b4wback.service.interfaces.ReviewUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -44,11 +44,11 @@ public class ReviewServiceTest {
     @Autowired
     private AuctionRepository auctionRepository;
     @Autowired
-    private ReviewService reviewService;
+    private ReviewUserService reviewService;
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private ReviewRepository reviewRepository;
+    private UserReviewRepository reviewRepository;
 
     @BeforeEach
     public void setup(){
@@ -77,20 +77,23 @@ public class ReviewServiceTest {
         auction.setStatus(AuctionStatus.FINISHED);
         auction = auctionRepository.save(auction);
         CreateReviewDTO createReviewDTO = new CreateReviewDTO("Muy buen comprador", 4.5f);
+
         String token = jwtService.generateToken(users.get(0).getEmail(), users.get(0).getId());
         ReviewDTO reviewDTO = reviewService.createReviewForWinner(createReviewDTO, auction.getId(),"Bearer " +token);
+
+
         assertEquals(createReviewDTO.getReview(), reviewDTO.getReview());
         assertEquals(createReviewDTO.getRating(), reviewDTO.getRating());
-        assertEquals(UserReviewType.OWNER, reviewDTO.getType());
+        assertEquals(UserReviewType.WINNER, reviewDTO.getType());
         assertEquals(users.get(0).getId(), reviewDTO.getOwner().getId());
         assertEquals(users.get(1).getId(), reviewDTO.getWinner().getId());
-        Review review = reviewRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("Review not found"));
-            assertEquals(createReviewDTO.getReview(), review.getReview());
-            assertEquals(createReviewDTO.getRating(), review.getRating());
-            assertEquals(UserReviewType.OWNER, review.getType());
-            assertEquals(users.get(0).getId(), review.getOwner().getId());
-            assertEquals(users.get(1).getId(), review.getWinner().getId());
 
+        UserReview review = reviewRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("Review not found"));
+        assertEquals(createReviewDTO.getReview(), review.getReview());
+        assertEquals(createReviewDTO.getRating(), review.getPunctuation());
+        assertEquals(UserReviewType.WINNER, review.getType());
+        assertEquals(users.get(0).getId(), review.getReviewer().getId());
+        assertEquals(users.get(1).getId(), review.getReviewed().getId());
     }
 
     @Test
