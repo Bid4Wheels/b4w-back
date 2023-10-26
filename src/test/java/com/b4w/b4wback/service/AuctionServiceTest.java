@@ -782,7 +782,25 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test039_AuctionServiceWhenFinishAuctionByTheWinnerThenAllCorrect(){
+    void Test040_AuctionServiceWhenRemoveAuctionItShouldRemoveTagsThatAreNotInUsed(){
+        List<String> tags = List.of("tag1", "tag2", "tag3", "tag4", "tag5");
+        tagRepository.saveAll(tags.stream().map(Tag::new).toList());
+        auctionDTO.setTags(tags);
+        auctionService.createAuction(auctionDTO);
+        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil2", "text",
+                LocalDateTime.of(2031, 6, 27, 2, 11, 0), "Toyota",
+                "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
+                4, GearShiftType.AUTOMATIC, List.of("tag4"));
+        auctionService.createAuction(auctionDTO2);
+        SignInRequest signInRequest=new SignInRequest("bejero7623@dusyum.com","1Afjfslkjfl");
+        String token = authenticateAndGetToken(signInRequest, restTemplate);
+        auctionService.deleteAuction(1L,"Bearer "+token);
+        assertEquals(1,tagRepository.findAll().size());
+        assertEquals("tag4",tagRepository.findAll().get(0).getTagName());
+    }
+
+
+    void Test041_AuctionServiceWhenFinishAuctionByTheWinnerThenAllCorrect(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
 
@@ -801,7 +819,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test040_AuctionServiceWhenFinishAuctionByUserBeforeFinishingThenBadCredentialsException(){
+    void Test042_AuctionServiceWhenFinishAuctionByUserBeforeFinishingThenBadCredentialsException(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
 
@@ -809,7 +827,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test041_AuctionServiceWhenFinishAuctionNotByTheWinnerThenBadCredentialsException(){
+    void Test043_AuctionServiceWhenFinishAuctionNotByTheWinnerThenBadCredentialsException(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
 

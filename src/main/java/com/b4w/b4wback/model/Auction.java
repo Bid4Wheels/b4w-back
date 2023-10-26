@@ -106,7 +106,8 @@ public class Auction {
 
     @ManyToOne()
     private User user;
-
+    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL)
+    private List<Question> questions;
     private boolean alreadySentImageUrl;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

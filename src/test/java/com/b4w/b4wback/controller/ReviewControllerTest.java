@@ -4,6 +4,8 @@ import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.UserReview.CreateUserReview;
 import com.b4w.b4wback.dto.UserReview.ReviewDTO;
+import com.b4w.b4wback.dto.CreateReviewDTO;
+import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
@@ -33,13 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-public class ReviewControllerTest {
+public class
+ReviewControllerTest {
     private final String baseUrl = "/review";
     @Autowired
     private UserService userService;
-    private String token1;
-    private String token2;
-    private List<User> users;
+    private String token;
     private Auction auction;
     @Autowired
     private TestRestTemplate restTemplate;
@@ -74,6 +75,18 @@ public class ReviewControllerTest {
         auction = auctionRepository.save(auction);
     }
 
+
+    @Test
+    void Test001_ReviewControllerCreateReviewForWinnerShouldReturnStatusCreated(){
+        auction.setStatus(AuctionStatus.FINISHED);
+        auctionRepository.save(auction);
+        CreateReviewDTO createReviewDTO = new CreateReviewDTO("Muy buen producto",5);
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        ResponseEntity<String> res = restTemplate.exchange(baseUrl+"/winner/"+auction.getId(), HttpMethod.POST, new HttpEntity<>(createReviewDTO, headers), String.class);
+        assertEquals(HttpStatus.CREATED, res.getStatusCode());
+    }
+    
     @Test
     void Test003_ReviewControllerCreateReviewForOwnerShouldReturnStatusCreated(){
         auction.setStatus(AuctionStatus.FINISHED);
@@ -85,9 +98,19 @@ public class ReviewControllerTest {
 
         ResponseEntity<ReviewDTO> res = restTemplate.exchange(baseUrl+"/owner/"+auction.getId(), HttpMethod.POST,
                 new HttpEntity<>(createReviewDTO, headers), ReviewDTO.class);
-        assertEquals(HttpStatus.CREATED, res.getStatusCode());
     }
 
+
+
+    @Test
+    void Test002_ReviewControllerCreateReviewForWinnerShouldReturnStatusBadRequest(){
+        CreateReviewDTO createReviewDTO = new CreateReviewDTO("Muy buen producto",5);
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token);
+        ResponseEntity<String> res = restTemplate.exchange(baseUrl+"/winner/"+auction.getId(), HttpMethod.POST, new HttpEntity<>(createReviewDTO, headers), String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
+    }
+    
     @Test
     void Test004_ReviewControllerCreateReviewForOwnerShouldReturnStatusBadRequest(){
         CreateUserReview createReviewDTO = new CreateUserReview(users.get(0).getId(), 4.2f, "relativamente aceptable");
