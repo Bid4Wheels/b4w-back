@@ -65,14 +65,15 @@ public class ReviewUserServiceImp implements ReviewUserService {
     //TODO: make an accurate exception fot this
     public UserReview createUserReviewOwner(CreateUserReview userReviewDTO, long auctionId, long reviewerId) {
         User reviewer = getEntity(userRepository, reviewerId, "The reviewer id was not found");
-        User reviewed = getEntity(userRepository, userReviewDTO.getReviewed(), "The reviewed id was not found");
-
-        if (reviewer.getId() == reviewed.getId())
-            throw new BadCredentialsException("Reviewer can't be the same as the reviewed");
 
         Auction auction = getEntity(auctionRepository, auctionId, "The auction with the given id was not found");
         if (auction.getStatus() != AuctionStatus.FINISHED)
             throw new BadCredentialsException("Auction not closed");
+
+        User reviewed = auction.getUser();
+
+        if (reviewer.getId() == reviewed.getId())
+            throw new BadCredentialsException("Reviewer can't be the same as the reviewed");
 
         UserReviewType reviewType = getReviewType(auction, reviewer, reviewed);
 
