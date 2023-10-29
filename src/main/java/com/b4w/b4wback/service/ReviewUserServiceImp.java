@@ -88,7 +88,7 @@ public class ReviewUserServiceImp implements ReviewUserService {
                 .reviewer(reviewer)
                 .reviewed(reviewed)
                 .type(reviewType)
-                .punctuation(userReviewDTO.getPunctuation())
+                .punctuation(userReviewDTO.getRating())
                 .review(userReviewDTO.getReview())
                 .date(LocalDateTime.now()).build()
         );
