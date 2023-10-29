@@ -100,18 +100,19 @@ public class ReviewControllerTest {
     void Test003_ReviewControllerCreateReviewForOwnerShouldReturnStatusCreated(){
         auction.setStatus(AuctionStatus.FINISHED);
         auctionRepository.save(auction);
-        CreateUserReview createReviewDTO = new CreateUserReview(users.get(0).getId(), 4.2f, "relativamente aceptable");
+        CreateUserReview createReviewDTO = new CreateUserReview(4.5f, "relativamente aceptable");
 
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token2);
 
         ResponseEntity<ReviewDTO> res = restTemplate.exchange(baseUrl+"/owner/"+auction.getId(), HttpMethod.POST,
                 new HttpEntity<>(createReviewDTO, headers), ReviewDTO.class);
+        assertEquals(HttpStatus.CREATED, res.getStatusCode());
     }
 
     @Test
     void Test004_ReviewControllerCreateReviewForOwnerShouldReturnStatusBadRequest(){
-        CreateUserReview createReviewDTO = new CreateUserReview(users.get(0).getId(), 4.2f, "relativamente aceptable");
+        CreateUserReview createReviewDTO = new CreateUserReview(4.5f, "relativamente aceptable");
 
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " +token2);
