@@ -1,0 +1,28 @@
+package com.b4w.b4wback.dto.UserReview;
+
+import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.enums.UserReviewType;
+import com.b4w.b4wback.model.UserReview;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+@AllArgsConstructor
+@Getter
+public class ReviewDTO {
+    String review;
+    float rating;
+    UserReviewType type;
+    UserDTO reviewer;
+    UserDTO reviewed;
+    LocalDateTime createdAt;
+
+    public ReviewDTO(UserReview userReview){
+        review = userReview.getReview();
+        rating = userReview.getPunctuation();
+        type = userReview.getType();
+        reviewer = new UserDTO(userReview.getReviewer());
+        reviewed = new UserDTO(userReview.getReviewed());
+        createdAt = userReview.getDate();
+    }
+}
