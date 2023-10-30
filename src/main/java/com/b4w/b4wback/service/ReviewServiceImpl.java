@@ -34,6 +34,18 @@ public class ReviewServiceImpl implements ReviewService {
     }
     @Override
     public ReviewDTO createReviewForWinner(CreateReviewDTO createReviewDTO, long auctionId,String token) {
+        if (createReviewDTO.getRating() != 1.0f &&
+            createReviewDTO.getRating() != 1.5f &&
+            createReviewDTO.getRating() != 2.0f &&
+            createReviewDTO.getRating() != 2.5f &&
+            createReviewDTO.getRating() != 3.0f &&
+            createReviewDTO.getRating() != 3.5f &&
+            createReviewDTO.getRating() != 4.0f &&
+            createReviewDTO.getRating() != 4.5f &&
+            createReviewDTO.getRating() != 5.0f) {
+            throw new BadRequestParametersException("Rating must be between 1 and 5");
+        }
+
         Auction auction = auctionRepository.findById(auctionId).orElseThrow(() -> new RuntimeException("Auction not found"));
         if(auction.getStatus() == AuctionStatus.FINISHED && auction.getUser().getUsername().equals(jwtService.extractUsername(token.substring(7)))){
             Bid winnerBid = bidRepository.findTopByAuctionOrderByAmountDesc(auction);
