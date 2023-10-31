@@ -1,28 +1,22 @@
 package com.b4w.b4wback.refactor.auction;
 
-import com.b4w.b4wback.dto.AuctionDTO;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
 import com.b4w.b4wback.dto.auth.SignInRequest;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
-import com.b4w.b4wback.model.Auction;
-import com.b4w.b4wback.repository.AuctionRepository;
-import com.b4w.b4wback.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,10 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AuctionSortingTest {
     @Autowired
     private TestRestTemplate restTemplate;
-    @Autowired
-    private AuctionRepository auctionRepository;
-    @Autowired
-    private UserRepository userRepository;
     private CreateAuctionDTO auctionDTO;
     private CreateUserDTO userDTO;
     private CreateUserDTO userDTO2;
