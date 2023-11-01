@@ -25,6 +25,8 @@ public class UserDTO {
     private String phoneNumber;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String imgURL;
+
+    private float rating;
     public UserDTO(User user){
         id=user.getId();
         name = user.getName();
@@ -32,6 +34,7 @@ public class UserDTO {
         email = user.getEmail();
         phoneNumber = user.getPhoneNumber();
     }
+    public UserDTO(){}
     public UserDTO(User user, String img){
         id=user.getId();
         name = user.getName();

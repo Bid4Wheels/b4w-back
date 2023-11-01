@@ -1,6 +1,7 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.dto.UserReview.ReviewDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
@@ -52,8 +53,11 @@ public class UserServiceImp implements UserService {
 
     private final QuestionRepository questionRepository;
 
+    private final ReviewUserServiceImp reviewUserServiceImp;
+
     public UserServiceImp(JwtService jwtService, UserRepository userRepository, MailService mailService, AuctionRepository auctionRepository,
-                          BidRepository bidRepository, S3Service s3Service, QuestionRepository questionRepository) {
+                          BidRepository bidRepository, S3Service s3Service, QuestionRepository questionRepository,
+                          ReviewUserServiceImp reviewUserServiceImp) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.mailService = mailService;
@@ -61,6 +65,7 @@ public class UserServiceImp implements UserService {
         this.bidRepository = bidRepository;
         this.s3Service = s3Service;
         this.questionRepository = questionRepository;
+        this.reviewUserServiceImp = reviewUserServiceImp;
     }
 
     @Override
@@ -84,8 +89,10 @@ public class UserServiceImp implements UserService {
         if(user.isDeleted()){
             throw new EntityNotFoundException("User with "+id+" not found");
         }
+        List<ReviewDTO> reviews=reviewUserServiceImp.getReviews(id);
+        float averageRate=reviews.stream().reduce(0f,(acc,review)->acc+review.getRating(),Float::sum)/reviews.size();
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
-                phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).build();
+                phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).rating(averageRate).build();
     }
 
     @Override
