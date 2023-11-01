@@ -3,8 +3,8 @@ package com.b4w.b4wback.service;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateReviewDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.ReviewDTO;
 import com.b4w.b4wback.dto.UserReview.CreateUserReview;
+import com.b4w.b4wback.dto.UserReview.ReviewDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -31,6 +31,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -85,8 +86,8 @@ public class ReviewServiceTest {
         assertEquals(createReviewDTO.getReview(), reviewDTO.getReview());
         assertEquals(createReviewDTO.getRating(), reviewDTO.getRating());
         assertEquals(UserReviewType.WINNER, reviewDTO.getType());
-        assertEquals(users.get(0).getId(), reviewDTO.getOwner().getId());
-        assertEquals(users.get(1).getId(), reviewDTO.getWinner().getId());
+        assertEquals(users.get(1).getId(), reviewDTO.getReviewed().getId());
+        assertEquals(users.get(0).getId(), reviewDTO.getReviewer().getId());
 
         UserReview review = reviewRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("Review not found"));
         assertEquals(createReviewDTO.getReview(), review.getReview());
@@ -127,5 +128,31 @@ public class ReviewServiceTest {
         CreateUserReview createReviewDTO = new CreateUserReview(4.6f, "Muy malo");
         assertThrows(BadCredentialsException.class, ()->
                 reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId()));
+    }
+
+    @Test
+    void Test005_ReviewServiceGetFilteredReviewsOfNoReviewsThenEmptyList() {
+        List<ReviewDTO> reviews = reviewService.getReviewsFiltered(users.get(0).getId(), 0f);
+        assertTrue(reviews.isEmpty());
+    }
+
+    @Test
+    void Test006_ReviewServiceGetFilteredReviewsThenReturn2() {
+        auction.setStatus(AuctionStatus.FINISHED);
+        auction = auctionRepository.save(auction);
+        CreateUserReview createReviewDTO = new CreateUserReview(4.5f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+
+        auction = auctionRepository.save(auction);
+        createReviewDTO = new CreateUserReview(3.5f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+
+        auction = auctionRepository.save(auction);
+        createReviewDTO = new CreateUserReview(2.5f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+
+        List<ReviewDTO> filteredReviews = reviewService.getReviewsFiltered(users.get(1).getId(), 3f);
+
+        assertEquals(2, filteredReviews.size());
     }
 }

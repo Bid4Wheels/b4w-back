@@ -1,8 +1,7 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateReviewDTO;
-import com.b4w.b4wback.dto.ReviewDTO;
-import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.dto.UserReview.ReviewDTO;
 import com.b4w.b4wback.dto.UserReview.CreateUserReview;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.UserReviewType;
@@ -22,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -53,10 +55,7 @@ public class ReviewUserServiceImp implements ReviewUserService {
                     .type(UserReviewType.WINNER)
                     .build());
             //Review savedreview = reviewRepository.save(new Review(createReviewDTO.getReview(), createReviewDTO.getRating(), UserReviewType.OWNER, owner, winner, LocalDateTime.now()));
-            return new ReviewDTO(savedReview.getReview(), savedReview.getPunctuation(), savedReview.getType(),
-                    new UserDTO(savedReview.getReviewer()),
-                    new UserDTO(savedReview.getReviewed()),
-                    savedReview.getDate());
+            return new ReviewDTO(savedReview);
         }
         throw new BadRequestParametersException("Auction is not finished or you are not the owner");
     }
@@ -92,6 +91,14 @@ public class ReviewUserServiceImp implements ReviewUserService {
                 .review(userReviewDTO.getReview())
                 .date(LocalDateTime.now()).build()
         );
+    }
+
+    public List<ReviewDTO> getReviewsFiltered(long userId, float rate) {
+        List<UserReview> filteredReviews =
+                reviewRepository.findUserReviewByPunctuationAfterAndReviewerIdOrReviewedId(rate, userId);
+
+        return filteredReviews.stream().map(ReviewDTO::new)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private UserReviewType getReviewType(Auction auction, User reviewer, User reviewed){
