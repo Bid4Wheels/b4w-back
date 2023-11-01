@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/review")
 @RequiredArgsConstructor
@@ -34,5 +36,15 @@ public class ReviewController {
 
         UserReview review = reviewService.createUserReviewOwner(createReviewDTO, auctionId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ReviewDTO(review));
+    }
+
+    @GetMapping("/filter/{rate}")
+    public ResponseEntity<List<ReviewDTO>> getFilteredReviews(@RequestHeader("Authorization") String auth,
+                                                        @PathVariable float rate){
+        final String jwt = auth.substring(7);
+        Long userId = jwtService.extractId(jwt);
+
+        List<ReviewDTO> reviews = reviewService.getReviewsFiltered(userId, rate);
+        return ResponseEntity.status(HttpStatus.OK).body(reviews);
     }
 }

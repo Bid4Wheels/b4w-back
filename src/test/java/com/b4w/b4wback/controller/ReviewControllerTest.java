@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -120,5 +120,52 @@ public class ReviewControllerTest {
         ResponseEntity<?> res = restTemplate.exchange(baseUrl+"/owner/"+auction.getId(), HttpMethod.POST,
                 new HttpEntity<>(createReviewDTO, headers), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
+    }
+
+    @Test
+    void Test005_ReviewServiceGetFilteredReviewsOfNoReviewsThenEmptyList() {
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " + token1);
+
+        float rate = 3;
+        ResponseEntity<List> res = restTemplate.exchange(baseUrl + "/filter/" + rate, HttpMethod.GET,
+                new HttpEntity<>(headers), List.class);
+
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        List body = res.getBody();
+        assertNotNull(body);
+        assertTrue(body.isEmpty());
+    }
+
+    @Test
+    void Test006_ReviewServiceGetFilteredReviewsThenReturn2() {
+        CreateAnAuctionAndCreateAReview(4.5f);
+        CreateAnAuctionAndCreateAReview(3.5f);
+        CreateAnAuctionAndCreateAReview(2.5f);
+
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " + token1);
+
+        float rate = 3f;
+        ResponseEntity<List> res = restTemplate.exchange(baseUrl + "/filter/" + rate, HttpMethod.GET,
+                new HttpEntity<>(headers), List.class);
+
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        List body = res.getBody();
+        assertNotNull(body);
+        assertEquals(2, body.size());
+    }
+
+    private void CreateAnAuctionAndCreateAReview(float rate){
+        auction.setStatus(AuctionStatus.FINISHED);
+        auction = auctionRepository.save(auction);
+
+        CreateUserReview createReviewDTO = new CreateUserReview(rate, "relativamente aceptable");
+
+        HttpHeaders headers= new HttpHeaders();
+        headers.set("Authorization","Bearer " +token2);
+
+        restTemplate.exchange(baseUrl+"/owner/"+auction.getId(), HttpMethod.POST,
+                new HttpEntity<>(createReviewDTO, headers), String.class);
     }
 }
