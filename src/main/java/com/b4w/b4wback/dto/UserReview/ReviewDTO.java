@@ -25,4 +25,13 @@ public class ReviewDTO {
         reviewed = new UserDTO(userReview.getReviewed());
         createdAt = userReview.getDate();
     }
+
+    public ReviewDTO(UserReview userReview, UserDTO reviewer, UserDTO reviewed){
+        review = userReview.getReview();
+        rating = userReview.getPunctuation();
+        type = userReview.getType();
+        this.reviewer = reviewer;
+        this.reviewed = reviewed;
+        createdAt = userReview.getDate();
+    }
 }

@@ -1,6 +1,7 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateReviewDTO;
+import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.dto.UserReview.ReviewDTO;
 import com.b4w.b4wback.dto.UserReview.CreateUserReview;
 import com.b4w.b4wback.enums.AuctionStatus;
@@ -14,6 +15,7 @@ import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.repository.UserReviewRepository;
 import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.ReviewUserService;
+import com.b4w.b4wback.service.interfaces.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 public class ReviewUserServiceImp implements ReviewUserService {
     private final UserReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
     private final JwtService jwtService;
@@ -97,7 +100,10 @@ public class ReviewUserServiceImp implements ReviewUserService {
         List<UserReview> filteredReviews =
                 reviewRepository.findUserReviewByPunctuationAfterAndReviewerIdOrReviewedId(rate, userId);
 
-        return filteredReviews.stream().map(ReviewDTO::new)
+        return filteredReviews.stream().map((ur)->
+                        new ReviewDTO(ur,
+                                new UserDTO(ur.getReviewer(), userService.createUrlForDownloadingImage(ur.getReviewer().getId())),
+                                new UserDTO(ur.getReviewed(), userService.createUrlForDownloadingImage(ur.getReviewed().getId()))))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
