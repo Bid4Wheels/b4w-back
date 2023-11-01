@@ -6,7 +6,10 @@ import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
+import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
 import com.b4w.b4wback.service.interfaces.UserService;
@@ -20,6 +23,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +57,6 @@ class UserServiceTest {
         passwordChangerDto = new PasswordChangerDTO("bejero7623@dusyum.com");
         passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
         changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com","1Afjfslkjfl");
-
     }
 
     @Test
@@ -225,5 +229,4 @@ class UserServiceTest {
         userService.deleteUser("Bearer " + token);
         assertThrowsExactly(EntityNotFoundException.class, ()->auctionService.getAuctionById(1L));
     }
-
 }

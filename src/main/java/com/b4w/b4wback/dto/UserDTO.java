@@ -34,7 +34,6 @@ public class UserDTO {
         email = user.getEmail();
         phoneNumber = user.getPhoneNumber();
     }
-    public UserDTO(){}
     public UserDTO(User user, String img){
         id=user.getId();
         name = user.getName();
