@@ -4,10 +4,14 @@ import com.b4w.b4wback.dto.UserDTO;
 import com.b4w.b4wback.enums.UserReviewType;
 import com.b4w.b4wback.model.UserReview;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class ReviewDTO {
     String review;
