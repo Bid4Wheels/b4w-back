@@ -152,11 +152,12 @@ public class ReviewServiceTest {
         createReviewDTO = new CreateUserReview(2.5f, "Muy malo");
         reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
 
-        List<ReviewDTO> filteredReviews = reviewService.getReviewsFiltered(users.get(1).getId(), 3f);
+        List<ReviewDTO> filteredReviews = reviewService.getReviewsFiltered(users.get(0).getId(), 3.5f);
 
         assertEquals(2, filteredReviews.size());
     }
 
+    @Test
     void Test007_ReviewServiceGetReviewsShouldReturnListOfReviewDTO(){
         auction.setStatus(AuctionStatus.FINISHED);
         auction = auctionRepository.save(auction);

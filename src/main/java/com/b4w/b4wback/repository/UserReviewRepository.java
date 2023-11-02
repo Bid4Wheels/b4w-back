@@ -7,11 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-import java.util.List;
 
 public interface UserReviewRepository extends JpaRepository<UserReview, Long> {
-    @Query("SELECT ur FROM UserReview ur WHERE ur.punctuation > :punctuation AND (ur.reviewer.id = :userId OR ur.reviewed.id = :userId)")
-    List<UserReview> findUserReviewByPunctuationAfterAndReviewerIdOrReviewedId(float punctuation, long userId);
+    @Query("SELECT ur FROM UserReview ur WHERE ur.punctuation >= :punctuation AND ur.reviewed.id = :userId")
+    List<UserReview> findUserReviewByPunctuationGreaterOrEqualThanAndReviewedId(float punctuation, long userId);
     
     List<UserReview> findAllByReviewed(User user);
 }
