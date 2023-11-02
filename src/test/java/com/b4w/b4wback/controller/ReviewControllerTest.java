@@ -147,7 +147,7 @@ public class ReviewControllerTest {
         headers.set("Authorization","Bearer " + token1);
 
         float rate = 3f;
-        ResponseEntity<List> res = restTemplate.exchange(baseUrl + "/filter?rate=" + rate + "&userId="+0, HttpMethod.GET,
+        ResponseEntity<List> res = restTemplate.exchange(baseUrl + "/filter?rate=" + rate + "&userId="+1, HttpMethod.GET,
                 new HttpEntity<>(headers), List.class);
 
         assertEquals(HttpStatus.OK, res.getStatusCode());
