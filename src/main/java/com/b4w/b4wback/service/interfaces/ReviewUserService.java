@@ -13,4 +13,5 @@ public interface ReviewUserService {
     UserReview createUserReviewOwner(CreateUserReview userReviewDTO, long auctionId, long userId);
 
     List<ReviewDTO> getReviewsFiltered(long userId, float rate);
+    List<ReviewDTO> getReviews(long userId);
 }

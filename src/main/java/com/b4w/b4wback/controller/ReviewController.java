@@ -47,4 +47,9 @@ public class ReviewController {
         List<ReviewDTO> reviews = reviewService.getReviewsFiltered(userId, rate);
         return ResponseEntity.status(HttpStatus.OK).body(reviews);
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getReviews(@PathVariable long userId){
+        return ResponseEntity.ok(reviewService.getReviews(userId));
+    }
 }

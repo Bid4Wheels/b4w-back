@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 public class ReviewUserServiceImp implements ReviewUserService {
     private final UserReviewRepository reviewRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
     private final JwtService jwtService;
+    private final UserService userService;
 
 
     @Override
@@ -55,7 +55,7 @@ public class ReviewUserServiceImp implements ReviewUserService {
                     .review(createReviewDTO.getReview())
                     .punctuation(createReviewDTO.getRating())
                     .date(LocalDateTime.now())
-                    .type(UserReviewType.WINNER)
+                    .type(UserReviewType.WINNER).auction(auction)
                     .build());
             //Review savedreview = reviewRepository.save(new Review(createReviewDTO.getReview(), createReviewDTO.getRating(), UserReviewType.OWNER, owner, winner, LocalDateTime.now()));
             return new ReviewDTO(savedReview);
@@ -92,6 +92,7 @@ public class ReviewUserServiceImp implements ReviewUserService {
                 .type(reviewType)
                 .punctuation(userReviewDTO.getRating())
                 .review(userReviewDTO.getReview())
+                        .auction(auction)
                 .date(LocalDateTime.now()).build()
         );
     }
@@ -105,6 +106,23 @@ public class ReviewUserServiceImp implements ReviewUserService {
                                 new UserDTO(ur.getReviewer(), userService.createUrlForDownloadingImage(ur.getReviewer().getId())),
                                 new UserDTO(ur.getReviewed(), userService.createUrlForDownloadingImage(ur.getReviewed().getId()))))
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Override
+    public List<ReviewDTO> getReviews(long userId) {
+        User user = getEntity(userRepository, userId, "The user with the given id was not found");
+        List<UserReview> reviews = reviewRepository.findAllByReviewed(user);
+        List<ReviewDTO> reviewDTOS=new ArrayList<>();
+        for (UserReview review:reviews) {
+            Auction auction = review.getAuction();
+            if (auction!=null){
+                User reviewer= review.getReviewer();
+                UserDTO userReviewerDTO= UserDTO.builder().id(reviewer.getId()).
+                        name(reviewer.getName()).lastName(reviewer.getLastName()).imgURL(userService.createUrlForDownloadingImage(userId)).build();
+                reviewDTOS.add(new ReviewDTO(review, userReviewerDTO, auction.getId(), auction.getTitle()));
+            }
+        }
+        return reviewDTOS;
     }
 
     private UserReviewType getReviewType(Auction auction, User reviewer, User reviewed){
