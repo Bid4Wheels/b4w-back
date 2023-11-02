@@ -292,6 +292,11 @@ public class AuctionServiceImpl implements AuctionService {
         Auction auction = auctionO.get();
         auction.setStatus(AuctionStatus.FINISHED);
 
+        mailService.sendMail(auctionO.get().getUser().getEmail(), "Confirmation of the auction",
+                "Hello from B4W, \n The auction: " + auctionO.get().getTitle()
+                        + " was confirmed as finished and now you can rate the winner of the auction here: " +
+                        ". \n Have a nice day");
+
         auctionRepository.save(auction);
     }
 
