@@ -146,14 +146,14 @@ public class ReviewControllerTest {
         HttpHeaders headers= new HttpHeaders();
         headers.set("Authorization","Bearer " + token1);
 
-        float rate = 3f;
+        float rate = 3.5f;
         ResponseEntity<List> res = restTemplate.exchange(baseUrl + "/filter?rate=" + rate + "&userId="+1, HttpMethod.GET,
                 new HttpEntity<>(headers), List.class);
 
         assertEquals(HttpStatus.OK, res.getStatusCode());
         List body = res.getBody();
         assertNotNull(body);
-        assertEquals(2, body.size());
+        assertEquals(1, body.size());
     }
 
     private void CreateAnAuctionAndCreateAReview(float rate){

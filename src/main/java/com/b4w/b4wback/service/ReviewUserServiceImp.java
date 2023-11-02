@@ -99,7 +99,7 @@ public class ReviewUserServiceImp implements ReviewUserService {
 
     public List<ReviewDTO> getReviewsFiltered(long userId, float rate) {
         List<UserReview> filteredReviews =
-                reviewRepository.findUserReviewByPunctuationGreaterOrEqualThanAndReviewedId(rate, userId);
+                reviewRepository.findUserReviewByPunctuationAndReviewedId(rate, userId);
 
         return filteredReviews.stream().map((ur)->
                         new ReviewDTO(ur,

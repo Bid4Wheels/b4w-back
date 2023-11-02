@@ -154,7 +154,7 @@ public class ReviewServiceTest {
 
         List<ReviewDTO> filteredReviews = reviewService.getReviewsFiltered(users.get(0).getId(), 3.5f);
 
-        assertEquals(2, filteredReviews.size());
+        assertEquals(1, filteredReviews.size());
     }
 
     @Test
