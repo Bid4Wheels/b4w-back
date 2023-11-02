@@ -35,4 +35,9 @@ public class ReviewController {
         UserReview review = reviewService.createUserReviewOwner(createReviewDTO, auctionId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ReviewDTO(review));
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getReviews(@PathVariable long userId){
+        return ResponseEntity.ok(reviewService.getReviews(userId));
+    }
 }

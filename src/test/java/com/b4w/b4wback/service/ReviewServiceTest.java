@@ -28,6 +28,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -127,5 +128,30 @@ public class ReviewServiceTest {
         CreateUserReview createReviewDTO = new CreateUserReview(4.6f, "Muy malo");
         assertThrows(BadCredentialsException.class, ()->
                 reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId()));
+    }
+
+    @Test
+    void Test005_ReviewServiceGetReviewsShouldReturnListOfReviewDTO(){
+        auction.setStatus(AuctionStatus.FINISHED);
+        auction = auctionRepository.save(auction);
+        Auction auction2 = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
+                LocalDateTime.of(2030, 10, 10, 10, 10), "Toyota",
+                "A1", 1, 120000, GasType.DIESEL, 1990, "Blue", 4,
+                GearShiftType.AUTOMATIC, null), null);
+        auctionRepository.save(auction2);
+        auction2.setStatus(AuctionStatus.FINISHED);
+        auction2 = auctionRepository.save(auction2);
+        User user= userRepository.save(new User(new CreateUserDTO("Mark", "Pil", "pliiii@gmail,com",
+                "+5491112345678", "dsadsadsadsadada")));
+        CreateUserReview createReviewDTO = new CreateUserReview(4.6f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+        auction2.setUser(users.get(0));
+        List<Bid> bids = new ArrayList<>();
+        bids.add(new Bid(10000, user, auction2));
+        auction2.setBids(bids);
+        auctionRepository.save(auction2);
+        reviewService.createUserReviewOwner(createReviewDTO, auction2.getId(), user.getId());
+        List<com.b4w.b4wback.dto.UserReview.ReviewDTO> reviews = reviewService.getReviews(users.get(0).getId());
+        assertEquals(2, reviews.size());
     }
 }
