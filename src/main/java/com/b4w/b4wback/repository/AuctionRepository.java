@@ -78,7 +78,7 @@ public interface AuctionRepository extends JpaRepository<Auction,Long> {
     @Query("SELECT NEW com.b4w.b4wback.dto.AuctionDTO(auction.id, auction.title, auction.deadline, auction.createdAt, auction.status , " +
             "COALESCE((SELECT MAX(bid.amount) FROM Bid bid WHERE bid.auction.id = auction.id), auction.basePrice)) " +
             "FROM Auction auction " +
-            "WHERE auction.deadline > :currentDateTime AND auction.deadline < :limitDateTime" +
+            "WHERE auction.deadline > :currentDateTime AND auction.deadline < :limitDateTime  " +
             "ORDER BY auction.deadline ASC")
     Page<AuctionDTO> findUpcomingAuctions(@Param("currentDateTime") LocalDateTime currentDateTime,
                                           @Param("limitDateTime") LocalDateTime limitDateTime, Pageable pageable);
