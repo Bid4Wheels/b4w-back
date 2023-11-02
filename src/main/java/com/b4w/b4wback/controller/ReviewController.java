@@ -38,9 +38,9 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ReviewDTO(review));
     }
 
-    @GetMapping("/filter/{rate}")
+    @GetMapping("/filter")
     public ResponseEntity<List<ReviewDTO>> getFilteredReviews(@RequestHeader("Authorization") String auth,
-                                                        @PathVariable float rate){
+                                                        @RequestParam float rate){
         final String jwt = auth.substring(7);
         Long userId = jwtService.extractId(jwt);
 
