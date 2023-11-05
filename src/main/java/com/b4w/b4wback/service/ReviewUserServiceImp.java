@@ -1,8 +1,8 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.CreateReviewDTO;
-import com.b4w.b4wback.dto.ReviewDTO;
 import com.b4w.b4wback.dto.UserDTO;
+import com.b4w.b4wback.dto.UserReview.ReviewDTO;
 import com.b4w.b4wback.dto.UserReview.CreateUserReview;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.UserReviewType;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -57,10 +58,7 @@ public class ReviewUserServiceImp implements ReviewUserService {
                     .type(UserReviewType.WINNER).auction(auction)
                     .build());
             //Review savedreview = reviewRepository.save(new Review(createReviewDTO.getReview(), createReviewDTO.getRating(), UserReviewType.OWNER, owner, winner, LocalDateTime.now()));
-            return new ReviewDTO(savedReview.getReview(), savedReview.getPunctuation(), savedReview.getType(),
-                    new UserDTO(savedReview.getReviewer()),
-                    new UserDTO(savedReview.getReviewed()),
-                    savedReview.getDate());
+            return new ReviewDTO(savedReview);
         }
         throw new BadRequestParametersException("Auction is not finished or you are not the owner");
     }
@@ -99,19 +97,29 @@ public class ReviewUserServiceImp implements ReviewUserService {
         );
     }
 
+    public List<ReviewDTO> getReviewsFiltered(long userId, float rate) {
+        List<UserReview> filteredReviews =
+                reviewRepository.findUserReviewByPunctuationAndReviewedId(rate, userId);
+
+        return filteredReviews.stream().map((ur)->
+                        new ReviewDTO(ur,
+                                new UserDTO(ur.getReviewer(), userService.createUrlForDownloadingImage(ur.getReviewer().getId())),
+                                new UserDTO(ur.getReviewed(), userService.createUrlForDownloadingImage(ur.getReviewed().getId()))))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
 
     @Override
-    public List<com.b4w.b4wback.dto.UserReview.ReviewDTO> getReviews(long userId) {
+    public List<ReviewDTO> getReviews(long userId) {
         User user = getEntity(userRepository, userId, "The user with the given id was not found");
         List<UserReview> reviews = reviewRepository.findAllByReviewed(user);
-        List<com.b4w.b4wback.dto.UserReview.ReviewDTO> reviewDTOS=new ArrayList<>();
+        List<ReviewDTO> reviewDTOS=new ArrayList<>();
         for (UserReview review:reviews) {
             Auction auction = review.getAuction();
             if (auction!=null){
                 User reviewer= review.getReviewer();
                 UserDTO userReviewerDTO= UserDTO.builder().id(reviewer.getId()).
                         name(reviewer.getName()).lastName(reviewer.getLastName()).imgURL(userService.createUrlForDownloadingImage(userId)).build();
-                reviewDTOS.add(new com.b4w.b4wback.dto.UserReview.ReviewDTO(review, userReviewerDTO, auction.getId(), auction.getTitle()));
+                reviewDTOS.add(new ReviewDTO(review, userReviewerDTO, auction.getId(), auction.getTitle()));
             }
         }
         return reviewDTOS;
