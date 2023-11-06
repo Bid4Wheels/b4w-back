@@ -14,6 +14,7 @@ import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.*;
+import com.b4w.b4wback.util.MailFormat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -77,7 +78,8 @@ public class UserServiceImp implements UserService {
         String email = createUserDTO.getEmail();
         User newUser = userRepository.save(new User(createUserDTO));
         if (sendMail) {
-            mailService.sendMail(email, "Welcome to B4W", "Welcome to B4W");
+            mailService.sendMail(email, "Welcome to B4W", MailFormat.createWithDefaultHtml("Welcome to B4W", "We are glad to have you here, "
+                    + newUser.getName() + " " + newUser.getLastName()));
             email = "";
         }
         return newUser;
@@ -119,7 +121,7 @@ public class UserServiceImp implements UserService {
         Integer passwordCode = Random.nextInt(100000, 999999);
         user.setPasswordCode(passwordCode);
         userRepository.save(user);
-        mailService.sendMail(userDTO.getEmail(), "Password change code", "Your password change code is: " + passwordCode);
+        mailService.sendMail(userDTO.getEmail(), "Password change code", MailFormat.createWithDefaultHtml("Change Password","Your password change code is: " + passwordCode));
         return passwordCode;
     }
 
