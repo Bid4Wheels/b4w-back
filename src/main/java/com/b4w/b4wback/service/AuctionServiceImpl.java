@@ -185,7 +185,11 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public Page<AuctionDTO> getAuctionsEnding(Pageable pageable) {
         LocalDateTime currentDateTime = LocalDateTime.now();
-        Page<AuctionDTO> auctions = auctionRepository.findUpcomingAuctions(currentDateTime, pageable);
+        Page<AuctionDTO> auctions = auctionRepository.findUpcomingAuctions(
+                currentDateTime,
+                currentDateTime.plusDays(1),
+                pageable);
+        
         List<AuctionDTO> auctionDTOS = new ArrayList<>();
         for (AuctionDTO auction : auctions){
             Auction reusableAuction = auctionRepository.findById(auction.getId()).orElseThrow(() -> new EntityNotFoundException("Auction with "+auction.getId()+" not found"));
