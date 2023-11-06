@@ -14,6 +14,7 @@ import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.QuestionService;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test001_QuestionServiceCreateQuestionWithAllCorrectThenCreateQuestion() {
+    void Test001_QuestionServiceCreateQuestionWithAllCorrectThenCreateQuestion() throws MessagingException {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         assertEquals(createQuestionDTO.getQuestion(), question.getQuestion());
@@ -72,7 +73,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test002_QuestionServiceCreateQuestionMultipleTimesForSameAuctionThenAllCorrect(){
+    void Test002_QuestionServiceCreateQuestionMultipleTimesForSameAuctionThenAllCorrect() throws MessagingException {
         GetQuestionDTO question1 = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         CreateQuestionDTO questionDTO2 = new CreateQuestionDTO("Hello", auction.getId());
@@ -107,7 +108,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test005_QuestionServiceAnswerQuestionWithAllCorrectThenAnswerQuestion() {
+    void Test005_QuestionServiceAnswerQuestionWithAllCorrectThenAnswerQuestion() throws MessagingException {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         String answer ="sale 150000, un saludo";
@@ -120,7 +121,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test006_QuestionServiceAnswerQuestionWhenAlreadyAnswerShouldOverwriteAnswer(){
+    void Test006_QuestionServiceAnswerQuestionWhenAlreadyAnswerShouldOverwriteAnswer() throws MessagingException {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         String answer ="sale 150000, un saludo";
@@ -141,7 +142,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test007_QuestionServiceAnswerQuestionWhenUserIsNotOwnerOfAuctionReturnBadRequest(){
+    void Test007_QuestionServiceAnswerQuestionWhenUserIsNotOwnerOfAuctionReturnBadRequest() throws MessagingException {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         String answer ="sale 150000, un saludo";
@@ -152,7 +153,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test008_QuestionServiceAnswerQuestionWhenAuctionIsNotOpenReturnBadRequest(){
+    void Test008_QuestionServiceAnswerQuestionWhenAuctionIsNotOpenReturnBadRequest() throws MessagingException {
         auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
                 LocalDateTime.of(2025, 10, 10, 10, 10), "Toyota",
                 "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
@@ -182,7 +183,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test010_QuestionServiceGetQandAWhenAuctionHasQuestionsReturnList(){
+    void Test010_QuestionServiceGetQandAWhenAuctionHasQuestionsReturnList() throws MessagingException {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
 
         List<GetQandADTO> list = questionService.getQandA(auction.getId());
@@ -201,7 +202,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test012_QuestionServiceDeleteQuestionWhenAuctionIsClosed(){
+    void Test012_QuestionServiceDeleteQuestionWhenAuctionIsClosed() throws MessagingException {
         questionService.createQuestion(createQuestionDTO, users.get(1).getId());
         auction.setStatus(AuctionStatus.FINISHED);
         auctionRepository.save(auction);
@@ -209,7 +210,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test013_QuestionServiceDeleteQuestionWhenQuestionHasAnswer(){
+    void Test013_QuestionServiceDeleteQuestionWhenQuestionHasAnswer() throws MessagingException {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
         String answer ="sale 150000, un saludo";
         AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);
@@ -218,7 +219,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void Test013_QuestionServiceDeleteAnswerWithAllOk(){
+    void Test013_QuestionServiceDeleteAnswerWithAllOk() throws MessagingException {
         GetQuestionDTO question = questionService.createQuestion(createQuestionDTO, users.get(1).getId());
         String answer ="sale 150000, un saludo";
         AnswerQuestionDTO answerCheck = new AnswerQuestionDTO(answer);

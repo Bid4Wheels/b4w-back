@@ -148,4 +148,6 @@ public class MailServiceImp implements MailService {
         helper.addInline("img1", classPathResource);
         mailSender.send(message);
     }
+
+
 }

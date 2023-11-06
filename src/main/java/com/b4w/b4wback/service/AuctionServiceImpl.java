@@ -24,6 +24,7 @@ import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.*;
 
+import com.b4w.b4wback.util.MailFormat;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.data.domain.Page;
@@ -282,17 +283,19 @@ public class AuctionServiceImpl implements AuctionService {
 
     public void finishAuction(Long auctionID, Long userId){
         Optional<Auction> auctionO = auctionRepository.findById(auctionID);
+        User user= userRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("User with Id "+ userId +" not found"));
         if (auctionO.isEmpty()) throw new EntityNotFoundException("The auction with the given ID was not found");
         if (auctionO.get().getStatus() != AuctionStatus.AWATINGDELIVERY)
             throw  new BadCredentialsException("Not valid operation");
 
         Bid bid = bidRepository.findTopByAuctionOrderByAmountDesc(auctionO.get());
         if (bid.getBidder().getId() != userId) throw new BadCredentialsException("Not valid operation");
-
         Auction auction = auctionO.get();
         auction.setStatus(AuctionStatus.FINISHED);
-
         auctionRepository.save(auction);
+        mailService.sendMail(user.getEmail(), "Auction finished",
+                MailFormat.createWithDefaultHtmlWithUrl("Auction finished","Your auction has finished, you can see the result in the link below.",
+                        "bid4wheels.com/finish/"+auctionID));
     }
 
     @Transactional
