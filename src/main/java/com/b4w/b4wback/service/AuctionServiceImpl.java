@@ -98,7 +98,7 @@ public class AuctionServiceImpl implements AuctionService {
             top5.add(AuctionHigestBidDTO.builder()
                     .amount(bids.get(bids.size() -1 -i).getAmount())
                     .userId(bids.get(bids.size()-1 -i).getBidder().getId())
-                    .userName(bids.get(bids.size()-1 -i).getBidder().getUsername())
+                    .userName(bids.get(bids.size()-1 -i).getBidder().getName())
                     .userLastName(bids.get(bids.size()-1 -i).getBidder().getLastName())
                     .build());
             }
