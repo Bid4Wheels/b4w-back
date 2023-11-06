@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -68,7 +69,16 @@ public class BidServiceImpl implements BidService {
                 new BidNotificationDTO(bidDTO.getAmount(),user.getName(),user.getLastName()),new MessageHeaders(Collections.singletonMap(
                         MessageHeaders.CONTENT_TYPE,"application/json")));
 
+        ExtendAuctionTimeTo1MinuteIfLowerThanThat(auction);
         return bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
+    }
+
+    public void ExtendAuctionTimeTo1MinuteIfLowerThanThat(Auction auction){
+        LocalDateTime now = LocalDateTime.now();
+        if (auction.getDeadline().isAfter(now.minusMinutes(1))) return;
+
+        auction.setDeadline(now.minusMinutes(1));
+        auctionRepository.save(auction);
     }
 
     @Override
