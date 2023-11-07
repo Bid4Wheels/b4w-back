@@ -1,6 +1,7 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.dto.UserReview.ReviewDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
@@ -12,11 +13,9 @@ import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.BidRepository;
 import com.b4w.b4wback.repository.QuestionRepository;
 import com.b4w.b4wback.repository.UserRepository;
-import com.b4w.b4wback.service.interfaces.JwtService;
-import com.b4w.b4wback.service.interfaces.MailService;
-import com.b4w.b4wback.service.interfaces.S3Service;
-import com.b4w.b4wback.service.interfaces.UserService;
+import com.b4w.b4wback.service.interfaces.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -52,8 +51,12 @@ public class UserServiceImp implements UserService {
 
     private final QuestionRepository questionRepository;
 
+    private final ReviewUserService reviewUserService;
+
     public UserServiceImp(JwtService jwtService, UserRepository userRepository, MailService mailService, AuctionRepository auctionRepository,
-                          BidRepository bidRepository, S3Service s3Service, QuestionRepository questionRepository) {
+                          BidRepository bidRepository, S3Service s3Service,
+                          QuestionRepository questionRepository,
+                          @Lazy ReviewUserService reviewUserService) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.mailService = mailService;
@@ -61,6 +64,7 @@ public class UserServiceImp implements UserService {
         this.bidRepository = bidRepository;
         this.s3Service = s3Service;
         this.questionRepository = questionRepository;
+        this.reviewUserService = reviewUserService;
     }
 
     @Override
@@ -84,8 +88,10 @@ public class UserServiceImp implements UserService {
         if(user.isDeleted()){
             throw new EntityNotFoundException("User with "+id+" not found");
         }
+        List<ReviewDTO> reviews=reviewUserService.getReviews(id);
+        float averageRate=reviews.stream().reduce(0f,(acc,review)->acc+review.getRating(),Float::sum)/reviews.size();
         return UserDTO.builder().name(user.getName()).lastName(user.getLastName()).email(user.getEmail()).
-                phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).build();
+                phoneNumber(user.getPhoneNumber()).imgURL(createUrlForDownloadingImage(id)).rating(averageRate).build();
     }
 
     @Override

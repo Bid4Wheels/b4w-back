@@ -3,8 +3,8 @@ package com.b4w.b4wback.service;
 import com.b4w.b4wback.dto.CreateAuctionDTO;
 import com.b4w.b4wback.dto.CreateReviewDTO;
 import com.b4w.b4wback.dto.CreateUserDTO;
-import com.b4w.b4wback.dto.ReviewDTO;
 import com.b4w.b4wback.dto.UserReview.CreateUserReview;
+import com.b4w.b4wback.dto.UserReview.ReviewDTO;
 import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
@@ -28,9 +28,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -85,8 +87,8 @@ public class ReviewServiceTest {
         assertEquals(createReviewDTO.getReview(), reviewDTO.getReview());
         assertEquals(createReviewDTO.getRating(), reviewDTO.getRating());
         assertEquals(UserReviewType.WINNER, reviewDTO.getType());
-        assertEquals(users.get(0).getId(), reviewDTO.getOwner().getId());
-        assertEquals(users.get(1).getId(), reviewDTO.getWinner().getId());
+        assertEquals(users.get(1).getId(), reviewDTO.getReviewed().getId());
+        assertEquals(users.get(0).getId(), reviewDTO.getReviewer().getId());
 
         UserReview review = reviewRepository.findById(1L).orElseThrow(() -> new EntityNotFoundException("Review not found"));
         assertEquals(createReviewDTO.getReview(), review.getReview());
@@ -127,5 +129,56 @@ public class ReviewServiceTest {
         CreateUserReview createReviewDTO = new CreateUserReview(4.6f, "Muy malo");
         assertThrows(BadCredentialsException.class, ()->
                 reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId()));
+    }
+
+    @Test
+    void Test005_ReviewServiceGetFilteredReviewsOfNoReviewsThenEmptyList() {
+        List<ReviewDTO> reviews = reviewService.getReviewsFiltered(users.get(0).getId(), 0f);
+        assertTrue(reviews.isEmpty());
+    }
+
+    @Test
+    void Test006_ReviewServiceGetFilteredReviewsThenReturn2() {
+        auction.setStatus(AuctionStatus.FINISHED);
+        auction = auctionRepository.save(auction);
+        CreateUserReview createReviewDTO = new CreateUserReview(4.5f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+
+        auction = auctionRepository.save(auction);
+        createReviewDTO = new CreateUserReview(3.5f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+
+        auction = auctionRepository.save(auction);
+        createReviewDTO = new CreateUserReview(2.5f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+
+        List<ReviewDTO> filteredReviews = reviewService.getReviewsFiltered(users.get(0).getId(), 3.5f);
+
+        assertEquals(1, filteredReviews.size());
+    }
+
+    @Test
+    void Test007_ReviewServiceGetReviewsShouldReturnListOfReviewDTO(){
+        auction.setStatus(AuctionStatus.FINISHED);
+        auction = auctionRepository.save(auction);
+        Auction auction2 = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
+                LocalDateTime.of(2030, 10, 10, 10, 10), "Toyota",
+                "A1", 1, 120000, GasType.DIESEL, 1990, "Blue", 4,
+                GearShiftType.AUTOMATIC, null), null);
+        auctionRepository.save(auction2);
+        auction2.setStatus(AuctionStatus.FINISHED);
+        auction2 = auctionRepository.save(auction2);
+        User user= userRepository.save(new User(new CreateUserDTO("Mark", "Pil", "pliiii@gmail,com",
+                "+5491112345678", "dsadsadsadsadada")));
+        CreateUserReview createReviewDTO = new CreateUserReview(4.6f, "Muy malo");
+        reviewService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+        auction2.setUser(users.get(0));
+        List<Bid> bids = new ArrayList<>();
+        bids.add(new Bid(10000, user, auction2));
+        auction2.setBids(bids);
+        auctionRepository.save(auction2);
+        reviewService.createUserReviewOwner(createReviewDTO, auction2.getId(), user.getId());
+        List<com.b4w.b4wback.dto.UserReview.ReviewDTO> reviews = reviewService.getReviews(users.get(0).getId());
+        assertEquals(2, reviews.size());
     }
 }

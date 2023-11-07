@@ -20,6 +20,8 @@ public class UserReview {
     private User reviewer;
     @ManyToOne
     private User reviewed;
+    @ManyToOne
+    private Auction auction;
     private UserReviewType type;
     private float punctuation;
     private String review;
