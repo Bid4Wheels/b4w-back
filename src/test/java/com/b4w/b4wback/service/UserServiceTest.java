@@ -1,14 +1,20 @@
 package com.b4w.b4wback.service;
 
 import com.b4w.b4wback.dto.*;
+import com.b4w.b4wback.dto.UserReview.CreateUserReview;
 import com.b4w.b4wback.dto.auth.SignInRequest;
+import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.exception.BadRequestParametersException;
 import com.b4w.b4wback.exception.EntityNotFoundException;
+import com.b4w.b4wback.model.Auction;
+import com.b4w.b4wback.model.Bid;
 import com.b4w.b4wback.model.User;
+import com.b4w.b4wback.repository.AuctionRepository;
 import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.AuctionService;
+import com.b4w.b4wback.service.interfaces.ReviewUserService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +26,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.b4w.b4wback.util.HttpEntityCreator.authenticateAndGetToken;
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,13 +45,15 @@ class UserServiceTest {
     private TestRestTemplate restTemplate;
     @Autowired
     private AuctionService auctionService;
-
     CreateUserDTO userDTO;
     PasswordChangerDTO passwordChangerDto;
     GetPasswordCodeDTO passwordCodeDTO;
     ChangePasswordDTO changePasswordDTO;
     ModifyUserDTO modUser;
-
+    @Autowired
+    private AuctionRepository auctionRepository;
+    @Autowired
+    private ReviewUserService reviewUserService;
     @BeforeEach
     public void setup() {
         userDTO = new CreateUserDTO("Nico", "Borja", "bejero7623@dusyum.com",
@@ -52,7 +62,6 @@ class UserServiceTest {
         passwordChangerDto = new PasswordChangerDTO("bejero7623@dusyum.com");
         passwordCodeDTO = new GetPasswordCodeDTO("bejero7623@dusyum.com", 123456);
         changePasswordDTO = new ChangePasswordDTO("bejero7623@dusyum.com","1Afjfslkjfl");
-
     }
 
     @Test
@@ -226,4 +235,44 @@ class UserServiceTest {
         assertThrowsExactly(EntityNotFoundException.class, ()->auctionService.getAuctionById(1L));
     }
 
+    @Test
+    void Test024_UserServiceGetShouldReturnRating(){
+        List<User>users = new ArrayList<>();
+        users.add(userRepository.save(new User(new CreateUserDTO("Nico", "Pil", "pilo@gmail,com",
+                "+5491112345678", "Aa1bcdefgh"))));
+        users.add(userRepository.save(new User(new CreateUserDTO("Pablo", "Pil", "fsajkdf@gmail,com",
+                "+5491112345678", "Aa1bcdefgh"))));
+        users.add(userRepository.save(new User(new CreateUserDTO("Esteban", "Chiquito", "bejero@dusyum,com","+5491112345678",
+                "1Afjfslkjfl"))));
+
+        Auction auction = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
+                LocalDateTime.of(2030, 10, 10, 10, 10), "Toyota",
+                "A1", 1, 10000, GasType.DIESEL, 1990, "Blue", 4,
+                GearShiftType.AUTOMATIC, null), null);
+        auction.setUser(users.get(0));
+        List<Bid> bids = new ArrayList<>();
+        bids.add(new Bid(10000, users.get(1), auction));
+        auction.setBids(bids);
+        auction = auctionRepository.save(auction);
+        auction.setStatus(AuctionStatus.FINISHED);
+        auction = auctionRepository.save(auction);
+        Auction auction2 = new Auction(new CreateAuctionDTO(users.get(0).getId(), "A","text",
+                LocalDateTime.of(2030, 10, 10, 10, 10), "Toyota",
+                "A1", 1, 120000, GasType.DIESEL, 1990, "Blue", 4,
+                GearShiftType.AUTOMATIC, null), null);
+        auctionRepository.save(auction2);
+        auction2.setStatus(AuctionStatus.FINISHED);
+        auction2 = auctionRepository.save(auction2);
+        User user= userRepository.save(new User(new CreateUserDTO("Mark", "Pil", "pliiii@gmail,com",
+                "+5491112345678", "dsadsadsadsadada")));
+        CreateUserReview createReviewDTO = new CreateUserReview(4.6f, "Muy malo");
+        reviewUserService.createUserReviewOwner(createReviewDTO, auction.getId(), users.get(1).getId());
+        auction2.setUser(users.get(0));
+        bids.add(new Bid(10000, user, auction2));
+        auction2.setBids(bids);
+        auctionRepository.save(auction2);
+        CreateUserReview createReviewDTO2 = new CreateUserReview(1.4f, "El peor auto que vi en mi vida");
+        reviewUserService.createUserReviewOwner(createReviewDTO2, auction2.getId(), user.getId());
+        assertEquals(3.0f, userService.getUserById(users.get(0).getId()).getRating());
+    }
 }
