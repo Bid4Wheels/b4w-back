@@ -98,7 +98,7 @@ public class AuctionServiceImpl implements AuctionService {
             top5.add(AuctionHigestBidDTO.builder()
                     .amount(bids.get(bids.size() -1 -i).getAmount())
                     .userId(bids.get(bids.size()-1 -i).getBidder().getId())
-                    .userName(bids.get(bids.size()-1 -i).getBidder().getUsername())
+                    .userName(bids.get(bids.size()-1 -i).getBidder().getName())
                     .userLastName(bids.get(bids.size()-1 -i).getBidder().getLastName())
                     .build());
             }
@@ -185,7 +185,11 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public Page<AuctionDTO> getAuctionsEnding(Pageable pageable) {
         LocalDateTime currentDateTime = LocalDateTime.now();
-        Page<AuctionDTO> auctions = auctionRepository.findUpcomingAuctions(currentDateTime, pageable);
+        Page<AuctionDTO> auctions = auctionRepository.findUpcomingAuctions(
+                currentDateTime,
+                currentDateTime.plusDays(1),
+                pageable);
+        
         List<AuctionDTO> auctionDTOS = new ArrayList<>();
         for (AuctionDTO auction : auctions){
             Auction reusableAuction = auctionRepository.findById(auction.getId()).orElseThrow(() -> new EntityNotFoundException("Auction with "+auction.getId()+" not found"));

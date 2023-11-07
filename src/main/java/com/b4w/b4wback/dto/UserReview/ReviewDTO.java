@@ -7,11 +7,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-@AllArgsConstructor
-@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class ReviewDTO {
     private String review;
     private float rating;
@@ -24,6 +26,7 @@ public class ReviewDTO {
     private Long auctionId;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String auctionName;
+
     public ReviewDTO(UserReview userReview){
         review = userReview.getReview();
         rating = userReview.getPunctuation();
@@ -32,8 +35,20 @@ public class ReviewDTO {
         reviewed = new UserDTO(userReview.getReviewed());
         createdAt = userReview.getDate();
     }
-    public ReviewDTO(){}
 
+    public ReviewDTO(UserReview userReview, UserDTO reviewer, UserDTO reviewed){
+        review = userReview.getReview();
+        rating = userReview.getPunctuation();
+        type = userReview.getType();
+        this.reviewer = reviewer;
+        this.reviewed = reviewed;
+        createdAt = userReview.getDate();
+
+        this.auctionId = userReview.getAuction().getId();
+        this.auctionName = userReview.getAuction().getTitle();
+    }
+
+    //TODO: Is possible to make it similar to the upper constructor
     public ReviewDTO(UserReview userReview, UserDTO userReviewerDto,Long auctionId, String auctionName){
         review = userReview.getReview();
         rating = userReview.getPunctuation();

@@ -633,11 +633,11 @@ public class AuctionServiceTest {
 
         List<AuctionDTO> auctionList = actualAuctions.getContent();
 
-        LocalDateTime currentTime = auctionList.get(0).getDeadline();
+        LocalDateTime currentTime = LocalDateTime.now();
         for (int i = 1; i < auctionList.size(); i++) {
             AuctionDTO auctionDTO = auctionList.get(i);
             assertTrue(auctionDTO.getDeadline().isAfter(currentTime));
-            currentTime = auctionDTO.getDeadline();
+            assertTrue(auctionDTO.getDeadline().isBefore(currentTime.plusDays(1)));
         }
     }
 
@@ -799,7 +799,7 @@ public class AuctionServiceTest {
         assertEquals("tag4",tagRepository.findAll().get(0).getTagName());
     }
 
-
+    @Test
     void Test041_AuctionServiceWhenFinishAuctionByTheWinnerThenAllCorrect(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
