@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -42,10 +40,10 @@ public class AuctionSortingTest {
     @Autowired
     private AuctionService auctionService;
     private CreateAuctionDTO auctionDTO;
-    private CreateUserDTO userDTO;
-    private CreateUserDTO userDTO2;
-    private CreateUserDTO userDTO3;
     private List<Auction> auctions;
+    private HttpHeaders headers;
+    private HttpHeaders headers2;
+    private HttpHeaders headers3;
 
     @BeforeEach
     public void setUp() {
@@ -53,15 +51,28 @@ public class AuctionSortingTest {
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 1000, 100, GasType.GASOLINE, 2019, "Blanco",
                 4, GearShiftType.MANUAL, new ArrayList<>(Arrays.asList("azul", "nuevo")));
-        userDTO = new CreateUserDTO("Nico", "Borja", "test@mail.com",
+        CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "test@mail.com",
                 "+5491154964341", "1Afjfslkjfl");
         restTemplate.exchange("/user", HttpMethod.POST, createHttpEntity(userDTO), Void.class);
-        userDTO2 = new CreateUserDTO("Mico", "Vorja", "bejero@dusyum.com",
+        CreateUserDTO userDTO2 = new CreateUserDTO("Mico", "Vorja", "bejero@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
         restTemplate.exchange("/user", HttpMethod.POST, createHttpEntity(userDTO2), CreateUserDTO.class);
-        userDTO3 = new CreateUserDTO("Rico", "Vorja", "bejero23@dusyum.com",
+        CreateUserDTO userDTO3 = new CreateUserDTO("Rico", "Vorja", "bejero23@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
         restTemplate.exchange("/user", HttpMethod.POST, createHttpEntity(userDTO3), CreateUserDTO.class);
+
+        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
+        headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+
+        String jwtToken2 = authenticateAndGetToken(new SignInRequest(userDTO2.getEmail(), userDTO2.getPassword()), restTemplate);
+        headers2 = new HttpHeaders();
+        headers2.set("Authorization", "Bearer " + jwtToken2);
+
+        String jwtToken3 = authenticateAndGetToken(new SignInRequest(userDTO3.getEmail(), userDTO3.getPassword()), restTemplate);
+        headers3 = new HttpHeaders();
+        headers3.set("Authorization", "Bearer " + jwtToken3);
+
     }
 
     private HttpEntity<CreateUserDTO> createHttpEntity(CreateUserDTO createUserDTO) {
@@ -72,12 +83,7 @@ public class AuctionSortingTest {
 
     @Test
     void Test121_WhenGetAuctionsByUserRespondWithListOfAuctions() {
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
-
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
-
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange("/auction/user/1", HttpMethod.GET,
                 new HttpEntity<>(headers), String.class);
@@ -87,15 +93,8 @@ public class AuctionSortingTest {
 
     @Test
     void Test122_WhenGetAuctionsByOtherUserRespondWithEmptyList() {
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
-
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
 
-        String jwtToken2 = authenticateAndGetToken(new SignInRequest(userDTO2.getEmail(), userDTO2.getPassword()), restTemplate);
-        HttpHeaders headers2 = new HttpHeaders();
-        headers2.set("Authorization", "Bearer " + jwtToken2);
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange("/auction/user/1", HttpMethod.GET,
                 new HttpEntity<>(headers2), String.class);
         assertEquals(HttpStatus.OK, getAuctionsResponse.getStatusCode());
@@ -103,9 +102,6 @@ public class AuctionSortingTest {
 
     @Test
     void Test33_WhenGetAuctionsByUserRespondWithListOfAuctionsWithAllStatusFilteredByCreationDate() throws JsonProcessingException {
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
 
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
         Auction auction = auctionRepository.findById(1L).get();
@@ -117,9 +113,7 @@ public class AuctionSortingTest {
         auction.setStatus(AuctionStatus.AWATINGDELIVERY);
         auctionRepository.save(auction);
 
-
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
-
 
         ResponseEntity<String> res = restTemplate.exchange("/auction/new", HttpMethod.GET, new HttpEntity<>(headers), String.class);
         assertEquals(HttpStatus.OK, res.getStatusCode());
@@ -130,7 +124,6 @@ public class AuctionSortingTest {
         assertTrue(res.getBody().contains("OPEN"));
 
         String jsonData = res.getBody();
-
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonData);
@@ -143,15 +136,8 @@ public class AuctionSortingTest {
 
     @Test
     void Test121_WhenGetAuctionsBiddedByUserRespondWithListOfAuctions() {
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
-
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
 
-        String jwtToken2 = authenticateAndGetToken(new SignInRequest(userDTO2.getEmail(), userDTO2.getPassword()), restTemplate);
-        HttpHeaders headers2 = new HttpHeaders();
-        headers2.set("Authorization", "Bearer " + jwtToken2);
         restTemplate.exchange("/bid", HttpMethod.POST,new HttpEntity<>(new CreateBidDTO(100000000, 2L,1L), headers2), String.class);
 
         ResponseEntity<String> getAuctionsResponse = restTemplate.exchange("/auction/bidder/2", HttpMethod.GET,
@@ -163,15 +149,7 @@ public class AuctionSortingTest {
 
     @Test
     void Test122_WhenGetAuctionsBiddedByOtherUserRespondWithListOfAuctions() {
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
-
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
-
-        String jwtToken2 = authenticateAndGetToken(new SignInRequest(userDTO2.getEmail(), userDTO2.getPassword()), restTemplate);
-        HttpHeaders headers2 = new HttpHeaders();
-        headers2.set("Authorization", "Bearer " + jwtToken2);
 
         restTemplate.exchange("/bid", HttpMethod.POST,new HttpEntity<>(new CreateBidDTO(100000000, 2L,1L), headers2), String.class);
 
@@ -184,16 +162,10 @@ public class AuctionSortingTest {
 
     @Test
     void Test33_WhenGetAuctionsBiddedByUserRespondWithListOfAuctionsWithAllStatusFilteredByCreationDate() throws JsonProcessingException {
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
-
-        String jwtToken2 = authenticateAndGetToken(new SignInRequest(userDTO2.getEmail(), userDTO2.getPassword()), restTemplate);
-        HttpHeaders headers2 = new HttpHeaders();
-        headers2.set("Authorization", "Bearer " + jwtToken2);
-
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
+
         restTemplate.exchange("/bid", HttpMethod.POST,new HttpEntity<>(new CreateBidDTO(100000000, 2L,1L), headers2), String.class);
+
         Auction auction = auctionRepository.findById(1L).get();
         auction.setStatus(AuctionStatus.FINISHED);
         auctionRepository.save(auction);
@@ -232,18 +204,6 @@ public class AuctionSortingTest {
 
     @Test
     void Test34__WhenGetAuctionsBiddedByUserAndNotHighestBidRespondWithListOfAuctionsWithAllStatusFilteredByCreationDate() throws JsonProcessingException {
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
-
-        String jwtToken2 = authenticateAndGetToken(new SignInRequest(userDTO2.getEmail(), userDTO2.getPassword()), restTemplate);
-        HttpHeaders headers2 = new HttpHeaders();
-        headers2.set("Authorization", "Bearer " + jwtToken2);
-
-        String jwtToken3 = authenticateAndGetToken(new SignInRequest(userDTO3.getEmail(), userDTO3.getPassword()), restTemplate);
-        HttpHeaders headers3 = new HttpHeaders();
-        headers3.set("Authorization", "Bearer " + jwtToken3);
-
         restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
         restTemplate.exchange("/bid", HttpMethod.POST,new HttpEntity<>(new CreateBidDTO(100000000, 2L,1L), headers2), String.class);
         restTemplate.exchange("/bid", HttpMethod.POST,new HttpEntity<>(new CreateBidDTO(100000001, 3L,1L), headers3), String.class);
@@ -285,22 +245,21 @@ public class AuctionSortingTest {
         assertEquals(3, elementCount);
     }
     private void generateFilterAuctions(){
-        auctionDTO = new CreateAuctionDTO(1L,"Subasta de automovil","text",
+        auctionDTO = new CreateAuctionDTO(1L,"Subasta de automovil 1","text",
                 LocalDateTime.of(2024, 3, 3, 18, 0, 0),"Aston Martin",
                 "Amr23",200,4000, GasType.DIESEL,2,"Green",
                 2, GearShiftType.MANUAL, new ArrayList<>(List.of("awesome")));
 
         auctionService.createAuction(auctionDTO);
 
-
-        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+        CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil 2", "text",
                 LocalDateTime.of(2023, 11, 17, 3, 0, 0), "Volkswagen",
                 "golf 1,4 TSI", 16000, 107000, GasType.GASOLINE, 7, "Silver",
                 5, GearShiftType.MANUAL, new ArrayList<>(List.of("awesome", "nice")));
 
         auctionService.createAuction(auctionDTO2);
 
-        CreateAuctionDTO auctionDTO3 = new CreateAuctionDTO(1L, "Subasta de automovil", "text",
+        CreateAuctionDTO auctionDTO3 = new CreateAuctionDTO(1L, "Subasta de automovil 3", "text",
                 LocalDateTime.of(2024, 1, 10, 3, 0, 0), "Ford",
                 "Fiesta", 10000, 23354, GasType.GASOLINE, 10, "Silver",
                 4, GearShiftType.AUTOMATIC, new ArrayList<>(List.of("silver")));
@@ -317,12 +276,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setBrand(value);
 
-        auctions = auctions.stream().filter(a-> a.getBrand().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(3L, page.getContent().get(0).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 3"));
     }
 
     @Test
@@ -335,12 +293,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setBrand(value);
 
-        auctions = auctions.stream().filter(a-> a.getBrand().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -355,12 +312,12 @@ public class AuctionSortingTest {
 
         auctions = auctions.stream().filter(a-> a.getColor().equals(value)).toList();
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(2L, page.getContent().get(0).getId());
-        assertEquals(3L, page.getContent().get(1).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 2"));
+        assertTrue(res.getBody().contains("Subasta de automovil 3"));
     }
 
     @Test
@@ -372,12 +329,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setColor(value);
 
-        auctions = auctions.stream().filter(a -> a.getColor().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -389,12 +345,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setGasType(value);
 
-        auctions = auctions.stream().filter(a-> a.getGasType().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(1L, page.getContent().get(0).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
     }
 
     @Test
@@ -406,12 +361,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setGasType(value);
 
-        auctions = auctions.stream().filter(a -> a.getGasType().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -423,13 +377,12 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setPriceMin(min);
 
-        auctions = auctions.stream().filter(a->(a.getBasePrice() >= min)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(2L, page.getContent().get(0).getId());
-        assertEquals(3L, page.getContent().get(1).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 2"));
+        assertTrue(res.getBody().contains("Subasta de automovil 3"));
     }
 
     @Test
@@ -441,12 +394,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setPriceMin(min);
 
-        auctions = auctions.stream().filter(a->(a.getBasePrice() >= min)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
     @Test
     void Test213_WhenFilterByBasePriceMaxAndExistingAuctionReturnListOfAuctions() {
@@ -457,12 +409,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setPriceMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getBasePrice() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(1L, page.getContent().get(0).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
     }
 
     @Test
@@ -474,12 +425,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setPriceMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getBasePrice() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -493,13 +443,12 @@ public class AuctionSortingTest {
         filter.setPriceMin(min);
         filter.setPriceMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getBasePrice() >= min && a.getBasePrice() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(1L, page.getContent().get(0).getId());
-        assertEquals(3L, page.getContent().get(1).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
+        assertTrue(res.getBody().contains("Subasta de automovil 3"));
     }
 
     @Test
@@ -513,12 +462,11 @@ public class AuctionSortingTest {
         filter.setPriceMin(min);
         filter.setPriceMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getBasePrice() >= min && a.getBasePrice() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -530,12 +478,12 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setModelYearMin(min);
 
-        auctions = auctions.stream().filter(a->(a.getModelYear() >= min)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(1L, page.getContent().get(0).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
+        assertTrue(res.getBody().contains("Subasta de automovil 2"));
     }
 
 //    @Test
@@ -564,12 +512,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setModelYearMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getModelYear() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(1L, page.getContent().get(0).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
     }
 
     @Test
@@ -581,12 +528,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setModelYearMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getModelYear() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -600,13 +546,12 @@ public class AuctionSortingTest {
         filter.setModelYearMin(min);
         filter.setModelYearMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getModelYear() >= min && a.getModelYear() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(1L, page.getContent().get(0).getId());
-        assertEquals(2L, page.getContent().get(1).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
+        assertTrue(res.getBody().contains("Subasta de automovil 2"));
     }
 
     @Test
@@ -620,16 +565,15 @@ public class AuctionSortingTest {
         filter.setModelYearMin(min);
         filter.setModelYearMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getModelYear() >= min && a.getModelYear() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
-    void Test223_WhenFilterByMilageMinAndExistingAuctionReturnListOfAuctions() {
+    void Test223_WhenFilterByMillageMinAndExistingAuctionReturnListOfAuctions() {
         generateFilterAuctions();
         auctions = auctionRepository.findAll();
         int min = 100000;
@@ -637,12 +581,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setMilageMin(min);
 
-        auctions = auctions.stream().filter(a->(a.getMilage() >= min)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(2L, page.getContent().get(0).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 2"));
     }
 
     @Test
@@ -654,12 +597,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setMilageMin(min);
 
-        auctions = auctions.stream().filter(a->(a.getMilage() >= min)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -671,15 +613,15 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setMilageMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getMilage() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
     }
 
     @Test
-    void Test226_WhenFilterByMilageMaxAndNotExistingAuctionReturnListOfAuctionsEmpty() {
+    void Test226_WhenFilterByMillageMaxAndNotExistingAuctionReturnListOfAuctionsEmpty() {
         generateFilterAuctions();
         auctions = auctionRepository.findAll();
         int max = 100;
@@ -687,15 +629,15 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setMilageMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getMilage() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
-    void Test227_WhenFilterByMilageMinAndMaxAndExistingAuctionReturnListOfAuctions() {
+    void Test227_WhenFilterByMillageMinAndMaxAndExistingAuctionReturnListOfAuctions() {
         generateFilterAuctions();
         auctions = auctionRepository.findAll();
         int min = 3000;
@@ -705,15 +647,15 @@ public class AuctionSortingTest {
         filter.setMilageMin(min);
         filter.setMilageMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getMilage() >= min && a.getMilage() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(auctions.size(), page.getTotalElements());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 3"));
     }
 
     @Test
-    void Test228_WhenFilterByMilageMinAndMaxAndNotExistingAuctionReturnListOfAuctionsEmpty() {
+    void Test228_WhenFilterByMillageMinAndMaxAndNotExistingAuctionReturnListOfAuctionsEmpty() {
         generateFilterAuctions();
         auctions = auctionRepository.findAll();
         int min = 1000;
@@ -723,11 +665,11 @@ public class AuctionSortingTest {
         filter.setMilageMin(min);
         filter.setMilageMax(max);
 
-        auctions = auctions.stream().filter(a->(a.getMilage() >= min && a.getMilage() <= max)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-        assertEquals(0, page.getTotalElements());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -739,13 +681,12 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setModel(value);
 
-        auctions = auctions.stream().filter(a-> a.getModel().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 3"));
 
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(3L, page.getContent().get(0).getId());
     }
 
     @Test
@@ -757,13 +698,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setModel(value);
 
-        auctions = auctions.stream().filter(a-> a.getModel().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -775,13 +714,12 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setDoorsAmount(value);
 
-        auctions = auctions.stream().filter(a-> a.getDoorsAmount() == value).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 3"));
 
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(3L, page.getContent().get(0).getId());
     }
 
     @Test
@@ -793,13 +731,11 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setDoorsAmount(value);
 
-        auctions = auctions.stream().filter(a-> a.getDoorsAmount() == value).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertTrue(page.getContent().isEmpty());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("[]"));
     }
 
     @Test
@@ -811,14 +747,12 @@ public class AuctionSortingTest {
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
         filter.setGearShiftType(value);
 
-        auctions = auctions.stream().filter(a-> a.getGearShiftType().equals(value)).toList();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
-
-        assertEquals(auctions.size(), page.getTotalElements());
-        assertEquals(1L, page.getContent().get(0).getId());
-        assertEquals(2L, page.getContent().get(1).getId());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
+        assertTrue(res.getBody().contains("Subasta de automovil 2"));
     }
 
     @Test
@@ -828,10 +762,13 @@ public class AuctionSortingTest {
 
         FilterAuctionDTO filter = FilterAuctionDTO.builder().build();
 
-        Page<AuctionDTO> page = auctionService
-                .getAuctionsFiltered(filter, Pageable.ofSize(10));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<String> res = restTemplate.exchange("/auction/filter", HttpMethod.POST, new HttpEntity<>(filter, headers), String.class);
 
-        assertEquals(auctions.size(), page.getTotalElements());
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("Subasta de automovil 1"));
+        assertTrue(res.getBody().contains("Subasta de automovil 2"));
+        assertTrue(res.getBody().contains("Subasta de automovil 3"));
     }
 //    @Test
 //    void Test1340_WhenFilterByEndingSoonReturnListOfAuctions() {
@@ -849,5 +786,15 @@ public class AuctionSortingTest {
 //        assertTrue(res.getBody().contains("2023-11-17T03:00:00"));
 //    }
 
+    @Test
+    void Test2341_WhenFilterByNewlyListedReturnListOfAuctions() throws JsonProcessingException {
+        generateFilterAuctions();
 
+        ResponseEntity<String> res = restTemplate.exchange("/auction/new",HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+
+        assertTrue(Objects.requireNonNull(res.getBody()).contains("2024-03-03T18:00:00"));
+        assertTrue(res.getBody().contains("2024-01-10T03:00:00"));
+        assertTrue(res.getBody().contains("2023-11-17T03:00:00"));
+    }
 }
