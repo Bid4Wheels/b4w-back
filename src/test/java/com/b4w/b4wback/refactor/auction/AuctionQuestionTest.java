@@ -34,7 +34,8 @@ public class AuctionQuestionTest {
     @Autowired
     private TestRestTemplate restTemplate;
     private CreateUserDTO userDTO;
-    private CreateAuctionDTO auctionDTO;
+    private CreateQuestionDTO questionDTO;
+
 
     @BeforeEach
     public void setup() {
@@ -46,10 +47,18 @@ public class AuctionQuestionTest {
                 "+5491112345678", "Aa1bcdefgh");
         restTemplate.exchange("/user", HttpMethod.POST, createHttpEntity(userDTO2), Void.class);
 
-        auctionDTO = new CreateAuctionDTO(1L, "titulo", "vendo auto",
+        CreateAuctionDTO auctionDTO = new CreateAuctionDTO(1L, "titulo", "vendo auto",
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 1000, 100, GasType.GASOLINE, 2019, "Blanco",
                 4, GearShiftType.MANUAL, new ArrayList<>(Arrays.asList("azul", "nuevo")));
+
+        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+
+        restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
+
+        questionDTO = new CreateQuestionDTO("Make a question", 1L);
     }
     private HttpEntity<CreateQuestionDTO> createHttpEntity(CreateQuestionDTO questionDTO, CreateUserDTO userDTO){
         HttpHeaders headers = createHeaderWithToken(userDTO, restTemplate);
@@ -65,14 +74,9 @@ public class AuctionQuestionTest {
 
     @Test
     void Test11_WhenCreateQuestionOnAnExistingAuctionReturn(){
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
 
-        restTemplate.exchange("/auction", HttpMethod.POST, new HttpEntity<>(auctionDTO, headers), String.class);
-
-            ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange("/QandA/question", HttpMethod.POST,
-                    createHttpEntity(new CreateQuestionDTO("Make a question", 1L), userDTO), GetQuestionDTO.class);
+        ResponseEntity<GetQuestionDTO> postBidResponse = restTemplate.exchange("/QandA/question", HttpMethod.POST,
+                createHttpEntity(questionDTO,userDTO), GetQuestionDTO.class);
         assertEquals(HttpStatus.CREATED, postBidResponse.getStatusCode());
         assertEquals(HttpStatus.CREATED, postBidResponse.getStatusCode());
         assertTrue(postBidResponse.hasBody());
