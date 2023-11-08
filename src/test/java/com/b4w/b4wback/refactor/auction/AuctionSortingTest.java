@@ -51,12 +51,15 @@ public class AuctionSortingTest {
                 LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
                 "Corolla", 1000, 100, GasType.GASOLINE, 2019, "Blanco",
                 4, GearShiftType.MANUAL, new ArrayList<>(Arrays.asList("azul", "nuevo")));
+
         CreateUserDTO userDTO = new CreateUserDTO("Nico", "Borja", "test@mail.com",
                 "+5491154964341", "1Afjfslkjfl");
         restTemplate.exchange("/user", HttpMethod.POST, createHttpEntity(userDTO), Void.class);
+
         CreateUserDTO userDTO2 = new CreateUserDTO("Mico", "Vorja", "bejero@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
         restTemplate.exchange("/user", HttpMethod.POST, createHttpEntity(userDTO2), CreateUserDTO.class);
+
         CreateUserDTO userDTO3 = new CreateUserDTO("Rico", "Vorja", "bejero23@dusyum.com",
                 "+5491112345678", "1Afjfslkjfl");
         restTemplate.exchange("/user", HttpMethod.POST, createHttpEntity(userDTO3), CreateUserDTO.class);
@@ -787,7 +790,7 @@ public class AuctionSortingTest {
 //    }
 
     @Test
-    void Test2341_WhenFilterByNewlyListedReturnListOfAuctions() throws JsonProcessingException {
+    void Test2341_WhenFilterByNewlyListedReturnListOfAuctions(){
         generateFilterAuctions();
 
         ResponseEntity<String> res = restTemplate.exchange("/auction/new",HttpMethod.GET, new HttpEntity<>(headers), String.class);

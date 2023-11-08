@@ -6,7 +6,6 @@ import com.b4w.b4wback.dto.Question.AnswerQuestionDTO;
 import com.b4w.b4wback.dto.Question.CreateQuestionDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.dto.Question.*;
-import com.b4w.b4wback.enums.AuctionStatus;
 import com.b4w.b4wback.enums.GasType;
 import com.b4w.b4wback.enums.GearShiftType;
 import com.b4w.b4wback.model.Auction;
@@ -174,7 +173,7 @@ public class QuestionAndAnswerControllerTest {
 
         assertEquals(HttpStatus.CREATED, answerResponse.getStatusCode());
         assertTrue(answerResponse.hasBody());
-        assertTrue(answerResponse.getBody().contains("150000 pesos, un saludo"));
+        assertTrue(Objects.requireNonNull(answerResponse.getBody()).contains("150000 pesos, un saludo"));
     }
 
     @Test
@@ -213,6 +212,7 @@ public class QuestionAndAnswerControllerTest {
 
         GetQuestionDTO questionDTO = postBidResponse.getBody();
 
+        assert questionDTO != null;
         ResponseEntity<String> deleteQuestionResponse = restTemplate.exchange(baseUrl+"/question/"+questionDTO.getId(), HttpMethod.DELETE,
                 createHttpEntity(createQuestionDTO, userDTOS.get(1)),
                 String.class);
@@ -228,6 +228,7 @@ public class QuestionAndAnswerControllerTest {
 
         GetQuestionDTO questionDTO = postBidResponse.getBody();
 
+        assert questionDTO != null;
         restTemplate.exchange(baseUrl+"/answer/"+questionDTO.getId(), HttpMethod.PATCH,
                 createHttpEntity(new AnswerQuestionDTO("150000 pesos, un saludo"), userDTOS.get(0)),
                 String.class);
@@ -245,6 +246,7 @@ public class QuestionAndAnswerControllerTest {
                 GetQuestionDTO.class);
 
         GetQuestionDTO questionDTO = postBidResponse.getBody();
+        assert questionDTO != null;
         ResponseEntity<String> deleteAnswerResponse = restTemplate.exchange(baseUrl+"/answer/"+questionDTO.getId(), HttpMethod.DELETE,
                 createHttpEntity(createQuestionDTO, userDTOS.get(1)),
                 String.class);
