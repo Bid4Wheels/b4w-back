@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -105,7 +106,7 @@ public class UserRemovalTest {
         Optional<User> optionalUser = userRepository.findByEmail(userDTO.getEmail());
         User user = optionalUser.get();
 
-        List<Auction> auctions= auctionRepository.findByUser(user);
+        Page<Auction> auctions= auctionRepository.findByUser(user,null);
         List<AuctionDTO> auctionDTOS = new ArrayList<>();
         for (Auction auction : auctions){
             auctionDTOS.add((new AuctionDTO(auction)));
@@ -124,7 +125,7 @@ public class UserRemovalTest {
 
         assertTrue(user.isDeleted());
 
-        auctions= auctionRepository.findByUser(user);
+        auctions= auctionRepository.findByUser(user,null);
         auctionDTOS = new ArrayList<>();
         for (Auction auction : auctions){
             auctionDTOS.add((new AuctionDTO(auction)));
