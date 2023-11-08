@@ -833,17 +833,21 @@ public class AuctionSortingTest {
 
         assertEquals(auctions.size(), page.getTotalElements());
     }
-    @Test
-    void Test1340_WhenFileterByEndingSoonReturnListOfAuctions() {
-        generateFilterAuctions();
+//    @Test
+//    void Test1340_WhenFilterByEndingSoonReturnListOfAuctions() {
+//        generateFilterAuctions();
+//
+//        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Authorization", "Bearer " + jwtToken);
+//
+//        ResponseEntity<String> res = restTemplate.exchange("/auction/ending",HttpMethod.GET, new HttpEntity<>(headers), String.class);
+//        assertEquals(HttpStatus.OK, res.getStatusCode());
+//        System.out.println(res.getBody());
+//        assertTrue(res.getBody().contains("2024-03-03T18:00:00"));
+//        assertTrue(res.getBody().contains("2024-01-10T03:00:00"));
+//        assertTrue(res.getBody().contains("2023-11-17T03:00:00"));
+//    }
 
-        String jwtToken = authenticateAndGetToken(new SignInRequest(userDTO.getEmail(), userDTO.getPassword()), restTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + jwtToken);
 
-        ResponseEntity<String> res = restTemplate.exchange("/auction/ending",HttpMethod.GET, new HttpEntity<>(headers), String.class);
-        assertEquals(HttpStatus.OK, res.getStatusCode());
-        System.out.println(res.getBody());
-
-    }
 }

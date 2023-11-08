@@ -120,7 +120,7 @@ public class UserRegistrationTest {
         String error = postUserResponse.getBody();
         assertNotNull(error);
         assertTrue(error.contains("email"));
-        assertTrue(error.contains("debe ser una dirección de correo electrónico con formato correcto"));
+        assertTrue(error.contains("must be a well-formed email address\n"));
     }
 
     @Test
