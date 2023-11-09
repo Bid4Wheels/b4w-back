@@ -77,7 +77,7 @@ public class BidServiceImpl implements BidService {
         LocalDateTime now = LocalDateTime.now();
         if (auction.getDeadline().isAfter(now.minusMinutes(1))) return;
 
-        auction.setDeadline(now.minusMinutes(1));
+        auction.setDeadline(now.plusMinutes(1));
         auctionRepository.save(auction);
     }
 
