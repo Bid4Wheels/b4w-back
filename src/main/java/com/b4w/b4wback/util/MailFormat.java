@@ -3,7 +3,6 @@ package com.b4w.b4wback.util;
 public class MailFormat {
     public static String createWithDefaultHtml(String title,String text){
         return """
-       
         <html>
         <head>
             <title>Página de Ejemplo</title>
@@ -12,6 +11,10 @@ public class MailFormat {
                 body {
                     font-family: 'Roboto', sans-serif;
                 }
+                .small-image{
+                    max-width: 25%%;
+                    height: auto;
+                }
             </style>
         </head>
         <body>
@@ -19,7 +22,7 @@ public class MailFormat {
                 <img src='cid:img1'>
                 <h1 style="text-align: center;">%s</h1>
                 <p style="text-align: center;">%s</p>
-                <p style="text-align: center;"><u style="color: darkgray;">Bid4Wheels</u></p>
+                <a href="https://bid4wheels.com" style="text-align: center; color: darkgray; display: block; margin-top: 0px; margin-bottom: 60px;"><u>Bid4Wheels</u></a>
             </div>
         </body>
         </html>
@@ -38,6 +41,10 @@ public class MailFormat {
                 body {
                     font-family: 'Roboto', sans-serif;
                 }
+                .small-image{
+                    max-width: 25%%;
+                    height: auto;
+                }
             </style>
         </head>
         <body>
@@ -46,7 +53,7 @@ public class MailFormat {
                 <h1 style="text-align: center;">%s</h1>
                 <p style="text-align: center;">%s</p>
                 <a href="%s" style="color: rgb(35, 191, 113); text-align: center; display: block;">Url </a>
-                <p style="text-align: center;"><u style="color: darkgray;">Bid4Wheels</u></p>
+                <a href="https://bid4wheels.com" style="text-align: center; color: darkgray; display: block; margin-top: 0px; margin-bottom: 60px;"><u>Bid4Wheels</u></a>
             </div>
         </body>
         </html>
