@@ -20,6 +20,8 @@ import com.b4w.b4wback.service.interfaces.BidService;
 import com.b4w.b4wback.service.interfaces.TagService;
 import com.b4w.b4wback.service.interfaces.UserService;
 import com.b4w.b4wback.util.AuctionGenerator;
+import jakarta.validation.constraints.AssertTrue;
+import net.bytebuddy.implementation.bytecode.ShiftRight;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -837,5 +839,44 @@ public class AuctionServiceTest {
         auctionRepository.save(auctionHelper.get());
 
         assertThrows(BadCredentialsException.class, ()->auctionService.finishAuction(auction.getAuctionId(), 3L));
+    }
+
+    @Test
+    void Test044_AuctionWithLessThatOneMinuteUpdates(){
+        LocalDateTime time = LocalDateTime.now().plusSeconds(30);
+        CreateAuctionDTO auctionDTO1 = new CreateAuctionDTO(2L, "A", "B", time, "C", "D",
+                10, 10, GasType.GASOLINE, 2020, "Red", 4,
+                GearShiftType.MANUAL, new ArrayList<>());
+        Auction auction = new Auction(auctionDTO1, new ArrayList<>());
+
+        Auction newAuctionStatus = bidService.extendAuctionTimeTo1MinuteIfLowerThanThat(auction);
+
+        assertTrue(time.isBefore(newAuctionStatus.getDeadline()));
+    }
+
+    @Test
+    void Test045_AuctionWithMoreThatOneMinuteDontUpdates(){
+        LocalDateTime time = LocalDateTime.now().plusSeconds(65);
+        CreateAuctionDTO auctionDTO1 = new CreateAuctionDTO(2L, "A", "B", time, "C", "D",
+                10, 10, GasType.GASOLINE, 2020, "Red", 4,
+                GearShiftType.MANUAL, new ArrayList<>());
+        Auction auction = new Auction(auctionDTO1, new ArrayList<>());
+
+        Auction newAuctionStatus = bidService.extendAuctionTimeTo1MinuteIfLowerThanThat(auction);
+
+        assertTrue(time.isEqual(newAuctionStatus.getDeadline()));
+    }
+
+    @Test
+    void Test045_AuctionReachedDeadlineIgnored(){
+        LocalDateTime time = LocalDateTime.now().minusSeconds(50);
+        CreateAuctionDTO auctionDTO1 = new CreateAuctionDTO(2L, "A", "B", time, "C", "D",
+                10, 10, GasType.GASOLINE, 2020, "Red", 4,
+                GearShiftType.MANUAL, new ArrayList<>());
+        Auction auction = new Auction(auctionDTO1, new ArrayList<>());
+
+        Auction newAuctionStatus = bidService.extendAuctionTimeTo1MinuteIfLowerThanThat(auction);
+
+        assertTrue(time.isEqual(newAuctionStatus.getDeadline()));
     }
 }

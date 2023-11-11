@@ -69,16 +69,20 @@ public class BidServiceImpl implements BidService {
                 new BidNotificationDTO(bidDTO.getAmount(),user.getName(),user.getLastName()),new MessageHeaders(Collections.singletonMap(
                         MessageHeaders.CONTENT_TYPE,"application/json")));
 
-        ExtendAuctionTimeTo1MinuteIfLowerThanThat(auction);
+        extendAuctionTimeTo1MinuteIfLowerThanThat(auction);
         return bidRepository.save(new Bid(bidDTO.getAmount(), user, auction));
     }
 
-    public void ExtendAuctionTimeTo1MinuteIfLowerThanThat(Auction auction){
+    public Auction extendAuctionTimeTo1MinuteIfLowerThanThat(Auction auction){
         LocalDateTime now = LocalDateTime.now();
-        if (auction.getDeadline().isAfter(now.minusMinutes(1))) return;
+        if (!isBetweenNowAndOneMinute(auction.getDeadline(), now)) return auction;
 
         auction.setDeadline(now.plusMinutes(1));
-        auctionRepository.save(auction);
+        return auctionRepository.save(auction);
+    }
+
+    private boolean isBetweenNowAndOneMinute(LocalDateTime time, LocalDateTime now) {
+        return time.isAfter(now) && time.isBefore(now.plusMinutes(1));
     }
 
     @Override
