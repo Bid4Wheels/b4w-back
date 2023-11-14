@@ -7,6 +7,7 @@ import com.b4w.b4wback.dto.Question.GetAnswerDTO;
 import com.b4w.b4wback.dto.Question.GetQuestionDTO;
 import com.b4w.b4wback.service.interfaces.JwtService;
 import com.b4w.b4wback.service.interfaces.QuestionService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class QuestionAndAnswerController {
     }
 
     @PostMapping("/question")
-    public ResponseEntity<GetQuestionDTO> createUserQuestion(@RequestHeader("Authorization") String auth,  @RequestBody @Valid CreateQuestionDTO questionDTO){
+    public ResponseEntity<GetQuestionDTO> createUserQuestion(@RequestHeader("Authorization") String auth,  @RequestBody @Valid CreateQuestionDTO questionDTO) throws MessagingException {
         final String jwt = auth.substring(7);
         Long userId = jwtService.extractId(jwt);
 

@@ -827,7 +827,7 @@ public class AuctionServiceTest {
     }
 
     @Test
-    void Test043_AuctionServiceWhenFinishAuctionNotByTheWinnerThenBadCredentialsException(){
+    void Test043_AuctionServiceWhenFinishAuctionNotByTheWinnerThenEntityNotFoundException(){
         CreateAuctionDTO auction = auctionService.createAuction(auctionDTO);
         bidService.crateBid(new CreateBidDTO(1000000, 2L, 1L));
 
@@ -836,6 +836,6 @@ public class AuctionServiceTest {
         auctionHelper.get().setStatus(AuctionStatus.AWATINGDELIVERY);
         auctionRepository.save(auctionHelper.get());
 
-        assertThrows(BadCredentialsException.class, ()->auctionService.finishAuction(auction.getAuctionId(), 3L));
+        assertThrows(EntityNotFoundException.class, ()->auctionService.finishAuction(auction.getAuctionId(), 3L));
     }
 }

@@ -18,6 +18,8 @@ import com.b4w.b4wback.repository.UserRepository;
 import com.b4w.b4wback.service.interfaces.MailService;
 import com.b4w.b4wback.service.interfaces.QuestionService;
 import com.b4w.b4wback.service.interfaces.UserService;
+import com.b4w.b4wback.util.MailFormat;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -48,7 +50,7 @@ public class QuestionServiceImp implements QuestionService {
     }
 
     @Override
-    public GetQuestionDTO createQuestion(CreateQuestionDTO questionDTO, Long authorId) {
+    public GetQuestionDTO createQuestion(CreateQuestionDTO questionDTO, Long authorId) throws MessagingException {
         Optional<Auction> auctionOptional = auctionRepository.findById(questionDTO.getAuctionId());
         if (auctionOptional.isEmpty()) throw new EntityNotFoundException("The auction with "+ questionDTO.getAuctionId()+ " id was not found");
         Auction auction = auctionOptional.get();
@@ -125,7 +127,9 @@ public class QuestionServiceImp implements QuestionService {
         question.setTimeOfAnswer(LocalDateTime.now());
         questionRepository.save(questionOptional.get());
         if(sendMail)
-            mailService.sendMail(question.getAuthor().getEmail(), question.getAuction().getUser().getName() + " replied to your question of auction: " + question.getAuction().getTitle(), "your question: " + question.getQuestion() + "\n" + "answer: " + question.getAnswer());
+            mailService.sendMail(question.getAuthor().getEmail(), question.getAuction().getUser().getName() + " replied to your question of auction: " + question.getAuction().getTitle(),
+                    MailFormat.createWithDefaultHtml("Your question has been answered",
+                            "Your question: " + question.getQuestion() + " has been answered with the following answer: " + answer.getAnswer()));
         return new GetAnswerDTO(questionOptional.get().getTimeOfAnswer(), questionOptional.get().getAnswer());
     }
 
