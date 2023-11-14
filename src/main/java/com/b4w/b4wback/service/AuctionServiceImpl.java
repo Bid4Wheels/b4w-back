@@ -297,9 +297,6 @@ public class AuctionServiceImpl implements AuctionService {
         Auction auction = auctionO.get();
         auction.setStatus(AuctionStatus.FINISHED);
         auctionRepository.save(auction);
-        mailService.sendMail(user.getEmail(), "Auction finished",
-                MailFormat.createWithDefaultHtmlWithUrl("Auction finished","Your auction has finished, you can see the result in the link below.",
-                        "bid4wheels.com/finish/"+auctionID));
     }
 
     @Transactional
@@ -310,7 +307,10 @@ public class AuctionServiceImpl implements AuctionService {
             if (auction.getBids().isEmpty()) auction.setStatus(AuctionStatus.FINISHED);
             else auction.setStatus(AuctionStatus.AWATINGDELIVERY);
             Bid winnerBid = bidRepository.findTopByAuctionOrderByAmountDesc(auction);
-            mailService.endOfAuctionMails(auction, winnerBid, getLosersMails(auction, winnerBid));
+            if (winnerBid == null) continue;
+            mailService.sendMail(winnerBid.getBidder().getEmail(), "Auction finished",
+                    MailFormat.createWithDefaultHtmlWithUrl("Auction finished","Please click the following link to confirm the reception of the vehicle",
+                            "bid4wheels.com/finish/"+auction.getId()));
         }
 
         auctionRepository.saveAll(auctions);
