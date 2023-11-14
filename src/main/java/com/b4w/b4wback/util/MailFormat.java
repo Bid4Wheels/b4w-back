@@ -12,7 +12,7 @@ public class MailFormat {
                     font-family: 'Roboto', sans-serif;
                 }
                 .small-image{
-                    max-width: 25%%;
+                    max-width: 10%%;
                     height: auto;
                 }
             </style>
@@ -42,7 +42,7 @@ public class MailFormat {
                     font-family: 'Roboto', sans-serif;
                 }
                 .small-image{
-                    max-width: 25%%;
+                    max-width: 10%%;
                     height: auto;
                 }
             </style>
