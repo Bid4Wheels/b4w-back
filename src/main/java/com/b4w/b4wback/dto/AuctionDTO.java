@@ -25,7 +25,7 @@ public class AuctionDTO {
         this.id = id;
         this.title = title;
         this.createdAt = createdAt;
-        this.deadline = deadline;
+        this.deadline = deadline.minusHours(3);
         this.highestBidAmount = highestBidAmount;
         this.status = status;
     }
@@ -34,7 +34,7 @@ public class AuctionDTO {
         this.id = auction.getId();
         this.title = auction.getTitle();
         this.createdAt = auction.getCreatedAt();
-        this.deadline = auction.getDeadline();
+        this.deadline = auction.getDeadline().minusHours(3);
         this.highestBidAmount = auction.getHighestBidAmount();
         this.status = auction.getStatus();
         this.tagNames = auction.getTagNames();

@@ -42,7 +42,7 @@ public class GetAuctionDTO {
         this.title=getAuctionDTO.getTitle();
         this.description=getAuctionDTO.getDescription();
         this.createdAt=getAuctionDTO.getCreatedAt();
-        this.deadline=getAuctionDTO.getDeadline();
+        this.deadline=getAuctionDTO.getDeadline().minusHours(3);
         this.basePrice=getAuctionDTO.getBasePrice();
         this.brand=getAuctionDTO.getBrand();
         this.model=getAuctionDTO.getModel();

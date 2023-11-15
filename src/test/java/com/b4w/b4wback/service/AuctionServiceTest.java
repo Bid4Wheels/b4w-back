@@ -140,7 +140,7 @@ public class AuctionServiceTest {
         GetAuctionDTO auction=auctionService.getAuctionById(1L);
         assertEquals(auctionDTO.getTitle(),auction.getTitle());
         assertEquals(auctionDTO.getDescription(),auction.getDescription());
-        assertEquals(auctionDTO.getDeadline(),auction.getDeadline());
+        assertEquals(LocalDateTime.of(2030, 8, 26, 23, 11, 0),auction.getDeadline());
         assertEquals(auctionDTO.getBasePrice(),auction.getBasePrice());
         assertEquals(auctionDTO.getBrand(),auction.getBrand());
         assertEquals(auctionDTO.getModel(),auction.getModel());
@@ -169,12 +169,12 @@ public class AuctionServiceTest {
     @Test
     void Test007_AuctionServiceWhenGetAuctionsByUserIdShouldReturnAListOfAuctions() {
         auctionDTO = new CreateAuctionDTO(1L, "Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Toyota",
+                LocalDateTime.of(2030, 8, 26, 23, 11, 0), "Toyota",
                 "Corolla", 150000, 30000, GasType.GASOLINE, 2022, "Silver",
                 4, GearShiftType.AUTOMATIC, null);
 
         CreateAuctionDTO auctionDTO2 = new CreateAuctionDTO(1L, "Subasta de automovil","text",
-                LocalDateTime.of(2030, 8, 27, 2, 11, 0), "Ford",
+                LocalDateTime.of(2030, 8, 26, 23, 11, 0), "Ford",
                 "Focus", 120000, 10000, GasType.HYBRID, 2022, "Blue",
                 4, GearShiftType.MANUAL, null);
 
@@ -191,14 +191,14 @@ public class AuctionServiceTest {
         AuctionDTO firstAuction = auctionList.get(0);
         assertEquals(1L, firstAuction.getId(), "Expected auction ID to match");
         assertEquals("Subasta de automovil", firstAuction.getTitle(), "Expected auction title to match");
-        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(LocalDateTime.of(2030, 8, 26, 20, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
         assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
         assertEquals( "OPEN", firstAuction.getStatus().toString(), "Expected auction status to match");
 
         AuctionDTO secondAuction = auctionList.get(1);
         assertEquals(2L, secondAuction.getId(), "Expected auction ID to match");
         assertEquals("Subasta de automovil", secondAuction.getTitle(), "Expected auction title to match");
-        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), secondAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(LocalDateTime.of(2030, 8, 26, 20, 11, 0), secondAuction.getDeadline(), "Expected auction deadline to match");
         assertEquals(120000, secondAuction.getHighestBidAmount(), "Expected highest bid amount to match");
         assertEquals( "OPEN", secondAuction.getStatus().toString(), "Expected auction status to match");
     }
@@ -577,7 +577,7 @@ public class AuctionServiceTest {
         AuctionDTO firstAuction = auctionList.get(0);
         assertEquals(1L, firstAuction.getId(), "Expected auction ID to match");
         assertEquals("Subasta de automovil", firstAuction.getTitle(), "Expected auction title to match");
-        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(LocalDateTime.of(2030, 8, 26, 23, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
         assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
         assertEquals( "OPEN", firstAuction.getStatus().toString(), "Expected auction status to match");
         assertEquals(tags.size(), firstAuction.getTagNames().size(), "Expected auction tags to match");
@@ -597,7 +597,7 @@ public class AuctionServiceTest {
         AuctionDTO firstAuction = auctionList.get(0);
         assertEquals(1L, firstAuction.getId(), "Expected auction ID to match");
         assertEquals("Subasta de automovil", firstAuction.getTitle(), "Expected auction title to match");
-        assertEquals(LocalDateTime.of(2030, 8, 27, 2, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
+        assertEquals(LocalDateTime.of(2030, 8, 26, 23, 11, 0), firstAuction.getDeadline(), "Expected auction deadline to match");
         assertEquals(150000, firstAuction.getHighestBidAmount(), "Expected highest bid amount to match");
         assertEquals( "OPEN", firstAuction.getStatus().toString(), "Expected auction status to match");
         assertEquals(0, firstAuction.getTagNames().size(), "Expected auction tags to match");
