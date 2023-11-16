@@ -296,6 +296,11 @@ public class AuctionServiceImpl implements AuctionService {
         if (bid.getBidder().getId() != userId) throw new BadCredentialsException("Not valid operation");
         Auction auction = auctionO.get();
         auction.setStatus(AuctionStatus.FINISHED);
+
+        mailService.sendMail(auction.getUser().getEmail(), "Auction finished",
+                MailFormat.createWithDefaultHtmlWithUrl("Auction " + auction.getTitle() + " finished","Please click the following link to rate your experience with the winner of the auction",
+                        "bid4wheels.com/finish/"+auction.getId()));
+
         auctionRepository.save(auction);
     }
 
